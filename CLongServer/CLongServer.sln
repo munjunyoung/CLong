@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2037
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLongServer", "CLongServer\CLongServer.csproj", "{EEE64E07-9C1B-481D-9BF5-76BB68F1F5B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLongLib", "..\CLongLib\CLongLib\CLongLib.csproj", "{5AC2EA7A-1943-4571-B47E-96DEE2C70B0C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EEE64E07-9C1B-481D-9BF5-76BB68F1F5B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEE64E07-9C1B-481D-9BF5-76BB68F1F5B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEE64E07-9C1B-481D-9BF5-76BB68F1F5B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEE64E07-9C1B-481D-9BF5-76BB68F1F5B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AC2EA7A-1943-4571-B47E-96DEE2C70B0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AC2EA7A-1943-4571-B47E-96DEE2C70B0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AC2EA7A-1943-4571-B47E-96DEE2C70B0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AC2EA7A-1943-4571-B47E-96DEE2C70B0C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B998A283-FE84-4F94-9F58-A1F544C36F2D}
+	EndGlobalSection
+EndGlobal
