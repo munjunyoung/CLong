@@ -12,7 +12,7 @@ namespace tcpNet
     class NetworkManager
     {
         //tcpClient
-        private static string ip = "192.168.0.41";//"172.30.1.24";
+        private static string ip = "127.0.0.1";//"172.30.1.24";
         private static int portNumber = 23000;
         private static TcpClient clientTcp = null;
         private static NetworkStream streamTcp;
@@ -24,9 +24,16 @@ namespace tcpNet
         public static void TcpConnectToServer()
         {
             clientTcp = new TcpClient();
-            clientTcp.Connect(ip, portNumber);
+            clientTcp.BeginConnect(ip, portNumber, OnConnectCallBack, clientTcp);
+            //clientTcp.Connect(ip, portNumber);
+            
+        }
+
+        public static void OnConnectCallBack(IAsyncResult ar)
+        {
             streamTcp = clientTcp.GetStream();
             socketTcp = clientTcp.Client;
+            Debug.Log("[Client] Socket : Connect..");
         }
 
         #region Stream
@@ -79,18 +86,26 @@ namespace tcpNet
         /// <param name="p"></param>
         public static void SendSocket(Packet p)
         {
-            var packetStr = JsonConvert.SerializeObject(p, Formatting.Indented, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Objects
-            });
-            var bodyBuf = Encoding.UTF8.GetBytes(packetStr);
-            var headBuf = BitConverter.GetBytes(bodyBuf.Length);
-            List<byte> sendPacket = new List<byte>();
-            sendPacket.AddRange(headBuf);
-            sendPacket.AddRange(bodyBuf);
+            try
+            { 
+                var packetStr = JsonConvert.SerializeObject(p, Formatting.Indented, new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Objects
+                });
+                var bodyBuf = Encoding.UTF8.GetBytes(packetStr);
+                var headBuf = BitConverter.GetBytes(bodyBuf.Length);
+                List<byte> sendPacket = new List<byte>();
+                sendPacket.AddRange(headBuf);
+                sendPacket.AddRange(bodyBuf);
 
-            socketTcp.BeginSend(sendPacket.ToArray(), 0, sendPacket.Count, SocketFlags.None, OnSendCallBackSocket, socketTcp);
-            Debug.Log("[Client] Socket - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
+                socketTcp.BeginSend(sendPacket.ToArray(), 0, sendPacket.Count, SocketFlags.None, OnSendCallBackSocket, socketTcp);
+                Debug.Log("[Client] Socket - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
+            }
+            catch(Exception e)
+            {
+                Debug.Log("[Client] Socket : " + e);
+                //...nothing
+            }
         }
 
         /// <summary>
@@ -103,6 +118,16 @@ namespace tcpNet
             Console.WriteLine("[Client] OnSend !");
         }
         #endregion
+
+        public static void BeginReceiveSocket()
+        {
+            if (!clientTcp.Connected)
+            {
+                Debug.Log("[Client] Socket = Not Connected");
+                return;
+            }
+
+        }
 
 
         public void Close()

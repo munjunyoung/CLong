@@ -8,6 +8,7 @@ public class IngameNetwork : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        
         NetworkManager.TcpConnectToServer();
 
 	}
@@ -16,7 +17,6 @@ public class IngameNetwork : MonoBehaviour {
     {
         if(Input.GetMouseButtonDown(0))
         {
-            Debug.Log("누른다임마");
             NetworkManager.SendSocket(new PositionInfo(0f, 0f, 0f));
         }
     }

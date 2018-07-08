@@ -13,7 +13,7 @@ namespace CLongServer
         TcpClient clientTcp;
         public NetworkStream streamTcp; // 전송 주소
         public Socket socketTcp; // socket
-
+        public Client oppo;
         private readonly byte[] _tempBufferStream = new byte[4096];
         private readonly List<byte[]> _bodyBufferListStream = new List<byte[]>();
 
