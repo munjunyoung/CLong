@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using Newtonsoft.Json;
 using CLongLib;
 
+
 namespace CLongServer
 {
     class Client
@@ -13,7 +14,6 @@ namespace CLongServer
         TcpClient clientTcp;
         public NetworkStream streamTcp; // 전송 주소
         public Socket socketTcp; // socket
-        public Client oppo;
         private readonly byte[] _tempBufferStream = new byte[4096];
         private readonly List<byte[]> _bodyBufferListStream = new List<byte[]>();
 
@@ -21,13 +21,18 @@ namespace CLongServer
         private readonly List<byte[]> _bodyBufferListSocket = new List<byte[]>();
         private readonly int headSize = 4;
 
+        public delegate void myEventHandler<T>(object sender, Packet p);
+        public event myEventHandler<Packet> ProcessData;
+
+        public bool ingame = false;
+        
         /// <summary>
         /// Constructor .. Stream Save;
         /// </summary>
         /// <param name="t"></param>
-        public Client(TcpClient t)
+        public Client(TcpClient tc)
         {
-            clientTcp = t;
+            clientTcp = tc;
             streamTcp = clientTcp.GetStream();
             socketTcp = clientTcp.Client;
         }
@@ -104,7 +109,7 @@ namespace CLongServer
                 CheckPacketStream(tempDataSize);
 
                 foreach (var p in _bodyBufferListStream)
-                    ProcessData(p);
+                    DeserializePacket(p);
 
                 _bodyBufferListStream.Clear();
                 BeginReceiveStream();
@@ -190,7 +195,7 @@ namespace CLongServer
                 CheckPacketSocket(tempDataSize);
 
                 foreach (var p in _bodyBufferListSocket)
-                    ProcessData(p);
+                    DeserializePacket(p);
 
                 _bodyBufferListSocket.Clear();
                 BeginReceiveSocket();
@@ -203,10 +208,10 @@ namespace CLongServer
         #endregion
 
         /// <summary>
-        /// Process Data
+        /// Deserialize Data
         /// </summary>
         /// <param name="bodyPacket"></param>
-        void ProcessData(byte[] bodyPacket)
+        void DeserializePacket(byte[] bodyPacket)
         {
             var packetStr = Encoding.UTF8.GetString(bodyPacket);
             var receivedPacket = JsonConvert.DeserializeObject<Packet>(packetStr, new JsonSerializerSettings
@@ -215,7 +220,34 @@ namespace CLongServer
             });
 
             Console.WriteLine("[Client] Socket - ReceiveData msg : " + receivedPacket.MsgName);
+            CorrespondData(receivedPacket);
+
         }
+
+        /// <summary>
+        /// CorrespondData
+        /// </summary>
+        /// <param name="p"></param>
+        void CorrespondData(Packet p)
+        {
+            if (!ingame)
+            {
+                switch (p.MsgName)
+                {
+                    case "StartGameReq":
+                        ProcessData += IngameProcess.IngameDataRequest;
+                        ingame = true;
+                        break;
+                    default:
+                        Console.WriteLine("[Client] Socket :  Mismatching Message");
+                        break;
+                }
+            }
+            else
+            {
+                ProcessData(this, p);
+            }
+        } 
 
         /// <summary>
         /// overLap Packet divide through stream
