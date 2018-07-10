@@ -11,6 +11,8 @@ public class IngameNetwork : MonoBehaviour {
         
         NetworkManager.TcpConnectToServer();
 
+        NetworkManager.SendSocket(new StartGameReq());
+            
 	}
 
     private void Update()

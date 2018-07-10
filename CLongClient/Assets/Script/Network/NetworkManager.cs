@@ -16,68 +16,41 @@ namespace tcpNet
         private static int portNumber = 23000;
         private static TcpClient clientTcp = null;
         private static NetworkStream streamTcp;
-        private static Socket socketTcp;
 
+        private static Socket socketTcp;
+        private static byte[] _tempBufferSocket = new byte[4096];
+        private static List<byte[]> _bodyBufferListSocket = new List<byte[]>();
+        private static int headSize = 4;
         /// <summary>
         /// Connect to server;
         /// </summary>
         public static void TcpConnectToServer()
         {
             clientTcp = new TcpClient();
-            clientTcp.BeginConnect(ip, portNumber, OnConnectCallBack, clientTcp);
-            //clientTcp.Connect(ip, portNumber);
+            try
+            {
+                clientTcp.BeginConnect(ip, portNumber, OnConnectCallBack, clientTcp);
+            }
+            catch(Exception e)
+            {
+                Debug.Log("[Client] Socket : ConeectToServer E : " + e);
+            }
             
         }
 
+        /// <summary>
+        /// Connect Call Back;
+        /// </summary>
+        /// <param name="ar"></param>
         public static void OnConnectCallBack(IAsyncResult ar)
         {
             streamTcp = clientTcp.GetStream();
             socketTcp = clientTcp.Client;
             Debug.Log("[Client] Socket : Connect..");
+            BeginReceiveSocket();
         }
 
-        #region Stream
-        /// <summary>
-        /// Send through Stream
-        /// </summary>
-        public static void SendStream(Packet p)
-        {
-            var packetStr = JsonConvert.SerializeObject(p, Formatting.Indented, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Objects
-            });
-            var bodyBuf = Encoding.UTF8.GetBytes(packetStr);
-            var headBuf = BitConverter.GetBytes(bodyBuf.Length);
-            
-            List<byte> sendPacket = new List<byte>();
-            sendPacket.AddRange(headBuf);
-            sendPacket.AddRange(bodyBuf);
-
-            streamTcp.BeginWrite(sendPacket.ToArray(), 0, sendPacket.Count, OnSendCallBackStream, streamTcp);
-            Debug.Log("[Client] Stream - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
-        }
-
-        /// <summary>
-        /// Send Callback func through stream
-        /// </summary>
-        /// <param name="ar"></param>
-        public static void OnSendCallBackStream(IAsyncResult ar)
-        {
-            var temps = (NetworkStream)ar.AsyncState;
-            Console.WriteLine("[Client] OnSend");
-        }
-
-
-        public void BeginReceive()
-        {
-
-        }
-
-        public void OnReceiveCallBack()
-        {
-
-        }
-        #endregion
+        
 
         #region Socket
         /// <summary>
@@ -115,18 +88,95 @@ namespace tcpNet
         public static void OnSendCallBackSocket(IAsyncResult ar)
         {
             var sock = (Socket)ar.AsyncState;
-            Console.WriteLine("[Client] OnSend !");
+            Debug.Log("[Client] OnSend !");
         }
-        #endregion
 
+
+        /// <summary>
+        /// Begin Receive
+        /// </summary>
         public static void BeginReceiveSocket()
         {
+            
             if (!clientTcp.Connected)
             {
                 Debug.Log("[Client] Socket = Not Connected");
                 return;
             }
 
+            Array.Clear(_tempBufferSocket, 0, _tempBufferSocket.Length);
+
+            try
+            {
+                
+                socketTcp.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, OnReceiveCallBackSocket, socketTcp);
+            }
+            catch(Exception e)
+            {
+                Debug.Log("[Client] : Socket - Receive : " + e);
+            }
+
+        }
+
+        public static void OnReceiveCallBackSocket(IAsyncResult ar)
+        {
+            var tempSocket = (Socket)ar.AsyncState;
+            try
+            {
+                var tempDataSize = tempSocket.EndReceive(ar);
+                Debug.Log("[Client] Socket - Receive Data Size : " + tempDataSize);
+                if (tempDataSize == 0)
+                {
+                    Debug.Log("[Client] Socket -  Receive Data Size is zero");
+                    return;
+                }
+                CheckPacketSocket(tempDataSize);
+
+                foreach (var p in _bodyBufferListSocket)
+                    DeserializePacket(p);
+
+                _bodyBufferListSocket.Clear();
+                BeginReceiveSocket();
+            }
+            catch (Exception e)
+            {
+               Debug.Log("[Client] Socket -  RecevieCallBack : " + e.ToString());
+            }
+        }
+        
+        #endregion
+
+        /// <summary>
+        /// Process Data
+        /// </summary>
+        /// <param name="bodyPacket"></param>
+        private static void DeserializePacket(byte[] bodyPacket)
+        {
+            var packetStr = Encoding.UTF8.GetString(bodyPacket);
+            var receivedPacket = JsonConvert.DeserializeObject<Packet>(packetStr, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Objects
+            });
+
+            Debug.Log("[Client] Socket - ReceiveData msg : " + receivedPacket.MsgName);
+        }
+
+        /// <summary>
+        /// overLap Packet divide through socket
+        /// </summary>
+        /// <param name="totalSize"></param>
+        private static void CheckPacketSocket(int totalSize)
+        {
+            var tempSize = 0;
+            while (totalSize > tempSize)
+            {
+                var bodySize = _tempBufferSocket[tempSize];
+                byte[] bodyBuf = new byte[1024];
+
+                Array.Copy(_tempBufferSocket, tempSize + headSize, bodyBuf, 0, bodySize);
+                _bodyBufferListSocket.Add(bodyBuf);
+                tempSize += (bodySize + headSize);
+            }
         }
 
 
@@ -134,5 +184,49 @@ namespace tcpNet
         {
 
         }
+
+
+        #region Stream
+        /// <summary>
+        /// Send through Stream
+        /// </summary>
+        public static void SendStream(Packet p)
+        {
+            var packetStr = JsonConvert.SerializeObject(p, Formatting.Indented, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Objects
+            });
+            var bodyBuf = Encoding.UTF8.GetBytes(packetStr);
+            var headBuf = BitConverter.GetBytes(bodyBuf.Length);
+
+            List<byte> sendPacket = new List<byte>();
+            sendPacket.AddRange(headBuf);
+            sendPacket.AddRange(bodyBuf);
+
+            streamTcp.BeginWrite(sendPacket.ToArray(), 0, sendPacket.Count, OnSendCallBackStream, streamTcp);
+            Debug.Log("[Client] Stream - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
+        }
+
+        /// <summary>
+        /// Send Callback func through stream
+        /// </summary>
+        /// <param name="ar"></param>
+        public static void OnSendCallBackStream(IAsyncResult ar)
+        {
+            var temps = (NetworkStream)ar.AsyncState;
+            Debug.Log("[Client] OnSend");
+        }
+
+
+        public void BeginReceive()
+        {
+
+        }
+
+        public void OnReceiveCallBack()
+        {
+
+        }
+        #endregion
     }
 }
