@@ -12,7 +12,12 @@ public class CharacterBase : MonoBehaviour  {
     Material mat;
 
 
-    protected virtual void Update()
+    protected virtual void FixedUpdate()
+    {
+        Move();
+    }
+
+    protected virtual void Move()
     {
 
     }

@@ -23,4 +23,9 @@ public class IngameNetwork : MonoBehaviour {
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        NetworkManager.SendSocket(new ExitReq());
+    }
+
 }

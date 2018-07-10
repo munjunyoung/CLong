@@ -21,6 +21,11 @@ namespace tcpNet
         private static byte[] _tempBufferSocket = new byte[4096];
         private static List<byte[]> _bodyBufferListSocket = new List<byte[]>();
         private static int headSize = 4;
+
+        public static Queue<Packet> receivedPacketQueue = new Queue<Packet>();
+        public static bool ingame = false;
+        
+        
         /// <summary>
         /// Connect to server;
         /// </summary>
@@ -88,7 +93,6 @@ namespace tcpNet
         public static void OnSendCallBackSocket(IAsyncResult ar)
         {
             var sock = (Socket)ar.AsyncState;
-            Debug.Log("[Client] OnSend !");
         }
 
 
@@ -118,6 +122,10 @@ namespace tcpNet
 
         }
 
+        /// <summary>
+        /// Receive Call Back
+        /// </summary>
+        /// <param name="ar"></param>
         public static void OnReceiveCallBackSocket(IAsyncResult ar)
         {
             var tempSocket = (Socket)ar.AsyncState;
@@ -136,6 +144,7 @@ namespace tcpNet
                     DeserializePacket(p);
 
                 _bodyBufferListSocket.Clear();
+
                 BeginReceiveSocket();
             }
             catch (Exception e)
@@ -153,12 +162,13 @@ namespace tcpNet
         private static void DeserializePacket(byte[] bodyPacket)
         {
             var packetStr = Encoding.UTF8.GetString(bodyPacket);
-            var receivedPacket = JsonConvert.DeserializeObject<Packet>(packetStr, new JsonSerializerSettings
+            var receivedTempPacket = JsonConvert.DeserializeObject<Packet>(packetStr, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Objects
             });
 
-            Debug.Log("[Client] Socket - ReceiveData msg : " + receivedPacket.MsgName);
+            receivedPacketQueue.Enqueue(receivedTempPacket);
+            Debug.Log("[Client] Socket - ReceiveData msg : " + receivedTempPacket.MsgName);
         }
 
         /// <summary>
@@ -179,7 +189,9 @@ namespace tcpNet
             }
         }
 
-
+        /// <summary>
+        /// SocketClose
+        /// </summary>
         public void Close()
         {
 

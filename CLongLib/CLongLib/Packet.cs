@@ -22,6 +22,7 @@ namespace CLongLib
     public class StartGameReq : Packet
     {
         public string Req { get; set; }
+        
     }
 
     /// <summary>
@@ -65,4 +66,6 @@ namespace CLongLib
             Z = z;
         }
     }
+
+    
 }

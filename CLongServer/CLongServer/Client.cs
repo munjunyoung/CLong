@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using CLongLib;
 
 
+
 namespace CLongServer
 {
     class Client
@@ -22,9 +23,10 @@ namespace CLongServer
         private readonly int headSize = 4;
 
         public delegate void myEventHandler<T>(object sender, Packet p);
-        public event myEventHandler<Packet> ProcessData;
+        public event myEventHandler<Packet> ProcessHandler;
 
         public bool ingame = false;
+        
         
         /// <summary>
         /// Constructor .. Stream Save;
@@ -211,7 +213,7 @@ namespace CLongServer
         /// Deserialize Data
         /// </summary>
         /// <param name="bodyPacket"></param>
-        void DeserializePacket(byte[] bodyPacket)
+        private void DeserializePacket(byte[] bodyPacket)
         {
             var packetStr = Encoding.UTF8.GetString(bodyPacket);
             var receivedPacket = JsonConvert.DeserializeObject<Packet>(packetStr, new JsonSerializerSettings
@@ -228,14 +230,15 @@ namespace CLongServer
         /// CorrespondData
         /// </summary>
         /// <param name="p"></param>
-        void CorrespondData(Packet p)
+        private void CorrespondData(Packet p)
         {
             if (!ingame)
             {
                 switch (p.MsgName)
                 {
                     case "StartGameReq":
-                        ProcessData += IngameProcess.IngameDataRequest;
+                        SendSocket(p);
+                        ProcessHandler += IngameProcess.IngameDataRequest;
                         ingame = true;
                         break;
                     default:
@@ -245,7 +248,7 @@ namespace CLongServer
             }
             else
             {
-                ProcessData(this, p);
+                ProcessHandler(this, p);
             }
         } 
 
@@ -253,7 +256,7 @@ namespace CLongServer
         /// overLap Packet divide through stream
         /// </summary>
         /// <param name="totalSize"></param>
-        void CheckPacketStream(int totalSize)
+        private void CheckPacketStream(int totalSize)
         {
             var tempSize = 0;
 
@@ -273,7 +276,7 @@ namespace CLongServer
         /// overLap Packet divide through socket
         /// </summary>
         /// <param name="totalSize"></param>
-        void CheckPacketSocket(int totalSize)
+        private void CheckPacketSocket(int totalSize)
         {
             var tempSize = 0;
             while (totalSize > tempSize)
@@ -289,9 +292,18 @@ namespace CLongServer
         /// <summary>
         /// TcpClient 
         /// </summary>
-        void Close()
+        public void Close()
         {
+            try
+            {
 
+                Console.WriteLine("[Client] Close Socket : " + socketTcp.RemoteEndPoint);
+                socketTcp.Close();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("[Clinet] Socket - Close Exception : " + e);
+            } 
         }
 
 
