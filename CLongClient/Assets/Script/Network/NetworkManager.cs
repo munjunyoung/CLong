@@ -14,7 +14,7 @@ namespace tcpNet
         //tcpClient
         private static string ip = "127.0.0.1";//"172.30.1.24";
         private static int portNumber = 23000;
-        private static TcpClient clientTcp = null;
+        public static TcpClient clientTcp = null;
         private static NetworkStream streamTcp;
 
         private static Socket socketTcp;
@@ -24,8 +24,8 @@ namespace tcpNet
 
         public static Queue<Packet> receivedPacketQueue = new Queue<Packet>();
         public static bool ingame = false;
-        
-        
+
+        static bool queuetest = false;
         /// <summary>
         /// Connect to server;
         /// </summary>
@@ -52,6 +52,7 @@ namespace tcpNet
             streamTcp = clientTcp.GetStream();
             socketTcp = clientTcp.Client;
             Debug.Log("[Client] Socket : Connect..");
+          
             BeginReceiveSocket();
         }
 

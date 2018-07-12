@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
-
+using System.Numerics;
 namespace CLongLib
 {
     /// <summary>
@@ -22,13 +22,20 @@ namespace CLongLib
     public class StartGameReq : Packet
     {
         public string Req { get; set; }
-        
     }
 
     /// <summary>
-    /// To Exit game from client
+    /// enqueue in queue list
     /// </summary>
-    public class ExitReq : Packet
+    public class QueueEntry : Packet
+    {
+        public string Req { get; set; }
+    }
+
+    /// <summary>
+    /// dequeue in queue list
+    /// </summary>
+    public class QueueLeave : Packet
     {
         public string Req { get; set; }
     }
@@ -38,34 +45,34 @@ namespace CLongLib
     /// </summary>
     public class PositionInfo : Packet
     {
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
-
-        public PositionInfo(float x, float y, float z)
+        public Vector3 ClientPos { get; set; }
+        
+        public PositionInfo(Vector3 p)
         {
-            X = x;
-            Y = y;
-            Z = z;
+            ClientPos = p;
         }
     }
-
+    
     /// <summary>
     /// ingamePacket Rotation Info
     /// </summary>
     public class RotationInfo : Packet
     {
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+       public Vector3 ClientRot { get; set; }
 
-        public RotationInfo(float x, float y, float z)
+        public RotationInfo(Vector3 r)
         {
-            X = x;
-            Y = y;
-            Z = z;
+            ClientRot = r;
         }
     }
 
-    
+
+
+    /// <summary>
+    /// To Exit game from client
+    /// </summary>
+    public class ExitReq : Packet
+    {
+        public string Req { get; set; }
+    }
 }

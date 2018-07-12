@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 
 namespace CLongLib
 {
     public class KeyDown : Packet
     {
-        int ClientNum { get; set; }
-        String DownKey { get; set; }
-        PositionInfo StartPos { get; set; }
+        public int ClientNum { get; set; }
+        public String DownKey { get; set; }
+        public Vector3 StartPos { get; set; }
 
-        public KeyDown(int n, string k, PositionInfo pos)
+        public KeyDown(int n, string k, Vector3 pos)
         {
             ClientNum = n;
             DownKey = k;
@@ -21,24 +22,22 @@ namespace CLongLib
 
     public class KeyUP : Packet
     {
-        int ClientNum { get; set; }
-        String UpKey { get; set; }
-        PositionInfo EndPos { get; set; }
+        public int ClientNum { get; set; }
+        public String UpKey { get; set; }
 
-        public KeyUP(int n, string k, PositionInfo pos)
+        public KeyUP(int n, string k)
         {
             ClientNum = n;
             UpKey = k;
-            EndPos = pos;
         }
     }
     
     public class MoveStop : Packet
     {
-        int ClientNum { get; set; }
-        PositionInfo ClientPos { get; set; }
+        public int ClientNum { get; set; }
+        public Vector3 ClientPos { get; set; }
         
-        public MoveStop(int n, PositionInfo pos)
+        public MoveStop(int n, Vector3 pos)
         {
             ClientNum = n;
             ClientPos = pos;

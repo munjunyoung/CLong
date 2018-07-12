@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using CLongLib;
+using Newtonsoft.Json;
 using tcpNet;
 
 public class NetworkProcess : MonoBehaviour {
@@ -15,6 +16,15 @@ public class NetworkProcess : MonoBehaviour {
     }
 
     private void Update()
+    {
+        //Process packet data for unity Thread
+        ProcessPacket();
+    }
+
+    /// <summary>
+    /// processPacketData in PacketList 
+    /// </summary>
+    private void ProcessPacket()
     {
         if (NetworkManager.receivedPacketQueue.Count > 0)
         {
@@ -33,6 +43,7 @@ public class NetworkProcess : MonoBehaviour {
             {
                 case "StartGameReq":
                     NetworkManager.ingame = true;
+                    //..IngameScene Load
                     break;
                 default:
                     break;
@@ -54,11 +65,37 @@ public class NetworkProcess : MonoBehaviour {
         switch(p.MsgName)
         {
             case "PositionInfo":
-                Debug.Log("Pos!");
+                var posData = JsonConvert.DeserializeObject<PositionInfo>(p.Data);
+                var tmpPos = ToUnityVectorChange(posData.ClientPos);
+                Debug.Log("[NetworkProcess] Client Pos : " + tmpPos );
                 break;
             default:
                 break;
         }
     }
 
+    #region ChangeVector
+    /// <summary>
+    /// return Numerics Vector3
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
+    public static System.Numerics.Vector3 ToNumericVectorChange(Vector3 pos)
+    {
+        var tempPos = new System.Numerics.Vector3(pos.x, pos.y, pos.z);
+        return tempPos;
+    }
+
+    /// <summary>
+    /// return Unity Vector3
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
+    public static Vector3 ToUnityVectorChange(System.Numerics.Vector3 pos)
+    {
+        var tempPos = new Vector3(pos.X, pos.Y, pos.Z);
+        return tempPos;
+    }
+
+    #endregion
 }

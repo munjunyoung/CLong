@@ -5,7 +5,7 @@ using System.Text;
 using System.Net.Sockets;
 using Newtonsoft.Json;
 using CLongLib;
-
+using System.Numerics;
 
 
 namespace CLongServer
@@ -26,6 +26,9 @@ namespace CLongServer
         public event myEventHandler<Packet> ProcessHandler;
 
         public bool ingame = false;
+        public int numberInGame = 0;
+
+        public Vector3 currentPos;
         
         
         /// <summary>
@@ -223,7 +226,6 @@ namespace CLongServer
 
             Console.WriteLine("[Client] Socket - ReceiveData msg : " + receivedPacket.MsgName);
             CorrespondData(receivedPacket);
-
         }
 
         /// <summary>
@@ -236,10 +238,8 @@ namespace CLongServer
             {
                 switch (p.MsgName)
                 {
-                    case "StartGameReq":
-                        SendSocket(p);
-                        ProcessHandler += IngameProcess.IngameDataRequest;
-                        ingame = true;
+                    case "QueueEntry":
+                        MatchingManager.ClientEnqueue(this);
                         break;
                     default:
                         Console.WriteLine("[Client] Socket :  Mismatching Message");

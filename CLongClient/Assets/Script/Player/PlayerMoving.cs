@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using tcpNet;
+using CLongLib;
 
 public class PlayerMoving : Player {
     float speed = 5f;
@@ -51,36 +53,41 @@ public class PlayerMoving : Player {
 
         if(Input.GetKeyDown(KeyCode.W))
         {
-            startPos = this.transform.position;
+            var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
+            NetworkManager.SendSocket(new KeyDown(0, KeyCode.W.ToString(), tmpAngle));
         }
         if (Input.GetKeyDown(KeyCode.A))
         {
-
+            var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
+            NetworkManager.SendSocket(new KeyDown(0, KeyCode.A.ToString(), tmpAngle));
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
-
+            var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
+            NetworkManager.SendSocket(new KeyDown(0, KeyCode.S.ToString(), tmpAngle));
         }
         if (Input.GetKeyDown(KeyCode.D))
         {
-
+            var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
+            NetworkManager.SendSocket(new KeyDown(0, KeyCode.D.ToString(), tmpAngle));
         }
+        
 
         if (Input.GetKeyUp(KeyCode.W))
         {
-
+            NetworkManager.SendSocket(new KeyUP(0, KeyCode.W.ToString()));
         }
         if (Input.GetKeyUp(KeyCode.A))
         {
-
+            NetworkManager.SendSocket(new KeyUP(0, KeyCode.A.ToString()));
         }
         if (Input.GetKeyUp(KeyCode.S))
         {
-
+            NetworkManager.SendSocket(new KeyUP(0, KeyCode.S.ToString()));
         }
         if (Input.GetKeyUp(KeyCode.D))
         {
-
+            NetworkManager.SendSocket(new KeyUP(0, KeyCode.D.ToString()));
         }
     }
 }
