@@ -30,7 +30,7 @@ public class ArmorMaker : EditorWindow
 
         _name = EditorGUILayout.TextField("Name", _name);
         _type = (ARMOR_TYPE)EditorGUILayout.EnumPopup("Type", _type);
-        _reduceValue = EditorGUILayout.FloatField("Damage Reduction Rate", _reduceValue);
+        _reduceValue = EditorGUILayout.Slider("Reload Time", _reduceValue, 0, 1);
 
         GUILayout.Label("Detail Properties", EditorStyles.boldLabel);
 
