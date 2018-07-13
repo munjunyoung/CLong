@@ -2,17 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using CLongLib;
 using System.Numerics;
 using System.Timers;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace CLongServer
 {
     public class IngameProcess
     {
+        
+        static Stopwatch forwardTimer = new Stopwatch();
+        static Stopwatch backwardTimer = new Stopwatch();
+        static Stopwatch leftTimer = new Stopwatch();
+        static Stopwatch rightTimer = new Stopwatch();
+        
+        static Thread forwardThread = null;
+        static Thread backwardThread = null;
+        static Thread leftThread = null;
+        static Thread rightThread = null;
+        
 
-        static Timer moveTimer = new Timer();
+
         public static void IngameDataRequest(object sender, Packet p)
         {
             var c = sender as Client;
@@ -31,11 +44,11 @@ namespace CLongServer
                     break;
                 case "KeyDown":
                     var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
-                    KeyDownFunc(keyDownData.DownKey);
+                    KeyDownFunc(c, keyDownData.DownKey);
                     break;
                 case "KeyUP":
                     var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
-                    KeyUpFunc(keyUpData.UpKey);
+                    KeyUpFunc(c, keyUpData.UpKey);
                     break;
                 default:
                     Console.WriteLine("[INGAME] Mismatching Message");
@@ -47,12 +60,15 @@ namespace CLongServer
         /// key down func
         /// </summary>
         /// <param name="keyState"></param>
-        private static void KeyDownFunc(string keyState)
+        private static void KeyDownFunc(Client c, string keyState)
         {
             Console.WriteLine("[INGAME PROCESS] : Down Key - " + keyState);
             switch(keyState)
             {
                 case "W":
+                    forwardTimer.Start();
+                    forwardThread = new Thread(()=> MoveFoward(c));
+                    forwardThread.Start();
                     break;
                 case "S":
                     break;
@@ -67,12 +83,17 @@ namespace CLongServer
         /// key up func
         /// </summary>
         /// <param name="keyState"></param>
-        private static void KeyUpFunc(string keyState)
+        private static void KeyUpFunc(Client c, string keyState)
         {
             Console.WriteLine("[INGAME PROCESS] : Up Key - " + keyState);
             switch (keyState)
             {
                 case "W":
+                    forwardTimer.Reset();
+                    forwardTimer.Stop();
+                    if (forwardThread.IsAlive)
+                        forwardThread.Abort();
+                    Console.WriteLine("Client Current Pos : " + c.currentPos); 
                     break;
                 case "S":
                     break;
@@ -89,9 +110,16 @@ namespace CLongServer
         /// </summary>
         /// <param name="keyState"></param>
         /// <param name="pos"></param>
-        private void MoveFoward(Vector3 rot)
+        private static void MoveFoward(Client c)
         {
+            while (true)
+            {
+                TimeSpan t = forwardTimer.Elapsed;
 
+                float time =  (float)Math.Round(t.TotalSeconds,2);
+                Console.WriteLine("Time : " + time);
+                //c.currentPos.X += time;
+            }
         }
 
         /// <summary>
