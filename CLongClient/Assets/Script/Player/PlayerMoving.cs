@@ -9,7 +9,7 @@ public class PlayerMoving : Player {
     CharacterController playerController;
     private Vector3 moveDirection = Vector3.zero;
     private float gravity = 20f;
-
+    
     Vector3 startPos;
     Vector3 endPos;
 
@@ -33,15 +33,22 @@ public class PlayerMoving : Player {
     /// </summary>
     protected override void Move()
     {
-        if (playerController.isGrounded)
+        if (Input.GetKey(KeyCode.W))
         {
-            moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-            moveDirection = transform.TransformDirection(moveDirection);
-            moveDirection *= speed; 
+            this.transform.Translate(0f, 0f, 1f * Time.deltaTime * speed);
         }
-        
-        moveDirection.y -= gravity * Time.deltaTime;
-        playerController.Move(moveDirection * Time.deltaTime);
+        if (Input.GetKey(KeyCode.S))
+        {
+            this.transform.Translate(0f, 0f, -1f * Time.deltaTime * speed);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            this.transform.Translate(-1f * Time.deltaTime * speed, 0f, 0f);
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            this.transform.Translate(1f * Time.deltaTime * speed, 0f, 0f);
+        }
     }
     /// <summary>
     /// Player Turning
@@ -54,6 +61,7 @@ public class PlayerMoving : Player {
         if(Input.GetKeyDown(KeyCode.W))
         {
             var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
+            
             NetworkManager.SendSocket(new KeyDown(0, KeyCode.W.ToString(), tmpAngle));
         }
         if (Input.GetKeyDown(KeyCode.A))
@@ -71,7 +79,6 @@ public class PlayerMoving : Player {
             var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
             NetworkManager.SendSocket(new KeyDown(0, KeyCode.D.ToString(), tmpAngle));
         }
-        
 
         if (Input.GetKeyUp(KeyCode.W))
         {
