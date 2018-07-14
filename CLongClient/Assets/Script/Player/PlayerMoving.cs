@@ -4,12 +4,12 @@ using UnityEngine;
 using tcpNet;
 using CLongLib;
 
-public class PlayerMoving : Player {
+public class PlayerMoving : Player
+{
     float speed = 5f;
     CharacterController playerController;
     private Vector3 moveDirection = Vector3.zero;
-    private float gravity = 20f;
-    
+
     Vector3 startPos;
     Vector3 endPos;
 
@@ -17,7 +17,7 @@ public class PlayerMoving : Player {
     float endTime;
     float Timer;
     float distance;
-    
+
     private void Start()
     {
         playerController = this.GetComponent<CharacterController>();
@@ -28,11 +28,14 @@ public class PlayerMoving : Player {
         base.FixedUpdate();
         SendMoveData();
     }
+
+    #region Client
     /// <summary>
     /// Player Moving
     /// </summary>
     protected override void Move()
     {
+        SendMoveData();
         if (Input.GetKey(KeyCode.W))
         {
             this.transform.Translate(0f, 0f, 1f * Time.deltaTime * speed);
@@ -54,30 +57,30 @@ public class PlayerMoving : Player {
     /// Player Turning
     /// </summary>
     void Tunring() { }
-
+    #endregion
+    
+    #region Send To Server Func;
+    /// <summary>
+    /// when client key down, send to server
+    /// </summary>
     protected void SendMoveData()
     {
 
-        if(Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W))
         {
-            var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
-            
-            NetworkManager.SendSocket(new KeyDown(0, KeyCode.W.ToString(), tmpAngle));
+            NetworkManager.SendSocket(new KeyDown(0, KeyCode.W.ToString()));
         }
         if (Input.GetKeyDown(KeyCode.A))
         {
-            var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
-            NetworkManager.SendSocket(new KeyDown(0, KeyCode.A.ToString(), tmpAngle));
+            NetworkManager.SendSocket(new KeyDown(0, KeyCode.A.ToString()));
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
-            var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
-            NetworkManager.SendSocket(new KeyDown(0, KeyCode.S.ToString(), tmpAngle));
+            NetworkManager.SendSocket(new KeyDown(0, KeyCode.S.ToString()));
         }
         if (Input.GetKeyDown(KeyCode.D))
         {
-            var tmpAngle = NetworkProcess.ToNumericVectorChange(this.transform.eulerAngles);
-            NetworkManager.SendSocket(new KeyDown(0, KeyCode.D.ToString(), tmpAngle));
+            NetworkManager.SendSocket(new KeyDown(0, KeyCode.D.ToString()));
         }
 
         if (Input.GetKeyUp(KeyCode.W))
@@ -97,4 +100,6 @@ public class PlayerMoving : Player {
             NetworkManager.SendSocket(new KeyUP(0, KeyCode.D.ToString()));
         }
     }
+
+    #endregion
 }

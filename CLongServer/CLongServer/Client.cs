@@ -29,6 +29,7 @@ namespace CLongServer
         public int numberInGame = 0;
 
         public Vector3 currentPos;
+        public float speed = 5f;
         
         
         /// <summary>

@@ -41,7 +41,7 @@ namespace CLongServer
             queueClientList.Add(c);
             Console.WriteLine("[MATCHING MANAGER] : Matching people Count : " + queueClientList.Count);
             if (queueClientList.Count > 0)
-                MatchingComplete();
+                MatchingCompleteFunc();
             else
                 Console.WriteLine("[MATCHING MANAGER] : No people..");
         }
@@ -61,12 +61,12 @@ namespace CLongServer
         /// queueList에 있는 클라이언트들을 GameRoom의 list에 추가
         /// startgame packet 전송
         /// </summary>
-        public static void MatchingComplete()
+        public static void MatchingCompleteFunc()
         {
             var tmpRoom = new GameRoom();
             foreach (var cl in queueClientList)
             {
-                cl.SendSocket(new StartGameReq());
+                cl.SendSocket(new MatchingComplete());
                 tmpRoom.AddClientInGameRoom(cl);
             }
 

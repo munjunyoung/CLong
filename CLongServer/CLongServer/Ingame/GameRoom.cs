@@ -34,8 +34,8 @@ namespace CLongServer.Ingame
             c.numberInGame = clientList.Count();
             c.currentPos = StartPosList[c.numberInGame];
             clientList.Add(c);
-            c.ProcessHandler += IngameProcess.IngameDataRequest;
             c.ingame = true;
+            c.ProcessHandler += IngameProcess.IngameDataRequest;
             clientList[c.numberInGame].SendSocket(new StartGameReq());
 
             Console.WriteLine("[GAME ROOM] : People Count  - " + clientList.Count);

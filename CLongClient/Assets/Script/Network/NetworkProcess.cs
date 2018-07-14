@@ -41,8 +41,16 @@ public class NetworkProcess : MonoBehaviour {
         {
             switch (p.MsgName)
             {
+                case "MatchingComplete":
+                    //.. Show matchingComplete UI
+                    Debug.Log("Matching Complete");
+                    break;
                 case "StartGameReq":
+                    //서버에서 게임룸생성후 list에 client를 추가했을시 보내는 패킷
                     NetworkManager.ingame = true;
+                    ProcessHandler += IngameProcessData;
+                    NetworkManager.SendSocket(new StartGameReq());
+                    Debug.Log("Ingame Start");
                     //..IngameScene Load
                     break;
                 default:

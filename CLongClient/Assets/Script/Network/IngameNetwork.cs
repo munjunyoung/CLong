@@ -19,9 +19,10 @@ public class IngameNetwork : MonoBehaviour {
             NetworkManager.SendSocket(new PositionInfo(pos));
             
         }
-        if(Input.GetMouseButton(1))
+        if(Input.GetMouseButtonDown(1))
         {
-            NetworkManager.SendSocket(new QueueEntry());
+            if (!NetworkManager.ingame)
+                NetworkManager.SendSocket(new QueueEntry());
         }
     }
 
