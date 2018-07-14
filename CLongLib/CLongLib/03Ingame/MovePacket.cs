@@ -8,31 +8,58 @@ using System.Numerics;
 namespace CLongLib
 {
     /// <summary>
-    /// Create client
+    /// IngamePacket Position Info
     /// </summary>
-    public class ClientIns : Packet
+    public class PositionInfo : Packet
     {
-        public int ClientNum { get; set; }
-        public Vector3 StartPos { get; set; }
-        public ClientIns(int n, Vector3 p)
+        public Vector3 ClientPos { get; set; }
+
+        public PositionInfo(Vector3 p)
         {
-            ClientNum = n;
-            StartPos = p;
+            ClientPos = p;
         }
     }
 
     /// <summary>
-    /// create enemy in game;
+    /// ingamePacket Rotation Info
     /// </summary>
-    public class EnemyIns : Packet
+    public class RotationInfo : Packet
     {
-        public int EnemyNum { get; set; }
-        public Vector3 StartPos { get; set; }
+        public Vector3 ClientRot { get; set; }
 
-        public EnemyIns(int n, Vector3 p)
+        public RotationInfo(Vector3 r)
         {
-            EnemyNum = n;
-            StartPos = p;
+            ClientRot = r;
+        }
+    }
+
+    /// <summary>
+    ///  When Client Down key, send to Server
+    /// </summary>
+    public class KeyDown : Packet
+    {
+        public int ClientNum { get; set; }
+        public String DownKey { get; set; }
+
+        public KeyDown(int n, string k)
+        {
+            ClientNum = n;
+            DownKey = k;
+        }
+    }
+
+    /// <summary>
+    /// When Client up key, send to Server
+    /// </summary>
+    public class KeyUP : Packet
+    {
+        public int ClientNum { get; set; }
+        public String UpKey { get; set; }
+
+        public KeyUP(int n, string k)
+        {
+            ClientNum = n;
+            UpKey = k;
         }
     }
     
@@ -58,7 +85,7 @@ namespace CLongLib
     {
         public int EnemyNum { get; set; }
         public Vector3 CurrentPos { get; set; }
-        
+
         public EnemyMoveSync(int n, Vector3 p)
         {
             EnemyNum = n;

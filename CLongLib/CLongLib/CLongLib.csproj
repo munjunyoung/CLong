@@ -47,10 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientPacket.cs" />
-    <Compile Include="Packet.cs" />
+    <Compile Include="03Ingame\GameStartPacket.cs" />
+    <Compile Include="03Ingame\MovePacket.cs" />
+    <Compile Include="CommonPacket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerPacket.cs" />
+    <Compile Include="02Lobby\QueuePacket.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
