@@ -8,18 +8,20 @@ using Newtonsoft.Json;
 using System.Threading;
 using System.Timers; // timer
 using System.Diagnostics; //stopwatch
-
 namespace CLongServer
 {
     enum Dir { W, S, A, D };
 
     public class IngameProcess
     {
-        // static Stopwatch[] moveTimer;
+        //Move
         static List<Stopwatch> moveTimer = new List<Stopwatch>();
-        static Thread[] moveThread = new Thread[4];
-
+        readonly static Thread[] moveThread = new Thread[4];
+        static float updatePeriod = 0.01f;
         static System.Threading.Timer threadingTimer;
+        static System.Timers.Timer timerTimer = new System.Timers.Timer();
+        //Pos Sync
+        static System.Threading.Timer moveSyncTimer;
 
         public static void IngameDataRequest(object sender, Packet p)
         {
@@ -35,7 +37,11 @@ namespace CLongServer
                 case "PositionInfo":
                     c.SendSocket(p);
                     break;
-               
+                case "ClientDir":
+                    var dirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
+                    c.directionAngle = dirData.DirectionY;
+                    Console.WriteLine("확인 : " + c.directionAngle);
+                    break;
                 case "KeyDown":
                     var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
                     KeyDownFunc(c, keyDownData.DownKey);
@@ -43,6 +49,7 @@ namespace CLongServer
                 case "KeyUP":
                     var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
                     KeyUpFunc(c, keyUpData.UpKey);
+                    c.SendSocket(new ClientMoveSync(c.numberInGame, c.currentPos));
                     break;
                 case "ExitReq":
                     c.Close();
@@ -53,10 +60,7 @@ namespace CLongServer
             }
         }
 
-
         #region thread Stopwatch
-
-
         /// <summary>
         /// key down func
         /// </summary>
@@ -68,38 +72,38 @@ namespace CLongServer
             switch (key)
             {
                 case "W":
-                    moveThread[(int)Dir.W] = new Thread(() => MoveForwardStopWatchCallBack(c));
+                    moveThread[(int)Dir.W] = new Thread(() => MoveForwardhCallBack(c));
                     moveThread[(int)Dir.W].Start();
                     break;
                 case "S":
-                    moveThread[(int)Dir.S] = new Thread(() => MoveBackwardStopWatchCallBack(c));
+                    moveThread[(int)Dir.S] = new Thread(() => MoveBackwardCallBack(c));
                     moveThread[(int)Dir.S].Start();
                     break;
                 case "A":
-                    moveThread[(int)Dir.A] = new Thread(() => MoveLeftStopWatchCallBack(c));
+                    moveThread[(int)Dir.A] = new Thread(() => MoveLeftCallBack(c));
                     moveThread[(int)Dir.A].Start();
                     break;
                 case "D":
-                    moveThread[(int)Dir.D] = new Thread(() => MoveRightStopWatchCallBack(c));
+                    moveThread[(int)Dir.D] = new Thread(() => MoveRightCallBack(c));
                     moveThread[(int)Dir.D].Start();
                     break;
             }
         }
-        
+
         /// <summary>
         /// 앞으로 이동 Timer가 시작하고 
         /// </summary>
         /// <param name="c"></param>
-        private static void MoveForwardStopWatchCallBack(Client c)
+        private static void MoveForwardhCallBack(Client c)
         {
             var timer = moveTimer[(int)Dir.W];
             timer.Start();
             while (true)
             {
                 double time = Math.Truncate(timer.Elapsed.TotalMilliseconds);
-                if (time.Equals(10))
+                if (time.Equals(updatePeriod*1000))
                 {
-                    c.currentPos.Z += (0.01f * c.speed);
+                    c.currentPos += (ChangeZValue(c, updatePeriod * c.speed));
                     timer.Restart();
                     Console.WriteLine("Client Current Pos : " + c.currentPos);
                 }
@@ -110,16 +114,16 @@ namespace CLongServer
         /// 뒤로이동
         /// </summary>
         /// <param name="c"></param>
-        private static void MoveBackwardStopWatchCallBack(Client c)
+        private static void MoveBackwardCallBack(Client c)
         {
             var timer = moveTimer[(int)Dir.S];
             timer.Start();
             while (true)
             {
                 double time = Math.Truncate(timer.Elapsed.TotalMilliseconds);
-                if (time.Equals(10))
+                if (time.Equals(updatePeriod*1000))
                 {
-                    c.currentPos.Z -= (0.01f * c.speed);
+                    c.currentPos -= (ChangeZValue(c, updatePeriod * c.speed));
                     timer.Restart();
                     Console.WriteLine("Client Current Pos : " + c.currentPos);
                 }
@@ -130,16 +134,16 @@ namespace CLongServer
         /// 왼쪽으로 이동
         /// </summary>
         /// <param name="c"></param>
-        private static void MoveLeftStopWatchCallBack(Client c)
+        private static void MoveLeftCallBack(Client c)
         {
             var timer = moveTimer[(int)Dir.A];
             timer.Start();
             while (true)
             {
                 double time = Math.Truncate(timer.Elapsed.TotalMilliseconds);
-                if (time.Equals(10))
+                if (time.Equals(updatePeriod*1000))
                 {
-                    c.currentPos.X -= (0.01f * c.speed);
+                    c.currentPos -= ChangeXValue(c,updatePeriod * c.speed);
                     timer.Restart();
                     Console.WriteLine("Client Current Pos : " + c.currentPos);
                 }
@@ -150,16 +154,16 @@ namespace CLongServer
         /// 오른쪽으로 이동
         /// </summary>
         /// <param name="c"></param>
-        private static void MoveRightStopWatchCallBack(Client c)
+        private static void MoveRightCallBack(Client c)
         {
             var timer = moveTimer[(int)Dir.D];
             timer.Start();
             while (true)
             {
                 double time = Math.Truncate(timer.Elapsed.TotalMilliseconds);
-                if (time.Equals(10))
+                if (time.Equals(updatePeriod*1000))
                 {
-                    c.currentPos.X += (0.01f * c.speed);
+                    c.currentPos += ChangeXValue(c, updatePeriod * c.speed);
                     timer.Restart();
                     Console.WriteLine("Client Current Pos : " + c.currentPos);
                 }
@@ -200,13 +204,62 @@ namespace CLongServer
             moveTimer[(int)key].Stop();
             if (moveThread[(int)key].IsAlive)
                 moveThread[(int)key].Abort();
-            
         }
+
         #endregion
+        
+        /// <summary>
+        /// change increase Zpos value, according to Direction
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static Vector3 ChangeZValue(Client c, float value)
+        {
+            var x = (float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 5);
+            var z = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 5);
+            Vector3 returnVector = new Vector3(value * x, 0, value * z);
+            return returnVector;
+        }
+        /// <summary>
+        /// change increase Xpos value, according to Direction
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static Vector3 ChangeXValue(Client c, float value)
+        {
+            var x = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 5);
+            var z = -(float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 5);
+            Vector3 returnVector = new Vector3(value * x, 0, value * z);
+            return returnVector;
+        }
 
+        private void ClientPosSync()
+        {
 
+        }
         #region System.Threading.Timer
+        private static void KeyDownFuncThread(Client c, string key)
+        {
+            Console.WriteLine("[INGAME PROCESS] : Down Key - " + key);
+            Console.WriteLine("Client Pos in server : " + c.currentPos);
+            switch (key)
+            {
+                case "W":
+                    MoveForwardinThreadTimer(c);
+                    break;
+                case "S":
 
+                    break;
+                case "A":
+
+                    break;
+                case "D":
+
+                    break;
+            }
+        }
         /// <summary>
         /// System Thread로 구현
         /// </summary>
@@ -231,6 +284,44 @@ namespace CLongServer
             var c = (Client)sender;
             c.currentPos.X += (0.01f * (c.speed));
         }
+        #endregion
+
+        #region  Timer.TIMER
+        private static void KeyDownFuncTimer(Client c, string key)
+        {
+            Console.WriteLine("[INGAME PROCESS] : Down Key - " + key);
+            Console.WriteLine("Client Pos in server : " + c.currentPos);
+            switch (key)
+            {
+                case "W":
+                    break;
+                case "S":
+
+                    break;
+                case "A":
+
+                    break;
+                case "D":
+
+                    break;
+            }
+        }
+
+
+        static void MoveForwardTimer(Client c)
+        {
+            timerTimer.Interval = 1000;
+            timerTimer.Elapsed += new System.Timers.ElapsedEventHandler(MoveCallBack);
+        }
+
+        static void MoveCallBack(object sender, System.Timers.ElapsedEventArgs e)
+        {
+
+            var c = (Client)sender;
+            c.currentPos.X += (0.01f * (c.speed));
+            Console.WriteLine("Client Current Pos : " + c.currentPos);
+        }
+
         #endregion
     }
 }

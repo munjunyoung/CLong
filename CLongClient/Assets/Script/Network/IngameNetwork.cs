@@ -4,8 +4,7 @@ using UnityEngine;
 using tcpNet;
 using CLongLib;
 public class IngameNetwork : MonoBehaviour {
-
-    public Transform player;
+    
 	// Use this for initialization
 	void Start () {
         NetworkManager.TcpConnectToServer();
@@ -13,12 +12,6 @@ public class IngameNetwork : MonoBehaviour {
 
     private void Update()
     {
-        if(Input.GetMouseButtonDown(0))
-        {
-            var pos = NetworkProcess.ToNumericVectorChange(player.position);
-            NetworkManager.SendSocket(new PositionInfo(pos));
-            
-        }
         if(Input.GetMouseButtonDown(1))
         {
             if (!NetworkManager.ingame)

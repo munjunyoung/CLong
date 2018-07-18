@@ -62,6 +62,21 @@ namespace CLongLib
             UpKey = k;
         }
     }
+
+    /// <summary>
+    /// Client rotation Y value 
+    /// </summary>
+    public class ClientDir : Packet
+    {
+        public int ClientNum { get; set; }
+        public float DirectionY { get; set; }
+        
+        public ClientDir(int n, float d)
+        {
+            ClientNum = n;
+            DirectionY = d;
+        }
+    }
     
     /// <summary>
     /// 데드레커닝을 하지만 매 주기마다 싱크는 시켜주어야함

@@ -12,23 +12,26 @@ namespace CLongServer
 {
     class Client
     {
+        //Socket
         TcpClient clientTcp;
         public NetworkStream streamTcp; // 전송 주소
         public Socket socketTcp; // socket
         private readonly byte[] _tempBufferStream = new byte[4096];
         private readonly List<byte[]> _bodyBufferListStream = new List<byte[]>();
-
         private readonly byte[] _tempBufferSocket = new byte[4096];
         private readonly List<byte[]> _bodyBufferListSocket = new List<byte[]>();
         private readonly int headSize = 4;
 
+        //Handler
         public delegate void myEventHandler<T>(object sender, Packet p);
         public event myEventHandler<Packet> ProcessHandler;
 
+        //Ingame 
         public bool ingame = false;
         public int numberInGame = 0;
-
+        //Move
         public Vector3 currentPos;
+        public float directionAngle = 0f;
         public float speed = 5f;
         
         

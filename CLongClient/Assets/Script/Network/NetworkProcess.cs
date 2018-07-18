@@ -9,6 +9,7 @@ public class NetworkProcess : MonoBehaviour {
     
     public delegate void myEventHandler<T>(Packet p);
     public event myEventHandler<Packet> ProcessHandler;
+    public GameObject player;
 
     private void Start()
     {
@@ -73,9 +74,13 @@ public class NetworkProcess : MonoBehaviour {
         switch(p.MsgName)
         {
             case "PositionInfo":
-                var posData = JsonConvert.DeserializeObject<PositionInfo>(p.Data);
-                var tmpPos = ToUnityVectorChange(posData.ClientPos);
+                var testData = JsonConvert.DeserializeObject<PositionInfo>(p.Data);
+                var tmpPos = ToUnityVectorChange(testData.ClientPos);
                 Debug.Log("[NetworkProcess] Client Pos : " + tmpPos );
+                break;
+            case "ClientMoveSync":
+                var posData = JsonConvert.DeserializeObject<ClientMoveSync>(p.Data);
+                player.transform.position = new Vector3(posData.CurrentPos.X, posData.CurrentPos.Y, posData.CurrentPos.Z);
                 break;
             default:
                 break;
