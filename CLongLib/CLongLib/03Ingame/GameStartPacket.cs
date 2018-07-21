@@ -14,6 +14,7 @@ namespace CLongLib
     {
         public int ClientNum { get; set; }
         public Vector3 StartPos { get; set; }
+
         public ClientIns(int n, Vector3 p)
         {
             ClientNum = n;

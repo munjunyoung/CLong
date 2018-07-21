@@ -6,8 +6,8 @@ using CLongLib;
 using System.Numerics;
 using Newtonsoft.Json;
 using System.Threading;
-using System.Timers; // timer
 using System.Diagnostics; //stopwatch
+
 namespace CLongServer
 {
     enum Dir { W, S, A, D };
@@ -15,13 +15,12 @@ namespace CLongServer
     public class IngameProcess
     {
         //Move
-        static List<Stopwatch> moveTimer = new List<Stopwatch>();
-        readonly static Thread[] moveThread = new Thread[4];
         static float updatePeriod = 0.01f;
         static System.Threading.Timer threadingTimer;
         static System.Timers.Timer timerTimer = new System.Timers.Timer();
         //Pos Sync
-        static System.Threading.Timer moveSyncTimer;
+        //static System.Threading.Timer moveSyncTimer;
+
 
         public static void IngameDataRequest(object sender, Packet p)
         {
@@ -30,9 +29,12 @@ namespace CLongServer
             switch (p.MsgName)
             {
                 case "StartGameReq":
+                    //클라이언트 생성하는 패킷 전송 필요(나중에 게임룸 구현후)
                     //c.SendSocket(new ClientIns(c.numberInGame, c.currentPos));
+                    c.MoveThread = new Thread(() => CalcMovement(c));
+                    c.MoveThread.Start();
                     for (int i = 0; i < 4; i++)
-                        moveTimer.Add(new Stopwatch());
+                       c.moveTimer.Add(new Stopwatch());
                     break;
                 case "PositionInfo":
                     c.SendSocket(p);
@@ -40,7 +42,6 @@ namespace CLongServer
                 case "ClientDir":
                     var dirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
                     c.directionAngle = dirData.DirectionY;
-                    Console.WriteLine("확인 : " + c.directionAngle);
                     break;
                 case "KeyDown":
                     var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
@@ -53,14 +54,15 @@ namespace CLongServer
                     break;
                 case "ExitReq":
                     c.Close();
+                    
                     break;
                 default:
-                    Console.WriteLine("[INGAME] Mismatching Message");
+                    Console.WriteLine("[INGAME PROCESS] Mismatching Message");
                     break;
             }
         }
 
-        #region thread Stopwatch
+        #region Move thread Stopwatch
         /// <summary>
         /// key down func
         /// </summary>
@@ -69,64 +71,101 @@ namespace CLongServer
         {
             Console.WriteLine("[INGAME PROCESS] : Down Key - " + key);
             Console.WriteLine("Client Pos in server : " + c.currentPos);
+
             switch (key)
             {
                 case "W":
-                    moveThread[(int)Dir.W] = new Thread(() => MoveForwardhCallBack(c));
-                    moveThread[(int)Dir.W].Start();
+                    c.moveTimer[(int)Dir.W].Start();
+                    c.moveMentsKey[(int)Dir.W] = true;
                     break;
                 case "S":
-                    moveThread[(int)Dir.S] = new Thread(() => MoveBackwardCallBack(c));
-                    moveThread[(int)Dir.S].Start();
+                    c.moveTimer[(int)Dir.S].Start();
+                    c.moveMentsKey[(int)Dir.S] = true;
                     break;
                 case "A":
-                    moveThread[(int)Dir.A] = new Thread(() => MoveLeftCallBack(c));
-                    moveThread[(int)Dir.A].Start();
+                    c.moveTimer[(int)Dir.A].Start();
+                    c.moveMentsKey[(int)Dir.A] = true;
                     break;
                 case "D":
-                    moveThread[(int)Dir.D] = new Thread(() => MoveRightCallBack(c));
-                    moveThread[(int)Dir.D].Start();
+                    c.moveTimer[(int)Dir.D].Start();
+                    c.moveMentsKey[(int)Dir.D] = true;
+                    break;
+                case "LeftShift":
+                    //뛰기 이벤트
+                    c.speed = 10f;
+                    break;
+                case "LeftControl":
+                    //앉기 이벤트
+                    c.speed = 3f;
+                    break;
+                case "Z":
+                    //기기 이벤트
+                    c.speed = 1f;
+                    break;  
+                default:
+                    Console.Write("[INGAME PROCESS] Not Saved DownKey :" + key); 
                     break;
             }
         }
 
+
         /// <summary>
-        /// 앞으로 이동 Timer가 시작하고 
+        /// Client Move Thread callback func
         /// </summary>
         /// <param name="c"></param>
-        private static void MoveForwardhCallBack(Client c)
+        private static void CalcMovement(Client c)
         {
-            var timer = moveTimer[(int)Dir.W];
-            timer.Start();
             while (true)
             {
-                double time = Math.Truncate(timer.Elapsed.TotalMilliseconds);
-                if (time.Equals(updatePeriod*1000))
+                if (c.moveMentsKey[(int)Dir.W])
                 {
-                    c.currentPos += (ChangeZValue(c, updatePeriod * c.speed));
-                    timer.Restart();
-                    Console.WriteLine("Client Current Pos : " + c.currentPos);
+                    MoveForward(c);
+                }
+                if (c.moveMentsKey[(int)Dir.S])
+                {
+                    MoveBack(c);
+                }
+                if (c.moveMentsKey[(int)Dir.A])
+                {
+                    MoveLeft(c);
+                }
+                if (c.moveMentsKey[(int)Dir.D])
+                {
+                    MoveRight(c);
                 }
             }
+        }
+
+        /// <summary>
+        /// 앞으로 이동
+        /// </summary>
+        /// <param name="c"></param>
+        private static void MoveForward(Client c)
+        {
+            double time = Math.Truncate(c.moveTimer[(int)Dir.W].Elapsed.TotalMilliseconds);
+            if (time.Equals(updatePeriod * 1000))
+            {
+                c.currentPos += (ChangeZValue(c, updatePeriod * c.speed));
+                c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
+                c.moveTimer[(int)Dir.W].Restart();
+                Console.WriteLine("Client Current Pos : " + c.currentPos);
+            }
+
         }
 
         /// <summary>
         /// 뒤로이동
         /// </summary>
         /// <param name="c"></param>
-        private static void MoveBackwardCallBack(Client c)
+        private static void MoveBack(Client c)
         {
-            var timer = moveTimer[(int)Dir.S];
-            timer.Start();
-            while (true)
+            double time = Math.Truncate(c.moveTimer[(int)Dir.S].Elapsed.TotalMilliseconds);
+            if (time.Equals(updatePeriod * 1000))
             {
-                double time = Math.Truncate(timer.Elapsed.TotalMilliseconds);
-                if (time.Equals(updatePeriod*1000))
-                {
-                    c.currentPos -= (ChangeZValue(c, updatePeriod * c.speed));
-                    timer.Restart();
-                    Console.WriteLine("Client Current Pos : " + c.currentPos);
-                }
+                c.currentPos -= (ChangeZValue(c, updatePeriod * c.speed));
+                c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
+                c.moveTimer[(int)Dir.S].Restart();
+                Console.WriteLine("Client Current Pos : " + c.currentPos);
             }
         }
 
@@ -134,19 +173,15 @@ namespace CLongServer
         /// 왼쪽으로 이동
         /// </summary>
         /// <param name="c"></param>
-        private static void MoveLeftCallBack(Client c)
+        private static void MoveLeft(Client c)
         {
-            var timer = moveTimer[(int)Dir.A];
-            timer.Start();
-            while (true)
+            double time = Math.Truncate(c.moveTimer[(int)Dir.A].Elapsed.TotalMilliseconds);
+            if (time.Equals(updatePeriod * 1000))
             {
-                double time = Math.Truncate(timer.Elapsed.TotalMilliseconds);
-                if (time.Equals(updatePeriod*1000))
-                {
-                    c.currentPos -= ChangeXValue(c,updatePeriod * c.speed);
-                    timer.Restart();
-                    Console.WriteLine("Client Current Pos : " + c.currentPos);
-                }
+                c.currentPos -= ChangeXValue(c, updatePeriod * c.speed);
+                c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
+                c.moveTimer[(int)Dir.A].Restart();
+                Console.WriteLine("Client Current Pos : " + c.currentPos);
             }
         }
 
@@ -154,60 +189,73 @@ namespace CLongServer
         /// 오른쪽으로 이동
         /// </summary>
         /// <param name="c"></param>
-        private static void MoveRightCallBack(Client c)
+        private static void MoveRight(Client c)
         {
-            var timer = moveTimer[(int)Dir.D];
-            timer.Start();
-            while (true)
+            double time = Math.Truncate(c.moveTimer[(int)Dir.D].Elapsed.TotalMilliseconds);
+            if (time.Equals(updatePeriod * 1000))
             {
-                double time = Math.Truncate(timer.Elapsed.TotalMilliseconds);
-                if (time.Equals(updatePeriod*1000))
-                {
-                    c.currentPos += ChangeXValue(c, updatePeriod * c.speed);
-                    timer.Restart();
-                    Console.WriteLine("Client Current Pos : " + c.currentPos);
-                }
+                c.currentPos += ChangeXValue(c, updatePeriod * c.speed);
+                c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
+                c.moveTimer[(int)Dir.D].Restart();
+                Console.WriteLine("Client Current Pos : " + c.currentPos);
             }
         }
 
         /// <summary>
         /// key up func
         /// </summary>
-        /// <param name="keyState"></param>
-        private static void KeyUpFunc(Client c, string keyState)
+        /// <param name="key"></param>
+        private static void KeyUpFunc(Client c, string key)
         {
-            Console.WriteLine("[INGAME PROCESS] : Up Key - " + keyState);
-            switch (keyState)
+            Console.WriteLine("[INGAME PROCESS] : Up Key - " + key);
+            switch (key)
             {
                 case "W":
-                    StopForwardStopWatch(Dir.W);
+                    StopForwardStopWatch(c,Dir.W);
+                    c.moveMentsKey[0] = false;
                     break;
                 case "S":
-                    StopForwardStopWatch(Dir.S);
+                    StopForwardStopWatch(c,Dir.S);
+                    c.moveMentsKey[1] = false;
                     break;
                 case "A":
-                    StopForwardStopWatch(Dir.A);
+                    StopForwardStopWatch(c,Dir.A);
+                    c.moveMentsKey[2] = false;
                     break;
                 case "D":
-                    StopForwardStopWatch(Dir.D);
+                    StopForwardStopWatch(c,Dir.D);
+                    c.moveMentsKey[3] = false;
+                    break;
+                case "LeftShift":
+                    //뛰기 이벤트
+                    c.speed = 5f;
+                    break;
+                case "LeftControl":
+                    //앉기 이벤트
+                    c.speed = 5f;
+                    break;
+                case "Z":
+                    //기기 이벤트
+                    c.speed = 5f;
+                    break;
+                default:
+                    Console.Write("[INGAME PROCESS] Not Saved upKey : " + key);
                     break;
             }
             Console.WriteLine("Client Pos in server : " + c.currentPos);
         }
 
         /// <summary>
-        /// 이동 중지
+        /// 이동 중지 
         /// </summary>
-        private static void StopForwardStopWatch(Dir key)
+        private static void StopForwardStopWatch(Client c, Dir key)
         {
-            moveTimer[(int)key].Reset();
-            moveTimer[(int)key].Stop();
-            if (moveThread[(int)key].IsAlive)
-                moveThread[(int)key].Abort();
+            c.moveTimer[(int)key].Reset();
+            c.moveTimer[(int)key].Stop();
         }
 
         #endregion
-        
+
         /// <summary>
         /// change increase Zpos value, according to Direction
         /// </summary>
@@ -239,6 +287,7 @@ namespace CLongServer
         {
 
         }
+
         #region System.Threading.Timer
         private static void KeyDownFuncThread(Client c, string key)
         {

@@ -13,6 +13,7 @@ namespace CLongServer.Ingame
 
         public bool gameStartState = false;
         public int gameRoomNumber = 0;
+        
         public List<Client> clientList = new List<Client>();
 
         List<Vector3> StartPosList = new List<Vector3>();
@@ -36,27 +37,49 @@ namespace CLongServer.Ingame
             clientList.Add(c);
             c.ingame = true;
             c.ProcessHandler += IngameProcess.IngameDataRequest;
+            //게임시작 통보
             clientList[c.numberInGame].SendSocket(new StartGameReq());
-
-            Console.WriteLine("[GAME ROOM] : People Count  - " + clientList.Count);
-            //..플레이어를 생성하는 함수 필요
+            //해당 클라이언트 생성 통보
+            clientList[c.numberInGame].SendSocket(new ClientIns(c.numberInGame, c.currentPos));
+            //다른 클라이언트들에게 현재 생성하는 클라이언트 생성 통보
+            //현재 생성되는 클라이언트에선 이미 존재하고있는 클라이언트들의 존재 생성
+            foreach(var cl in clientList)
+            {
+                if (cl.clientNumber != c.numberInGame)
+                {
+                    cl.SendSocket(new EnemyIns(c.numberInGame, c.currentPos));
+                    clientList[c.numberInGame].SendSocket(new EnemyIns(cl.numberInGame, cl.currentPos));
+                }
+            }
+            Console.WriteLine("[GAME ROOM] People Count  : [" + clientList.Count + "]");
         }
-
+        
         /// <summary>
-        /// 
+        /// Find Client
         /// </summary>
-        public void ClientMove()
+        /// <param name="c"></param>
+        public void FindClient(Client c)
         {
+            //clientList.Find
+        }
+        
+        /// <summary>
+        /// Remove Client (Socket Close)
+        /// </summary>
+        /// <param name="c"></param>
+        public void ClientRemove(Client c)
+        {
+            clientList[c.clientNumber] = null;
 
         }
 
         public void SetStartPos()
         {
-            StartPosList.Add(new Vector3(0, 0, 0));
-            StartPosList.Add(new Vector3(10, 0, 0));
-            StartPosList.Add(new Vector3(20, 0, 0));
-            StartPosList.Add(new Vector3(30, 0, 0));
-            StartPosList.Add(new Vector3(40, 0, 0));
+            StartPosList.Add(new Vector3(0, 1, 0));
+            StartPosList.Add(new Vector3(10, 1, 0));
+            StartPosList.Add(new Vector3(20, 1, 0));
+            StartPosList.Add(new Vector3(30, 1, 0));
+            StartPosList.Add(new Vector3(40, 1, 0));
         }
     }
 }

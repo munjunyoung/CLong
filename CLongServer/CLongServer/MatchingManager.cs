@@ -69,6 +69,7 @@ namespace CLongServer
                 cl.SendSocket(new MatchingComplete());
                 tmpRoom.AddClientInGameRoom(cl);
             }
+            queueClientList.Clear();
 
             GameRoomManager.AddGameRoom(tmpRoom);
             Console.WriteLine("[MATCHING MANAGER] : Create Room! Queue List all Remove .. show Count : " + queueClientList.Count);

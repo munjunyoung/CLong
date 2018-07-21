@@ -6,6 +6,8 @@ using System.Net.Sockets;
 using Newtonsoft.Json;
 using CLongLib;
 using System.Numerics;
+using System.Threading;
+using System.Diagnostics;
 
 
 namespace CLongServer
@@ -29,10 +31,18 @@ namespace CLongServer
         //Ingame 
         public bool ingame = false;
         public int numberInGame = 0;
+        //Ingame Number
+        public int clientNumber = 0;
+
+
         //Move
+        public bool[] moveMentsKey = new bool[4];
+        public List<Stopwatch> moveTimer = new List<Stopwatch>();
+        public Thread MoveThread;
         public Vector3 currentPos;
         public float directionAngle = 0f;
         public float speed = 5f;
+        public float height = 1f;
         
         
         /// <summary>
