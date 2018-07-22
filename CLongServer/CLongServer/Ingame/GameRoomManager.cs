@@ -16,9 +16,10 @@ namespace CLongServer.Ingame
         /// <param name="room"></param>
         public static void AddGameRoom(GameRoom room)
         {
-            roomList.Add(room);
             room.gameRoomNumber = roomList.Count;
-            Console.WriteLine("[GameRoomManager] : Add GameRoom ! .. this gameroom in people count : " + roomList[0].clientList.Count());
+            roomList.Add(room);
+           
+            Console.WriteLine("[GAME ROOM MANAGER] : Add GameRoom ! .. this gameroom in people count : " + roomList[0].clientList.Count());
         }
 
         /// <summary>
@@ -28,7 +29,7 @@ namespace CLongServer.Ingame
         public static void DellGameRoom(GameRoom room)
         {
             roomList.Remove(room);
-            Console.WriteLine("[GameRoomManager] : Remove GameRoom");
+            Console.WriteLine("[GAME ROOM MANAGER] : Remove GameRoom");
         }
 
         public static void FindGameRoom()

@@ -418,7 +418,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2e8e1c5b0680fa46a38f26954dc2887, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camManagerSc: {fileID: 0}
+  camManagerSc: {fileID: 783572681}
   playerPrefab: {fileID: 1206502622049744, guid: 578f8942f79bdcc48a51b2c8b0f8fc72,
     type: 2}
 --- !u!114 &1404728218

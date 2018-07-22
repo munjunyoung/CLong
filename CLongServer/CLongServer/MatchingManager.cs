@@ -24,7 +24,7 @@ namespace CLongServer
                 if (!r.gameStartState)
                 {
                     r.AddClientInGameRoom(c);
-                    break;
+                    return;
                 }
             }
 

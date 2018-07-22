@@ -6,8 +6,7 @@ using CLongLib;
 
 public class PlayerMoving : Player
 {
-    //Move
-    enum Key { W, A, S, D, LeftShift, LeftControl, Z };
+    
     List<KeyCode> KeyList = new List<KeyCode>();
 
     float moveSpeed = 5f;
@@ -29,6 +28,7 @@ public class PlayerMoving : Player
     private void Start()
     {
         playerController = this.GetComponent<CharacterController>();
+        playerUpperBody = transform.Find("PlayerUpperBody").gameObject;
         KeySet();
     }
 
@@ -111,70 +111,70 @@ public class PlayerMoving : Player
         //Move Direction Key
         if (Input.GetKeyDown(KeyList[(int)Key.W]))
         {
-            NetworkManager.SendSocket(new KeyDown(0, KeyList[(int)Key.W].ToString()));
+            NetworkManager.SendSocket(new KeyDown(clientNum, KeyList[(int)Key.W].ToString()));
         }
         if (Input.GetKeyDown(KeyList[(int)Key.S]))
         {
-            NetworkManager.SendSocket(new KeyDown(0, KeyList[(int)Key.S].ToString()));
+            NetworkManager.SendSocket(new KeyDown(clientNum, KeyList[(int)Key.S].ToString()));
         }
         if (Input.GetKeyDown(KeyList[(int)Key.A]))
         {
-            NetworkManager.SendSocket(new KeyDown(0, KeyList[(int)Key.A].ToString()));
+            NetworkManager.SendSocket(new KeyDown(clientNum, KeyList[(int)Key.A].ToString()));
         }
         if (Input.GetKeyDown(KeyList[(int)Key.D]))
         {
-            NetworkManager.SendSocket(new KeyDown(0, KeyList[(int)Key.D].ToString()));
+            NetworkManager.SendSocket(new KeyDown(clientNum, KeyList[(int)Key.D].ToString()));
         }
 
         if (Input.GetKeyUp(KeyList[(int)Key.W]))
         {
-            NetworkManager.SendSocket(new KeyUP(0, KeyList[(int)Key.W].ToString()));
+            NetworkManager.SendSocket(new KeyUP(clientNum, KeyList[(int)Key.W].ToString()));
         }
         if (Input.GetKeyUp(KeyList[(int)Key.S]))
         {
-            NetworkManager.SendSocket(new KeyUP(0, KeyList[(int)Key.S].ToString()));
+            NetworkManager.SendSocket(new KeyUP(clientNum, KeyList[(int)Key.S].ToString()));
         }
         if (Input.GetKeyUp(KeyList[(int)Key.A]))
         {
-            NetworkManager.SendSocket(new KeyUP(0, KeyList[(int)Key.A].ToString()));
+            NetworkManager.SendSocket(new KeyUP(clientNum, KeyList[(int)Key.A].ToString()));
         }
         if (Input.GetKeyUp(KeyList[(int)Key.D]))
         {
-            NetworkManager.SendSocket(new KeyUP(0, KeyList[(int)Key.D].ToString()));
+            NetworkManager.SendSocket(new KeyUP(clientNum, KeyList[(int)Key.D].ToString()));
         }
 
         //Run
         if(Input.GetKeyDown(KeyList[(int)Key.LeftShift]))
         {
-            NetworkManager.SendSocket(new KeyDown(0, KeyList[(int)Key.LeftShift].ToString()));
+            NetworkManager.SendSocket(new KeyDown(clientNum, KeyList[(int)Key.LeftShift].ToString()));
             moveSpeed = 10f;
         }
         if(Input.GetKeyUp(KeyList[(int)Key.LeftShift]))
         {
-            NetworkManager.SendSocket(new KeyUP(0, KeyList[(int)Key.LeftShift].ToString()));
+            NetworkManager.SendSocket(new KeyUP(clientNum, KeyList[(int)Key.LeftShift].ToString()));
             moveSpeed = 5f;
         }
         
         //Seat
         if(Input.GetKeyDown(KeyList[(int)Key.LeftControl]))
         {
-            NetworkManager.SendSocket(new KeyDown(0, KeyList[(int)Key.LeftControl].ToString()));
+            NetworkManager.SendSocket(new KeyDown(clientNum, KeyList[(int)Key.LeftControl].ToString()));
             moveSpeed = 3f;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftControl]))
         {
-            NetworkManager.SendSocket(new KeyUP(0, KeyList[(int)Key.LeftControl].ToString()));
+            NetworkManager.SendSocket(new KeyUP(clientNum, KeyList[(int)Key.LeftControl].ToString()));
             moveSpeed = 5f;
         }
         //Creep
         if (Input.GetKeyDown(KeyList[(int)Key.Z]))
         {
-            NetworkManager.SendSocket(new KeyDown(0, KeyList[(int)Key.Z].ToString()));
+            NetworkManager.SendSocket(new KeyDown(clientNum, KeyList[(int)Key.Z].ToString()));
             moveSpeed = 1f;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.Z]))
         {
-            NetworkManager.SendSocket(new KeyUP(0, KeyList[(int)Key.Z].ToString()));
+            NetworkManager.SendSocket(new KeyUP(clientNum, KeyList[(int)Key.Z].ToString()));
             moveSpeed = 5f;
         }
     }

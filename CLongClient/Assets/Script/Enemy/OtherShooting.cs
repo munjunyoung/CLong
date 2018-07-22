@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyShooting : MonoBehaviour  {
+public class OtherShooting : Other  {
     
     /// <summary>
     /// enemy Shooting

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyWeaponManager : MonoBehaviour {
+public class OtherWeaponManager : Other{
 
 	// Use this for initialization
 	void Start () {

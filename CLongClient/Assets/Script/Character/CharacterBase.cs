@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterBase : MonoBehaviour  {
-    int health;
 
-    Vector3 startPosition;
-
+    public int clientNum;
+    //Health
+    public int health;
+    //waepon
     WeaponBase equipWeapon;
 
     Material mat;
-
+    
 
     protected virtual void FixedUpdate()
     {

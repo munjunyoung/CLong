@@ -31,9 +31,6 @@ namespace CLongServer
         //Ingame 
         public bool ingame = false;
         public int numberInGame = 0;
-        //Ingame Number
-        public int clientNumber = 0;
-
 
         //Move
         public bool[] moveMentsKey = new bool[4];
@@ -253,7 +250,7 @@ namespace CLongServer
                 switch (p.MsgName)
                 {
                     case "QueueEntry":
-                        MatchingManager.ClientEnqueue(this);
+                        MatchingManager.MatchingProcess(this);
                         break;
                     default:
                         Console.WriteLine("[Client] Socket :  Mismatching Message");

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Numerics;
 namespace CLongLib
 {
+    public enum Key { W = 0, A, S, D, LeftShift, LeftControl, Z };
     /// <summary>
     /// Common Packet;
     /// </summary>

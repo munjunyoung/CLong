@@ -14,11 +14,13 @@ namespace CLongLib
     {
         public int ClientNum { get; set; }
         public Vector3 StartPos { get; set; }
+        public bool Client { get; set; }
 
-        public ClientIns(int n, Vector3 p)
+        public ClientIns(int n, Vector3 p, bool b)
         {
             ClientNum = n;
             StartPos = p;
+            Client = b;
         }
     }
 

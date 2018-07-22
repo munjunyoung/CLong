@@ -8,6 +8,7 @@ public class IngameNetwork : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         NetworkManager.TcpConnectToServer();
+        Application.runInBackground = true;
 	}
 
     private void Update()
