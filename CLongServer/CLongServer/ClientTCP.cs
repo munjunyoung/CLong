@@ -8,11 +8,12 @@ using CLongLib;
 using System.Numerics;
 using System.Threading;
 using System.Diagnostics;
+using System.Net;
 
 
 namespace CLongServer
 {
-    class Client
+    class ClientTCP
     {
         //Socket
         TcpClient clientTcp;
@@ -40,17 +41,22 @@ namespace CLongServer
         public float directionAngle = 0f;
         public float speed = 5f;
         public float height = 1f;
+
+        //UDP
+        public IPEndPoint ipePoint = null;
+
         
         
         /// <summary>
         /// Constructor .. Stream Save;
         /// </summary>
         /// <param name="t"></param>
-        public Client(TcpClient tc)
+        public ClientTCP(TcpClient tc)
         {
             clientTcp = tc;
             streamTcp = clientTcp.GetStream();
             socketTcp = clientTcp.Client;
+        
         }
 
         #region Stream
@@ -143,7 +149,7 @@ namespace CLongServer
         /// send packet through socket
         /// </summary>
         /// <param name="p"></param>
-        public void SendSocket(Packet p)
+        public void SendTCP(Packet p)
         {
             var packetStr = JsonConvert.SerializeObject(p, Formatting.Indented, new JsonSerializerSettings
             {
@@ -155,39 +161,39 @@ namespace CLongServer
             sendPacket.AddRange(headBuf);
             sendPacket.AddRange(bodyBuf);
 
-            socketTcp.BeginSend(sendPacket.ToArray(), 0, sendPacket.Count, SocketFlags.None, OnSendCallBackSocket, socketTcp);
-            Console.WriteLine("[Client] Socket - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
+            socketTcp.BeginSend(sendPacket.ToArray(), 0, sendPacket.Count, SocketFlags.None, OnSendTCPCallBackSocket, socketTcp);
+            Console.WriteLine("[TCP] Socket - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
         }
 
         /// <summary>
         /// send callback func
         /// </summary>
         /// <param name="ar"></param>
-        public void OnSendCallBackSocket(IAsyncResult ar)
+        public void OnSendTCPCallBackSocket(IAsyncResult ar)
         {
             var sock = (Socket)ar.AsyncState;
-            Console.WriteLine("[Client] OnSend !");
+            Console.WriteLine("[TCP] OnSend !");
         }
 
         /// <summary>
         /// receive packet through socket
         /// </summary>
-        public void BeginReceiveSocket()
+        public void BeginReceiveTCP()
         {
             if (!clientTcp.Connected)
             {
-                Console.WriteLine("[Client] Socket - Not Connected");
+                Console.WriteLine("[TCP] Socket - Not Connected");
                 return;
             }
 
             Array.Clear(_tempBufferSocket, 0, _tempBufferSocket.Length);
             try
             {
-                socketTcp.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, OnReceiveCallBackSocket, socketTcp);
+                socketTcp.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, OnReceiveTCPCallBackSocket, socketTcp);
             }
             catch (Exception e)
             {
-                Console.WriteLine("[Client] Socket - Receive : " + e.ToString());
+                Console.WriteLine("[TCP] Socket - Receive : " + e.ToString());
             }
         }
 
@@ -195,17 +201,17 @@ namespace CLongServer
         /// receive call back func though socket
         /// </summary>
         /// <param name="ar"></param>
-        public void OnReceiveCallBackSocket(IAsyncResult ar)
+        public void OnReceiveTCPCallBackSocket(IAsyncResult ar)
         {
             var tempSocket = (Socket)ar.AsyncState;
 
             try
             {
                 var tempDataSize = tempSocket.EndReceive(ar);
-                Console.WriteLine("[Client] Socket - Receive Data Size : " + tempDataSize);
+                Console.WriteLine("[TCP] Socket - Receive Data Size : " + tempDataSize);
                 if (tempDataSize == 0)
                 {
-                    Console.WriteLine("[Client] Socket -  Receive Data Size is zero");
+                    Console.WriteLine("[TCP] Socket -  Receive Data Size is zero");
                     return;
                 }
                 CheckPacketSocket(tempDataSize);
@@ -214,11 +220,11 @@ namespace CLongServer
                     DeserializePacket(p);
 
                 _bodyBufferListSocket.Clear();
-                BeginReceiveSocket();
+                BeginReceiveTCP();
             }
             catch (Exception e)
             {
-                Console.WriteLine("[Client] Socket -  RecevieCallBack : " + e.ToString());
+                Console.WriteLine("[TCP] Socket -  RecevieCallBack : " + e.ToString());
             }
         }
         #endregion
@@ -235,15 +241,15 @@ namespace CLongServer
                 TypeNameHandling = TypeNameHandling.Objects
             });
 
-            Console.WriteLine("[Client] Socket - ReceiveData msg : " + receivedPacket.MsgName);
-            CorrespondData(receivedPacket);
+            Console.WriteLine("[TCP] Socket - ReceiveData msg : " + receivedPacket.MsgName);
+            CorrespondDataTCP(receivedPacket);
         }
 
         /// <summary>
         /// CorrespondData
         /// </summary>
         /// <param name="p"></param>
-        private void CorrespondData(Packet p)
+        private void CorrespondDataTCP(Packet p)
         {
             if (!ingame)
             {
@@ -253,7 +259,7 @@ namespace CLongServer
                         MatchingManager.MatchingProcess(this);
                         break;
                     default:
-                        Console.WriteLine("[Client] Socket :  Mismatching Message");
+                        Console.WriteLine("[TCP] Socket :  Mismatching Message");
                         break;
                 }
             }
@@ -307,13 +313,12 @@ namespace CLongServer
         {
             try
             {
-
-                Console.WriteLine("[Client] Close Socket : " + socketTcp.RemoteEndPoint);
+                Console.WriteLine("[TCP] Close Socket : " + socketTcp.RemoteEndPoint);
                 socketTcp.Close();
             }
             catch(Exception e)
             {
-                Console.WriteLine("[Clinet] Socket - Close Exception : " + e);
+                Console.WriteLine("[TCP] Socket - Close Exception : " + e);
             } 
         }
 

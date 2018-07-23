@@ -7,7 +7,8 @@ public class IngameNetwork : MonoBehaviour {
     
 	// Use this for initialization
 	void Start () {
-        NetworkManager.TcpConnectToServer();
+        NetworkManagerTCP.TcpConnectToServer();
+        NetworkManagerUDP.CreateUDPClient();
         Application.runInBackground = true;
 	}
 
@@ -16,14 +17,14 @@ public class IngameNetwork : MonoBehaviour {
         //마우스 오른쪽 버튼 클릭 시 queue entry.. 일단 만들어둠
         if(Input.GetMouseButtonDown(1))
         {
-            if (!NetworkManager.ingame)
-                NetworkManager.SendSocket(new QueueEntry());
+            if (!NetworkManagerTCP.ingame)
+                NetworkManagerTCP.SendTCP(new QueueEntry());
         }
     }
 
     private void OnApplicationQuit()
     {
-        NetworkManager.SendSocket(new ExitReq());
+        NetworkManagerTCP.SendTCP(new ExitReq());
     }
     
 }

@@ -12,7 +12,7 @@ namespace CLongServer
     {
         private TcpListener tcpServer;
         private Int32 portNumber = 23000;
-        private IPEndPoint ep;
+        public static IPEndPoint ep;
         //Thread signal
         private ManualResetEvent tcpClientConnected = new ManualResetEvent(false);
         
@@ -53,9 +53,9 @@ namespace CLongServer
         private void OnConnectTcpCallBack(IAsyncResult ar)
         {
             TcpListener listener = (TcpListener)ar.AsyncState;
-            Client newClient= new Client(listener.EndAcceptTcpClient(ar));
-            //newClient.BeginReceiveStream();
-            newClient.BeginReceiveSocket();
+            ClientTCP newClient= new ClientTCP(listener.EndAcceptTcpClient(ar));
+            newClient.ipePoint = (IPEndPoint)listener.LocalEndpoint;
+            newClient.BeginReceiveTCP();
             Console.WriteLine("[TCPSERVER] : New Client Connected Completed");
 
             tcpServer.BeginAcceptTcpClient(OnConnectTcpCallBack, tcpServer);

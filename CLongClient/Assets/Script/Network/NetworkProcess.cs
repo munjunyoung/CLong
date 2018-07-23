@@ -21,9 +21,9 @@ public class NetworkProcess : MonoBehaviour {
     /// </summary>
     private void ProcessPacket()
     {
-        if (NetworkManager.receivedPacketQueue.Count > 0)
+        if (NetworkManagerTCP.receivedPacketQueue.Count > 0)
         {
-            CorrespondData(NetworkManager.receivedPacketQueue.Dequeue());
+            CorrespondData(NetworkManagerTCP.receivedPacketQueue.Dequeue());
         }
     }
     /// <summary>
@@ -32,7 +32,7 @@ public class NetworkProcess : MonoBehaviour {
     /// <param name="p"></param>
     private void CorrespondData(Packet p)
     {
-        if (!NetworkManager.ingame)
+        if (!NetworkManagerTCP.ingame)
         {
             switch (p.MsgName)
             {
@@ -42,9 +42,9 @@ public class NetworkProcess : MonoBehaviour {
                     break;
                 case "StartGameReq":
                     //서버에서 게임룸생성후 list에 client를 추가했을시 보내는 패킷
-                    NetworkManager.ingame = true;
+                    NetworkManagerTCP.ingame = true;
                     ProcessHandler += GameObject.Find("IngameNetworkManager").GetComponent<IngameProcess>().IngameProcessData;
-                    NetworkManager.SendSocket(new StartGameReq());
+                    NetworkManagerTCP.SendTCP(new StartGameReq());
                     Debug.Log("Ingame Start");
                     //..IngameScene Load
                     break;

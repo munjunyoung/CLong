@@ -56,9 +56,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Client.cs" />
+    <Compile Include="ClientTCP.cs" />
     <Compile Include="Ingame\GameRoom.cs" />
     <Compile Include="Ingame\GameRoomManager.cs" />
+    <Compile Include="Ingame\UdpNetwork.cs" />
     <Compile Include="MatchingManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

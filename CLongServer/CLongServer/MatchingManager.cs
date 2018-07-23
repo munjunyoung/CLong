@@ -10,13 +10,13 @@ namespace CLongServer
 {
     class MatchingManager
     {
-        private static List<Client> queueClientList = new List<Client>();
+        private static List<ClientTCP> queueClientList = new List<ClientTCP>();
         
        /// <summary>
        /// 매칭프로세스
        /// </summary>
        /// <param name="c"></param>
-        public static void MatchingProcess(Client c)
+        public static void MatchingProcess(ClientTCP c)
         {
             //처음 큐를 눌렀을 경우 RoomList를 검색한후 아직 시작하지 않은게임에 참가
             foreach(var r in GameRoomManager.roomList)
@@ -36,7 +36,7 @@ namespace CLongServer
         /// queue 참가
         /// </summary>
         /// <param name="c"></param>
-        public static void ClientEnqueue(Client c)
+        public static void ClientEnqueue(ClientTCP c)
         {
             queueClientList.Add(c);
             Console.WriteLine("[MATCHING MANAGER] : Matching people Count : " + queueClientList.Count);
@@ -50,7 +50,7 @@ namespace CLongServer
         /// queuelist에서 클라이언트 제거
         /// </summary>
         /// <param name="c"></param>
-        public static void ClientDequeue(Client c)
+        public static void ClientDequeue(ClientTCP c)
         {
             queueClientList.Remove(c);
             Console.WriteLine("[MATCHING MANAGER] : client Mathcing remove.. Count : " + queueClientList.Count);
@@ -66,7 +66,7 @@ namespace CLongServer
             var tmpRoom = new GameRoom();
             foreach (var cl in queueClientList)
             {
-                cl.SendSocket(new MatchingComplete());
+                cl.SendTCP(new MatchingComplete());
                 tmpRoom.AddClientInGameRoom(cl);
             }
             queueClientList.Clear();

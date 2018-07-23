@@ -127,7 +127,6 @@ public class IngameProcess : MonoBehaviour
             playerList[num].AddComponent<OtherMoving>();
             playerList[num].GetComponent<OtherMoving>().clientNum = num;
         }
-        Debug.Log("생성한 캐릭터 num : " + num);
     }
 
 

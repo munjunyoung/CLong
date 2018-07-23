@@ -8,6 +8,7 @@ using CLongLib;
 using Newtonsoft.Json;
 using System.Threading;
 using System.Diagnostics;
+using CLongServer;
 
 namespace CLongServer.Ingame
 {
@@ -16,7 +17,7 @@ namespace CLongServer.Ingame
         public bool gameStartState = false;
         public int gameRoomNumber = 0;
         
-        public List<Client> clientList = new List<Client>();
+        public List<ClientTCP> clientList = new List<ClientTCP>();
         List<Vector3> StartPosList = new List<Vector3>();
 
         //Move
@@ -24,6 +25,8 @@ namespace CLongServer.Ingame
         System.Threading.Timer threadingTimer;
         System.Timers.Timer timerTimer = new System.Timers.Timer();
 
+        //UDP
+        public UdpNetwork udpServer;
 
         #region GameRoom
         /// <summary>
@@ -32,6 +35,8 @@ namespace CLongServer.Ingame
         public GameRoom()
         {
             gameStartState = false;
+            //UdpClient 생성
+            udpServer = new UdpNetwork(Program.ep);
             SetStartPos();
         }
 
@@ -39,7 +44,7 @@ namespace CLongServer.Ingame
         /// Add client in GameRoom
         /// </summary>
         /// <param name="c"></param>
-        public void AddClientInGameRoom(Client c)
+        public void AddClientInGameRoom(ClientTCP c)
         {
             c.numberInGame = clientList.Count();
             c.currentPos = StartPosList[c.numberInGame];
@@ -47,17 +52,17 @@ namespace CLongServer.Ingame
             c.ProcessHandler += IngameDataRequest;
             clientList.Add(c);
             //게임시작 통보
-            clientList[c.numberInGame].SendSocket(new StartGameReq());
+            clientList[c.numberInGame].SendTCP(new StartGameReq());
             //해당 클라이언트 생성 통보
-            clientList[c.numberInGame].SendSocket(new ClientIns(c.numberInGame, c.currentPos, true));
+            clientList[c.numberInGame].SendTCP(new ClientIns(c.numberInGame, c.currentPos, true));
             //다른 클라이언트들에게 현재 생성하는 클라이언트 생성 통보
             //현재 생성되는 클라이언트에선 이미 존재하고있는 클라이언트들의 존재 생성
             foreach(var cl in clientList)
             {
                 if (c.numberInGame != cl.numberInGame)
                 {
-                    cl.SendSocket(new ClientIns(c.numberInGame, c.currentPos, false));
-                    clientList[c.numberInGame].SendSocket(new ClientIns(cl.numberInGame, cl.currentPos, false));
+                    cl.SendTCP(new ClientIns(c.numberInGame, c.currentPos, false));
+                    clientList[c.numberInGame].SendTCP(new ClientIns(cl.numberInGame, cl.currentPos, false));
                 }
             }
             Console.WriteLine("[GAME ROOM] People Count  : [" + clientList.Count + "]");
@@ -67,7 +72,7 @@ namespace CLongServer.Ingame
         /// Find Client
         /// </summary>
         /// <param name="c"></param>
-        public void FindClient(Client c)
+        public void FindClient(ClientTCP c)
         {
             //clientList.Find
         }
@@ -76,7 +81,7 @@ namespace CLongServer.Ingame
         /// Remove Client (Socket Close)
         /// </summary>
         /// <param name="c"></param>
-        public void ClientRemove(Client c)
+        public void ClientRemove(ClientTCP c)
         {
             clientList[c.numberInGame] = null;
 
@@ -90,7 +95,7 @@ namespace CLongServer.Ingame
         /// <param name="p"></param>
         public void IngameDataRequest(object sender, Packet p)
         {
-            var c = sender as Client;
+            var c = sender as ClientTCP;
 
             switch (p.MsgName)
             {
@@ -103,7 +108,7 @@ namespace CLongServer.Ingame
                         c.moveTimer.Add(new Stopwatch());
                     break;
                 case "PositionInfo":
-                    c.SendSocket(p);
+                    c.SendTCP(p);
                     break;
                 case "ClientDir":
                     var dirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
@@ -115,19 +120,19 @@ namespace CLongServer.Ingame
                     foreach (var cl in clientList)
                     {
                         if (cl.numberInGame != c.numberInGame)
-                            cl.SendSocket(p);
+                            cl.SendTCP(p);
                     }
                     break;
                 case "KeyUP":
                     var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
                     KeyUpFunc(c, keyUpData.UpKey);
-                    c.SendSocket(new ClientMoveSync(c.numberInGame, c.currentPos));
+                    c.SendTCP(new ClientMoveSync(c.numberInGame, c.currentPos));
                     foreach (var cl in clientList)
                     {
                         if(cl.numberInGame != c.numberInGame)
                         {
-                            cl.SendSocket(p);
-                            cl.SendSocket(new ClientMoveSync(c.numberInGame, c.currentPos));
+                            cl.SendTCP(p);
+                            cl.SendTCP(new ClientMoveSync(c.numberInGame, c.currentPos));
                         }
                     }
                     
@@ -147,7 +152,7 @@ namespace CLongServer.Ingame
         /// key down func
         /// </summary>
         /// <param name="key"></param>
-        private void KeyDownFunc(Client c, string key)
+        private void KeyDownFunc(ClientTCP c, string key)
         {
             Console.WriteLine("[INGAME PROCESS] : Down Key - " + key);
             Console.WriteLine("Client Pos in server : " + c.currentPos);
@@ -193,7 +198,7 @@ namespace CLongServer.Ingame
         /// Client Move Thread callback func
         /// </summary>
         /// <param name="c"></param>
-        private void CalcMovement(Client c)
+        private void CalcMovement(ClientTCP c)
         {
             while (true)
             {
@@ -220,7 +225,7 @@ namespace CLongServer.Ingame
         /// 앞으로 이동
         /// </summary>
         /// <param name="c"></param>
-        private void MoveForward(Client c)
+        private void MoveForward(ClientTCP c)
         {
             double time = Math.Truncate(c.moveTimer[(int)Key.W].Elapsed.TotalMilliseconds);
             if (time.Equals(updatePeriod * 1000))
@@ -237,7 +242,7 @@ namespace CLongServer.Ingame
         /// 뒤로이동
         /// </summary>
         /// <param name="c"></param>
-        private void MoveBack(Client c)
+        private void MoveBack(ClientTCP c)
         {
             double time = Math.Truncate(c.moveTimer[(int)Key.S].Elapsed.TotalMilliseconds);
             if (time.Equals(updatePeriod * 1000))
@@ -253,7 +258,7 @@ namespace CLongServer.Ingame
         /// 왼쪽으로 이동
         /// </summary>
         /// <param name="c"></param>
-        private void MoveLeft(Client c)
+        private void MoveLeft(ClientTCP c)
         {
             double time = Math.Truncate(c.moveTimer[(int)Key.A].Elapsed.TotalMilliseconds);
             if (time.Equals(updatePeriod * 1000))
@@ -269,7 +274,7 @@ namespace CLongServer.Ingame
         /// 오른쪽으로 이동
         /// </summary>
         /// <param name="c"></param>
-        private void MoveRight(Client c)
+        private void MoveRight(ClientTCP c)
         {
             double time = Math.Truncate(c.moveTimer[(int)Key.D].Elapsed.TotalMilliseconds);
             if (time.Equals(updatePeriod * 1000))
@@ -285,7 +290,7 @@ namespace CLongServer.Ingame
         /// key up func
         /// </summary>
         /// <param name="key"></param>
-        private void KeyUpFunc(Client c, string key)
+        private void KeyUpFunc(ClientTCP c, string key)
         {
             Console.WriteLine("[INGAME PROCESS] : Up Key - " + key);
             switch (key)
@@ -328,7 +333,7 @@ namespace CLongServer.Ingame
         /// <summary>
         /// 이동 중지 
         /// </summary>
-        private void StopForwardStopWatch(Client c, Key key)
+        private void StopForwardStopWatch(ClientTCP c, Key key)
         {
             c.moveTimer[(int)key].Reset();
             c.moveTimer[(int)key].Stop();
@@ -342,7 +347,7 @@ namespace CLongServer.Ingame
         /// <param name="c"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        private Vector3 ChangeZValue(Client c, float value)
+        private Vector3 ChangeZValue(ClientTCP c, float value)
         {
             var x = (float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 5);
             var z = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 5);
@@ -355,7 +360,7 @@ namespace CLongServer.Ingame
         /// <param name="c"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        private Vector3 ChangeXValue(Client c, float value)
+        private Vector3 ChangeXValue(ClientTCP c, float value)
         {
             var x = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 5);
             var z = -(float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 5);

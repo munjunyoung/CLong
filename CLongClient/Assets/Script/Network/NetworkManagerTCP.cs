@@ -9,11 +9,11 @@ using UnityEngine;
 
 namespace tcpNet
 {
-    class NetworkManager
+    class NetworkManagerTCP
     {
         //tcpClient
-        private static string ip = "127.0.0.1";//"172.30.1.24";
-        private static int portNumber = 23000;
+        public static string ip = "127.0.0.1";//"172.30.1.24";
+        public static int portNumber = 23000;
         public static TcpClient clientTcp = null;
         private static NetworkStream streamTcp;
 
@@ -34,11 +34,11 @@ namespace tcpNet
             clientTcp = new TcpClient();
             try
             {
-                clientTcp.BeginConnect(ip, portNumber, OnConnectCallBack, clientTcp);
+                clientTcp.BeginConnect(ip, portNumber, OnConnectTCPCallBack, clientTcp);
             }
             catch(Exception e)
             {
-                Debug.Log("[Client] Socket : ConeectToServer E : " + e);
+                Debug.Log("[TCP] Socket : ConeectToServer E : " + e);
             }
             
         }
@@ -47,13 +47,13 @@ namespace tcpNet
         /// Connect Call Back;
         /// </summary>
         /// <param name="ar"></param>
-        public static void OnConnectCallBack(IAsyncResult ar)
+        public static void OnConnectTCPCallBack(IAsyncResult ar)
         {
             streamTcp = clientTcp.GetStream();
             socketTcp = clientTcp.Client;
-            Debug.Log("[Client] Socket : Connect..");
+            Debug.Log("[TCP] Socket : Connect..");
           
-            BeginReceiveSocket();
+            BeginReceiveTCP();
         }
 
         
@@ -63,7 +63,7 @@ namespace tcpNet
         /// send packet through socket
         /// </summary>
         /// <param name="p"></param>
-        public static void SendSocket(Packet p)
+        public static void SendTCP(Packet p)
         {
             try
             { 
@@ -77,12 +77,12 @@ namespace tcpNet
                 sendPacket.AddRange(headBuf);
                 sendPacket.AddRange(bodyBuf);
 
-                socketTcp.BeginSend(sendPacket.ToArray(), 0, sendPacket.Count, SocketFlags.None, OnSendCallBackSocket, socketTcp);
-                Debug.Log("[Client] Socket - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
+                socketTcp.BeginSend(sendPacket.ToArray(), 0, sendPacket.Count, SocketFlags.None, OnSendTCPCallBack, socketTcp);
+                Debug.Log("[TCP] Socket - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
             }
             catch(Exception e)
             {
-                Debug.Log("[Client] Socket : " + e);
+                Debug.Log("[TCP] Socket : " + e);
                 //...nothing
             }
         }
@@ -91,7 +91,7 @@ namespace tcpNet
         /// send callback func
         /// </summary>
         /// <param name="ar"></param>
-        public static void OnSendCallBackSocket(IAsyncResult ar)
+        public static void OnSendTCPCallBack(IAsyncResult ar)
         {
             var sock = (Socket)ar.AsyncState;
         }
@@ -100,12 +100,12 @@ namespace tcpNet
         /// <summary>
         /// Begin Receive
         /// </summary>
-        public static void BeginReceiveSocket()
+        public static void BeginReceiveTCP()
         {
             
             if (!clientTcp.Connected)
             {
-                Debug.Log("[Client] Socket = Not Connected");
+                Debug.Log("[TCP] Socket = Not Connected");
                 return;
             }
 
@@ -114,11 +114,11 @@ namespace tcpNet
             try
             {
                 
-                socketTcp.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, OnReceiveCallBackSocket, socketTcp);
+                socketTcp.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, OnReceiveTCPCallBack, socketTcp);
             }
             catch(Exception e)
             {
-                Debug.Log("[Client] : Socket - Receive : " + e);
+                Debug.Log("[TCP] : Socket - Receive : " + e);
             }
 
         }
@@ -127,16 +127,16 @@ namespace tcpNet
         /// Receive Call Back
         /// </summary>
         /// <param name="ar"></param>
-        public static void OnReceiveCallBackSocket(IAsyncResult ar)
+        public static void OnReceiveTCPCallBack(IAsyncResult ar)
         {
             var tempSocket = (Socket)ar.AsyncState;
             try
             {
                 var tempDataSize = tempSocket.EndReceive(ar);
-                Debug.Log("[Client] Socket - Receive Data Size : " + tempDataSize);
+                Debug.Log("[TCP] Socket - Receive Data Size : " + tempDataSize);
                 if (tempDataSize == 0)
                 {
-                    Debug.Log("[Client] Socket -  Receive Data Size is zero");
+                    Debug.Log("[TCP] Socket -  Receive Data Size is zero");
                     return;
                 }
                 CheckPacketSocket(tempDataSize);
@@ -146,11 +146,11 @@ namespace tcpNet
 
                 _bodyBufferListSocket.Clear();
 
-                BeginReceiveSocket();
+                BeginReceiveTCP();
             }
             catch (Exception e)
             {
-               Debug.Log("[Client] Socket -  RecevieCallBack : " + e.ToString());
+               Debug.Log("[TCP] Socket -  RecevieCallBack : " + e.ToString());
             }
         }
         
@@ -169,7 +169,7 @@ namespace tcpNet
             });
 
             receivedPacketQueue.Enqueue(receivedTempPacket);
-            Debug.Log("[Client] Socket - ReceiveData msg : " + receivedTempPacket.MsgName);
+            Debug.Log("[TCP] Socket - ReceiveData msg : " + receivedTempPacket.MsgName);
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace tcpNet
             sendPacket.AddRange(bodyBuf);
 
             streamTcp.BeginWrite(sendPacket.ToArray(), 0, sendPacket.Count, OnSendCallBackStream, streamTcp);
-            Debug.Log("[Client] Stream - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
+            Debug.Log("[TCP] Stream - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace tcpNet
         public static void OnSendCallBackStream(IAsyncResult ar)
         {
             var temps = (NetworkStream)ar.AsyncState;
-            Debug.Log("[Client] OnSend");
+            Debug.Log("[TCP] OnSend");
         }
 
 
