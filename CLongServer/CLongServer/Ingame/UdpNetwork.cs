@@ -10,20 +10,26 @@ using System.Net;
 
 namespace CLongServer.Ingame
 {
-    class UdpNetwork : NetworkManager
+    class UdpNetwork
     {
         //UdpClient
         UdpClient clientUDP;
+        
         //Unicast
         private IPEndPoint unicastEP = Program.ep;
+        
         //Multicast
         public static string multicastIP = "239.0.0.182";
         //동일 컴퓨터에서 포트번호 변경(multicast를 사용할때 클라이언트에서도 자기 자신을 bind해주어야하기때문에)
         public static int multicastPort = 22000;
         private IPEndPoint multicastEP = new IPEndPoint(IPAddress.Parse(multicastIP), multicastPort);
+
+        //Receive
+        private Packet receivedPacket = null;
+        private byte[] _tempBufferSocket = new byte[4096];
+        private readonly List<byte[]> _bodyBufferListSocket = new List<byte[]>();
+        private readonly int headSize = 4;
         
-        //Head Size
-        private int headSize = 4;
 
         /// <summary>
         /// Constructor . Create UDPClient
@@ -39,9 +45,18 @@ namespace CLongServer.Ingame
         /// </summary>
         /// <param name="p"></param>
         /// <param name="c"></param>
-        public override void Send(Packet p)
+        public void Send(Packet p)
         {
-            base.Send(p);
+            var packetStr = JsonConvert.SerializeObject(p, Formatting.Indented, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Objects
+            });
+
+            var bodyBuf = Encoding.UTF8.GetBytes(packetStr);
+            var headBuf = BitConverter.GetBytes(bodyBuf.Length);
+            List<byte> sendPacket = new List<byte>();
+            sendPacket.AddRange(headBuf);
+            sendPacket.AddRange(bodyBuf);
             clientUDP.Send(sendPacket.ToArray(), sendPacket.Count, multicastEP);
             Console.WriteLine("[UDP] Socket - Send : [" + p.MsgName + "] to [" + multicastEP + "]");
         }
@@ -50,7 +65,7 @@ namespace CLongServer.Ingame
         /// <summary>
         /// Receive Packet through UDP
         /// </summary>
-        public void BeginReceiveUDP()
+        private void BeginReceiveUDP()
         {
             var ep = new IPEndPoint(IPAddress.Any, 23000);
             UdpState udpInfo = new UdpState(ep, clientUDP);
@@ -69,7 +84,7 @@ namespace CLongServer.Ingame
         /// Receive CallBack Func;
         /// </summary>
         /// <param name="ar"></param>
-        protected void OnReceiveUDPCallBack(IAsyncResult ar)
+        private void OnReceiveUDPCallBack(IAsyncResult ar)
         {
             var tmpUDP = (UdpClient)((UdpState)ar.AsyncState).Uc;
             IPEndPoint tmpEP = (IPEndPoint)((UdpState)ar.AsyncState).Ep;
