@@ -9,27 +9,66 @@ namespace CLongLib
 {
     public class PacketMaker
     {
-        public static byte CODE_MOVE { get { return 0x00; } }
-        
-        public static byte[] MakePacket(byte CODE, object o)
+        protected PacketMaker() { }
+
+        public PacketMaker Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new PacketMaker();
+
+                return _instance;
+            }
+        }
+        private PacketMaker _instance;
+
+        public byte CODE_MOVE { get { return 0x00; } }
+        public byte CODE_MATCH { get { return 0x01; } }
+        public byte CODE_INGAME_MOVE { get { return 0x02; } }
+        public byte CODE_INGAME_ROTATE { get { return 0x03; } }
+
+        public static byte[] SetPacket(byte code, object o)
         {
             Type t = o.GetType();
             int size = Marshal.SizeOf(o);
+            byte[] ary = new byte[size+1];
             IntPtr p = Marshal.AllocHGlobal(size);
 
-            byte[] ary = new byte[size];
-            Marshal.Copy(p, ary, 0, size);
+            ary[0] = code;
+            Marshal.StructureToPtr(o, p, true);
+            Marshal.Copy(p, ary, 1, size);
+            Marshal.FreeHGlobal(p);
 
             return ary;
+        }
+
+        public static T GetPacket<T>(byte[] buffer) where T : struct
+        {
+            int size = Marshal.SizeOf(typeof(T));
+
+            if (size > buffer.Length)
+            {
+                throw new Exception();
+            }
+
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            Marshal.Copy(buffer, 0, ptr, size);
+            T obj = (T)Marshal.PtrToStructure(ptr, typeof(T));
+            Marshal.FreeHGlobal(ptr);
+            return obj;
         }
     }
 
     /// <summary>
     /// Login request from CLIENT to SERVER.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Login_Req
     {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
         public string id;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
         public string password;
     }
 
