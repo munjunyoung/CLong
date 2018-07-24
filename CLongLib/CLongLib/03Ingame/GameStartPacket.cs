@@ -25,23 +25,7 @@ namespace CLongLib
             Client = b;
         }
     }
-
-    /// <summary>
-    /// create enemy in game;
-    /// </summary>
-    public class EnemyIns : Packet
-    {
-        public int EnemyNum { get; set; }
-        public Vector3 StartPos { get; set; }
-
-        public EnemyIns(int n, Vector3 p)
-        {
-            EnemyNum = n;
-            StartPos = p;
-        }
-    }
-
-
+    
     /// <summary>
     /// Udp ReceiveCallBack Func
     /// </summary>

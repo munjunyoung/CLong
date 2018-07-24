@@ -18,19 +18,25 @@ public class NetworkManagerUDP
     private static readonly string multicastIP = "239.0.0.182";
     //동일 컴퓨터에서 포트번호 변경(multicast를 사용할때 클라이언트에서도 자기 자신을 bind해주어야하기때문에)
     private static readonly int multicastPort = 22000;
-    private static IPEndPoint clientEP = new IPEndPoint(IPAddress.Any, multicastPort);
+    private static IPEndPoint clientEP;
     //Receive Buffer
     private static byte[] _tempBufferSocket = new byte[4096];
     private static List<byte[]> _bodyBufferListSocket = new List<byte[]>();
     private static readonly int headSize = 4;
+
+    //UnityThread Queue
+    public static Queue<Packet> receivedPacketUDP = new Queue<Packet>();
+
     /// <summary>
-    /// Constructor : create UdpClient
+    /// Constructor : create UdpClient .. 
+    /// 한컴퓨터에서 여러개의 클라이언트를 실행할경우 bind포트가 겹치므로
+    /// 클라이언트 생성시 주어진 num에따라 port번호 +
     /// </summary>
     public static void CreateUDPClient()
     {
         //receive client local ip 접속
-        clientUDP = new UdpClient();
-        clientUDP.Client.Bind(clientEP);
+        clientUDP = new UdpClient(multicastPort);
+        clientEP = new IPEndPoint(IPAddress.Any, multicastPort);
         //멀티캐스트 접속
         clientUDP.JoinMulticastGroup(IPAddress.Parse(multicastIP));
         BeginMulticastReceive();
@@ -92,7 +98,13 @@ public class NetworkManagerUDP
                 Debug.Log("[UDP] Socket -  Receive Data Size is zero");
                 return;
             }
+            CheckPacket(tempDataSize);
 
+            foreach (var p in _bodyBufferListSocket)
+                DeserializePacket(p);
+
+            _bodyBufferListSocket.Clear();
+            
             BeginMulticastReceive();
         }
         catch (Exception e)
@@ -101,4 +113,39 @@ public class NetworkManagerUDP
         }
 
     }
+
+    /// <summary>
+    /// Deserialize Data
+    /// </summary>
+    /// <param name="bodyPacket"></param>
+    private static void DeserializePacket(byte[] bodyPacket)
+    {
+        var packetStr = Encoding.UTF8.GetString(bodyPacket);
+        var receivedPacket = JsonConvert.DeserializeObject<Packet>(packetStr, new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Objects
+        });
+        receivedPacketUDP.Enqueue(receivedPacket);
+        Console.WriteLine("[UDP] Socket - ReceiveData msg : " + receivedPacket.MsgName);
+       
+    }
+
+    /// <summary>
+    /// overLap Packet divide through socket
+    /// </summary>
+    /// <param name="totalSize"></param>
+    private static void CheckPacket(int totalSize)
+    {
+        var tempSize = 0;
+        while (totalSize > tempSize)
+        {
+            var bodySize = _tempBufferSocket[tempSize];
+            byte[] bodyBuf = new byte[1024];
+
+            Array.Copy(_tempBufferSocket, tempSize + headSize, bodyBuf, 0, bodySize);
+            _bodyBufferListSocket.Add(bodyBuf);
+            tempSize += (bodySize + headSize);
+        }
+    }
+    
 }

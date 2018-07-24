@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System.Threading;
 using System.Diagnostics;
 using CLongServer;
+using System.Net;
 
 namespace CLongServer.Ingame
 {
@@ -24,7 +25,7 @@ namespace CLongServer.Ingame
         float updatePeriod = 0.01f;
         System.Threading.Timer threadingTimer;
         System.Timers.Timer timerTimer = new System.Timers.Timer();
-
+        
         //UDP
         public UdpNetwork udpServer;
 
@@ -49,7 +50,8 @@ namespace CLongServer.Ingame
             c.numberInGame = clientList.Count();
             c.currentPos = StartPosList[c.numberInGame];
             c.ingame = true;
-            c.ProcessHandler += IngameDataRequest;
+            c.ProcessHandler += IngameDataRequestTCP;
+            udpServer.ProcessHandler += IngameDataRequestUDP;
             clientList.Add(c);
             //게임시작 통보
             clientList[c.numberInGame].Send(new StartGameReq());
@@ -93,7 +95,7 @@ namespace CLongServer.Ingame
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="p"></param>
-        public void IngameDataRequest(object sender, Packet p)
+        private void IngameDataRequestTCP(object sender, Packet p)
         {
             var c = sender as ClientTCP;
 
@@ -109,10 +111,6 @@ namespace CLongServer.Ingame
                     break;
                 case "PositionInfo":
                     c.Send(p);
-                    break;
-                case "ClientDir":
-                    var dirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
-                    c.directionAngle = dirData.DirectionY;
                     break;
                 case "KeyDown":
                     var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
@@ -142,11 +140,25 @@ namespace CLongServer.Ingame
 
                     break;
                 default:
-                    Console.WriteLine("[INGAME PROCESS] Mismatching Message");
+                    Console.WriteLine("[INGAME PROCESS] TCP : Mismatching Message");
                     break;
             }
         }
 
+        private void IngameDataRequestUDP(Packet p)
+        {
+            switch(p.MsgName)
+            {
+                case "ClientDir":
+                    var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
+                    clientList[clientDirData.ClientNum].directionAngle = clientDirData.DirectionY;
+                    udpServer.Send(p);
+                    break;
+                default:
+                    Console.WriteLine("[INGAME PROCESS] UDP : Mismatching Message");
+                    break;  
+            }
+        }
         #region Move thread Stopwatch
         /// <summary>
         /// key down func
@@ -154,9 +166,8 @@ namespace CLongServer.Ingame
         /// <param name="key"></param>
         private void KeyDownFunc(ClientTCP c, string key)
         {
-            Console.WriteLine("[INGAME PROCESS] : Down Key - " + key);
-            Console.WriteLine("Client Pos in server : " + c.currentPos);
-
+            Console.WriteLine("[INGAME PROCESS] TCP : Down Key - " + key);
+            
             switch (key)
             {
                 case "W":

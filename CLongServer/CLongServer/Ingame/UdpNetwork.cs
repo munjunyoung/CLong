@@ -13,7 +13,7 @@ namespace CLongServer.Ingame
     class UdpNetwork
     {
         //UdpClient
-        UdpClient clientUDP;
+        public UdpClient clientUDP;
         
         //Unicast
         private IPEndPoint unicastEP = Program.ep;
@@ -25,11 +25,13 @@ namespace CLongServer.Ingame
         private IPEndPoint multicastEP = new IPEndPoint(IPAddress.Parse(multicastIP), multicastPort);
 
         //Receive
-        private Packet receivedPacket = null;
         private byte[] _tempBufferSocket = new byte[4096];
         private readonly List<byte[]> _bodyBufferListSocket = new List<byte[]>();
         private readonly int headSize = 4;
         
+        //Handler
+        public delegate void myEventHandler<T>(Packet p);
+        public event myEventHandler<Packet> ProcessHandler;
 
         /// <summary>
         /// Constructor . Create UDPClient
@@ -100,10 +102,12 @@ namespace CLongServer.Ingame
                     return;
                 }
                 
-                CheckPacketSocket(tempDataSize);
+                CheckPacket(tempDataSize);
 
                 foreach (var p in _bodyBufferListSocket)
+                {
                     DeserializePacket(p);
+                }
 
                 _bodyBufferListSocket.Clear();
                 BeginReceiveUDP();
@@ -126,15 +130,15 @@ namespace CLongServer.Ingame
                 TypeNameHandling = TypeNameHandling.Objects
             });
 
+            RequestDataUDP(receivedPacket);
             Console.WriteLine("[UDP] Socket - ReceiveData msg : " + receivedPacket.MsgName);
-            CorrespondDataUDP(receivedPacket);
         }
 
         /// <summary>
         /// overLap Packet divide through socket
         /// </summary>
         /// <param name="totalSize"></param>
-        private void CheckPacketSocket(int totalSize)
+        private void CheckPacket(int totalSize)
         {
             var tempSize = 0;
             while (totalSize > tempSize)
@@ -149,20 +153,12 @@ namespace CLongServer.Ingame
         }
 
         /// <summary>
-        /// 
+        /// RequestData UDP
         /// </summary>
         /// <param name="p"></param>
-        private void CorrespondDataUDP(Packet p)
+        private void RequestDataUDP(Packet p)
         {
-            switch (p.MsgName)
-            {
-                case "ClientDir":
-                    Send(p);
-                    break;
-                default:
-                    Console.WriteLine("[UDP] Socket :  Mismatching Message");
-                    break;
-            }
+            ProcessHandler(p);
         }
     }
 }

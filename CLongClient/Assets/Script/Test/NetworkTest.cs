@@ -20,8 +20,9 @@ public class NetworkTest : MonoBehaviour
             password = "pasd"
         };
         IPEndPoint ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 30000);
-        var pb = PacketMaker.MakePacket(PacketMaker.CODE_MOVE, d);
-        Debug.Log(_c.Send(pb, pb.Length, ep));
+      // lib빌드했더니 코드 오류나서 주석처리로 변경
+      //  var pb = PacketMaker.MakePacket(PacketMaker.CODE_MOVE, d);
+      //  Debug.Log(_c.Send(pb, pb.Length, ep));
 	}
 	
 	// Update is called once per frame

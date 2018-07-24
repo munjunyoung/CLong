@@ -22,7 +22,7 @@ namespace tcpNet
         private static List<byte[]> _bodyBufferListSocket = new List<byte[]>();
         private static int headSize = 4;
 
-        public static Queue<Packet> receivedPacketQueue = new Queue<Packet>();
+        public static Queue<Packet> receivedPacketTCP = new Queue<Packet>();
         public static bool ingame = false;
 
         static bool queuetest = false;
@@ -168,7 +168,7 @@ namespace tcpNet
                 TypeNameHandling = TypeNameHandling.Objects
             });
 
-            receivedPacketQueue.Enqueue(receivedTempPacket);
+            receivedPacketTCP.Enqueue(receivedTempPacket);
             Debug.Log("[TCP] Socket - ReceiveData msg : " + receivedTempPacket.MsgName);
         }
 

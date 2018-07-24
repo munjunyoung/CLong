@@ -10,8 +10,8 @@ namespace CLongLib
     public class PacketMaker
     {
         protected PacketMaker() { }
-
-        public PacketMaker Instance
+        
+        public PacketMaker Instance 
         {
             get
             {

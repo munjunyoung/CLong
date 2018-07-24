@@ -130,7 +130,7 @@ namespace CLongServer
                 foreach (var p in _bodyBufferListSocket)
                 {
                     DeserializePacket(p);
-                    CorrespondDataTCP(receivedPacket);
+                    RequestDataTCP(receivedPacket);
                 }
 
                     _bodyBufferListSocket.Clear();
@@ -200,7 +200,7 @@ namespace CLongServer
         /// CorrespondData
         /// </summary>
         /// <param name="p"></param>
-        private void CorrespondDataTCP(Packet p)
+        private void RequestDataTCP(Packet p)
         {
             if (!ingame)
             {

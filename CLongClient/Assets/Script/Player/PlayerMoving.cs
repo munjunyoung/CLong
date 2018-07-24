@@ -8,7 +8,7 @@ public class PlayerMoving : Player
 {
     
     List<KeyCode> KeyList = new List<KeyCode>();
-
+    
     float moveSpeed = 5f;
     CharacterController playerController;
 
@@ -71,7 +71,7 @@ public class PlayerMoving : Player
     {
         if (Input.GetKey(KeyList[(int)Key.W]))
         {
-            this.transform.Translate(0f, 0f, 1f * Time.deltaTime * moveSpeed);
+           this.transform.Translate(0f, 0f, 1f * Time.deltaTime * moveSpeed);
         }
         if (Input.GetKey(KeyList[(int)Key.S]))
         {

@@ -11,7 +11,7 @@ public class IngameProcess : MonoBehaviour
 
     public GameObject[] playerList = new GameObject[100];
     //Player 
-    private int clientPlayerNum = -1;
+    public int clientPlayerNum = -1;
 
 
     //private List<GameObject> playerList = new List<GameObject>();
@@ -19,7 +19,7 @@ public class IngameProcess : MonoBehaviour
     /// IngameProcessHandler;
     /// </summary>
     /// <param name="p"></param>
-    public void IngameProcessData(Packet p)
+    public void IngameDataRequestTCP(Packet p)
     {
         switch (p.MsgName)
         {
@@ -40,6 +40,25 @@ public class IngameProcess : MonoBehaviour
                 KeyUpOtherClient(keyUpData.ClientNum, keyUpData.UpKey);
                 break;
             default:
+                Debug.Log("[Ingame Proces] TCP : Mismatching Message");
+                break;
+        }
+    }
+
+    public void IngameDataRequestUDP(Packet p)
+    {
+        switch(p.MsgName)
+        {
+            case "ClientDir":
+                var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
+                //자신의 플레이어가 아닐경우에만
+                if(clientPlayerNum != clientDirData.ClientNum)
+                {
+                    playerList[clientDirData.ClientNum].transform.eulerAngles = new Vector3(0, clientDirData.DirectionY, 0);
+                }
+                break;
+            default:
+                Debug.Log("[Ingame Proces] UDP : Mismatching Message");
                 break;
         }
     }
@@ -117,7 +136,7 @@ public class IngameProcess : MonoBehaviour
             camManagerSc = GameObject.Find("Main Camera").GetComponent<CameraManager>();
             camManagerSc.playerObject = playerList[clientPlayerNum].transform;
             camManagerSc.playerUpperBody = playerList[clientPlayerNum].transform.Find("PlayerUpperBody");
-
+            
             playerList[clientPlayerNum].AddComponent<PlayerMoving>();
             playerList[clientPlayerNum].GetComponent<PlayerMoving>().clientNum = clientPlayerNum;
         }
