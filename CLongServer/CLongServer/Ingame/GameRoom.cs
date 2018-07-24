@@ -52,17 +52,17 @@ namespace CLongServer.Ingame
             c.ProcessHandler += IngameDataRequest;
             clientList.Add(c);
             //게임시작 통보
-            clientList[c.numberInGame].SendTCP(new StartGameReq());
+            clientList[c.numberInGame].Send(new StartGameReq());
             //해당 클라이언트 생성 통보
-            clientList[c.numberInGame].SendTCP(new ClientIns(c.numberInGame, c.currentPos, true));
+            clientList[c.numberInGame].Send(new ClientIns(c.numberInGame, c.currentPos, true));
             //다른 클라이언트들에게 현재 생성하는 클라이언트 생성 통보
             //현재 생성되는 클라이언트에선 이미 존재하고있는 클라이언트들의 존재 생성
             foreach(var cl in clientList)
             {
                 if (c.numberInGame != cl.numberInGame)
                 {
-                    cl.SendTCP(new ClientIns(c.numberInGame, c.currentPos, false));
-                    clientList[c.numberInGame].SendTCP(new ClientIns(cl.numberInGame, cl.currentPos, false));
+                    cl.Send(new ClientIns(c.numberInGame, c.currentPos, false));
+                    clientList[c.numberInGame].Send(new ClientIns(cl.numberInGame, cl.currentPos, false));
                 }
             }
             Console.WriteLine("[GAME ROOM] People Count  : [" + clientList.Count + "]");
@@ -108,7 +108,7 @@ namespace CLongServer.Ingame
                         c.moveTimer.Add(new Stopwatch());
                     break;
                 case "PositionInfo":
-                    c.SendTCP(p);
+                    c.Send(p);
                     break;
                 case "ClientDir":
                     var dirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
@@ -120,19 +120,19 @@ namespace CLongServer.Ingame
                     foreach (var cl in clientList)
                     {
                         if (cl.numberInGame != c.numberInGame)
-                            cl.SendTCP(p);
+                            cl.Send(p);
                     }
                     break;
                 case "KeyUP":
                     var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
                     KeyUpFunc(c, keyUpData.UpKey);
-                    c.SendTCP(new ClientMoveSync(c.numberInGame, c.currentPos));
+                    c.Send(new ClientMoveSync(c.numberInGame, c.currentPos));
                     foreach (var cl in clientList)
                     {
                         if(cl.numberInGame != c.numberInGame)
                         {
-                            cl.SendTCP(p);
-                            cl.SendTCP(new ClientMoveSync(c.numberInGame, c.currentPos));
+                            cl.Send(p);
+                            cl.Send(new ClientMoveSync(c.numberInGame, c.currentPos));
                         }
                     }
                     

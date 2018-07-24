@@ -66,7 +66,7 @@ namespace CLongServer
             var tmpRoom = new GameRoom();
             foreach (var cl in queueClientList)
             {
-                cl.SendTCP(new MatchingComplete());
+                cl.Send(new MatchingComplete());
                 tmpRoom.AddClientInGameRoom(cl);
             }
             queueClientList.Clear();

@@ -13,18 +13,12 @@ using System.Net;
 
 namespace CLongServer
 {
-    class ClientTCP
+    class ClientTCP : NetworkManager
     {
         //Socket
         TcpClient clientTcp;
-        public NetworkStream streamTcp; // 전송 주소
         public Socket socketTcp; // socket
-        private readonly byte[] _tempBufferStream = new byte[4096];
-        private readonly List<byte[]> _bodyBufferListStream = new List<byte[]>();
-        private readonly byte[] _tempBufferSocket = new byte[4096];
-        private readonly List<byte[]> _bodyBufferListSocket = new List<byte[]>();
-        private readonly int headSize = 4;
-
+        
         //Handler
         public delegate void myEventHandler<T>(object sender, Packet p);
         public event myEventHandler<Packet> ProcessHandler;
@@ -32,7 +26,7 @@ namespace CLongServer
         //Ingame 
         public bool ingame = false;
         public int numberInGame = 0;
-
+        
         //Move
         public bool[] moveMentsKey = new bool[4];
         public List<Stopwatch> moveTimer = new List<Stopwatch>();
@@ -40,13 +34,8 @@ namespace CLongServer
         public Vector3 currentPos;
         public float directionAngle = 0f;
         public float speed = 5f;
-        public float height = 1f;
+        public float height = 1f;        
 
-        //UDP
-        public IPEndPoint ipePoint = null;
-
-        
-        
         /// <summary>
         /// Constructor .. Stream Save;
         /// </summary>
@@ -56,10 +45,138 @@ namespace CLongServer
             clientTcp = tc;
             streamTcp = clientTcp.GetStream();
             socketTcp = clientTcp.Client;
+            BeginReceive();
+        }
+
+
+        #region Socket
+        /// <summary>
+        /// send packet through socket
+        /// </summary>
+        /// <param name="p"></param>
+        public override void Send(Packet p)
+        {
+            base.Send(p);
+            socketTcp.BeginSend(sendPacket.ToArray(), 0, sendPacket.Count, SocketFlags.None, OnSendTCPCallBack, socketTcp);
+            Console.WriteLine("[TCP] Socket - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
+        }
+
+        /// <summary>
+        /// send callback func
+        /// </summary>
+        /// <param name="ar"></param>
+        public void OnSendTCPCallBack(IAsyncResult ar)
+        {
+            var sock = (Socket)ar.AsyncState;
+            Console.WriteLine("[TCP] OnSend !");
+        }
+
+        /// <summary>
+        /// receive packet through socket
+        /// </summary>
+        protected virtual void BeginReceive()
+        {
+            if (!clientTcp.Connected)
+            {
+                Console.WriteLine("[TCP] Socket - Not Connected");
+                return;
+            }
+
+            Array.Clear(_tempBufferSocket, 0, _tempBufferSocket.Length);
+            try
+            {
+                socketTcp.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, OnReceiveCallBack, socketTcp);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[TCP] Socket - Receive : " + e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// receive call back func though socket
+        /// </summary>
+        /// <param name="ar"></param>
+        protected void OnReceiveCallBack(IAsyncResult ar)
+        {
+            try
+            {
+                var tempSocket = (Socket)ar.AsyncState;
+                var tempDataSize = tempSocket.EndReceive(ar);
+
+                Console.WriteLine("[Network Manager] Socket - Receive Data Size : " + tempDataSize);
+                if (tempDataSize == 0)
+                {
+                    Console.WriteLine("[Network Manager] Socket -  Receive Data Size is zero");
+                    return;
+                }
+                CheckPacket(tempDataSize);
+
+                foreach (var p in _bodyBufferListSocket)
+                {
+                    DeserializePacket(p);
+                    CorrespondDataTCP(receivedPacket);
+                }
+
+                    _bodyBufferListSocket.Clear();
+
+                BeginReceive();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[TCP] Socket -  RecevieCallBack : " + e.ToString());
+            }
+            
+        }
         
+        #endregion
+        
+        /// <summary>
+        /// CorrespondData
+        /// </summary>
+        /// <param name="p"></param>
+        private void CorrespondDataTCP(Packet p)
+        {
+            if (!ingame)
+            {
+                switch (p.MsgName)
+                {
+                    case "QueueEntry":
+                        MatchingManager.MatchingProcess(this);
+                        break;
+                    default:
+                        Console.WriteLine("[TCP] Socket :  Mismatching Message");
+                        break;
+                }
+            }
+            else
+            {
+                ProcessHandler(this, p);
+            }
+        } 
+        
+        /// <summary>
+        /// TcpClient 
+        /// </summary>
+        public void Close()
+        {
+            try
+            {
+                Console.WriteLine("[TCP] Close Socket : " + socketTcp.RemoteEndPoint);
+                socketTcp.Close();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("[TCP] Socket - Close Exception : " + e);
+            } 
         }
 
         #region Stream
+        //StreamTest용
+        public NetworkStream streamTcp; // 전송 주소
+        protected byte[] _tempBufferStream = new byte[4096];
+        protected List<byte[]> _bodyBufferListStream = new List<byte[]>();
+
         /// <summary>
         /// Send through Stream
         /// </summary>
@@ -141,133 +258,6 @@ namespace CLongServer
                 Console.WriteLine("[Client] Stream - RecevieCallBack : " + e.ToString());
             }
         }
-        #endregion
-
-
-        #region Socket
-        /// <summary>
-        /// send packet through socket
-        /// </summary>
-        /// <param name="p"></param>
-        public void SendTCP(Packet p)
-        {
-            var packetStr = JsonConvert.SerializeObject(p, Formatting.Indented, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Objects
-            });
-            var bodyBuf = Encoding.UTF8.GetBytes(packetStr);
-            var headBuf = BitConverter.GetBytes(bodyBuf.Length);
-            List<byte> sendPacket = new List<byte>();
-            sendPacket.AddRange(headBuf);
-            sendPacket.AddRange(bodyBuf);
-
-            socketTcp.BeginSend(sendPacket.ToArray(), 0, sendPacket.Count, SocketFlags.None, OnSendTCPCallBackSocket, socketTcp);
-            Console.WriteLine("[TCP] Socket - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
-        }
-
-        /// <summary>
-        /// send callback func
-        /// </summary>
-        /// <param name="ar"></param>
-        public void OnSendTCPCallBackSocket(IAsyncResult ar)
-        {
-            var sock = (Socket)ar.AsyncState;
-            Console.WriteLine("[TCP] OnSend !");
-        }
-
-        /// <summary>
-        /// receive packet through socket
-        /// </summary>
-        public void BeginReceiveTCP()
-        {
-            if (!clientTcp.Connected)
-            {
-                Console.WriteLine("[TCP] Socket - Not Connected");
-                return;
-            }
-
-            Array.Clear(_tempBufferSocket, 0, _tempBufferSocket.Length);
-            try
-            {
-                socketTcp.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, OnReceiveTCPCallBackSocket, socketTcp);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("[TCP] Socket - Receive : " + e.ToString());
-            }
-        }
-
-        /// <summary>
-        /// receive call back func though socket
-        /// </summary>
-        /// <param name="ar"></param>
-        public void OnReceiveTCPCallBackSocket(IAsyncResult ar)
-        {
-            var tempSocket = (Socket)ar.AsyncState;
-
-            try
-            {
-                var tempDataSize = tempSocket.EndReceive(ar);
-                Console.WriteLine("[TCP] Socket - Receive Data Size : " + tempDataSize);
-                if (tempDataSize == 0)
-                {
-                    Console.WriteLine("[TCP] Socket -  Receive Data Size is zero");
-                    return;
-                }
-                CheckPacketSocket(tempDataSize);
-
-                foreach (var p in _bodyBufferListSocket)
-                    DeserializePacket(p);
-
-                _bodyBufferListSocket.Clear();
-                BeginReceiveTCP();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("[TCP] Socket -  RecevieCallBack : " + e.ToString());
-            }
-        }
-        #endregion
-
-        /// <summary>
-        /// Deserialize Data
-        /// </summary>
-        /// <param name="bodyPacket"></param>
-        private void DeserializePacket(byte[] bodyPacket)
-        {
-            var packetStr = Encoding.UTF8.GetString(bodyPacket);
-            var receivedPacket = JsonConvert.DeserializeObject<Packet>(packetStr, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Objects
-            });
-
-            Console.WriteLine("[TCP] Socket - ReceiveData msg : " + receivedPacket.MsgName);
-            CorrespondDataTCP(receivedPacket);
-        }
-
-        /// <summary>
-        /// CorrespondData
-        /// </summary>
-        /// <param name="p"></param>
-        private void CorrespondDataTCP(Packet p)
-        {
-            if (!ingame)
-            {
-                switch (p.MsgName)
-                {
-                    case "QueueEntry":
-                        MatchingManager.MatchingProcess(this);
-                        break;
-                    default:
-                        Console.WriteLine("[TCP] Socket :  Mismatching Message");
-                        break;
-                }
-            }
-            else
-            {
-                ProcessHandler(this, p);
-            }
-        } 
 
         /// <summary>
         /// overLap Packet divide through stream
@@ -288,40 +278,7 @@ namespace CLongServer
             }
         }
 
-
-        /// <summary>
-        /// overLap Packet divide through socket
-        /// </summary>
-        /// <param name="totalSize"></param>
-        private void CheckPacketSocket(int totalSize)
-        {
-            var tempSize = 0;
-            while (totalSize > tempSize)
-            {
-                var bodySize = _tempBufferSocket[tempSize];
-                byte[] bodyBuf = new byte[1024];
-
-                Array.Copy(_tempBufferSocket, tempSize + headSize, bodyBuf, 0, bodySize);
-                _bodyBufferListSocket.Add(bodyBuf);
-                tempSize += (bodySize + headSize);
-            }
-        }
-        /// <summary>
-        /// TcpClient 
-        /// </summary>
-        public void Close()
-        {
-            try
-            {
-                Console.WriteLine("[TCP] Close Socket : " + socketTcp.RemoteEndPoint);
-                socketTcp.Close();
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine("[TCP] Socket - Close Exception : " + e);
-            } 
-        }
-
+        #endregion
 
     }
 }

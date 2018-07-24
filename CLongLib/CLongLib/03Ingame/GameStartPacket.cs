@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
+using System.Net;
+using System.Net.Sockets;
 
 namespace CLongLib
 {
@@ -38,4 +40,21 @@ namespace CLongLib
             StartPos = p;
         }
     }
+
+
+    /// <summary>
+    /// Udp ReceiveCallBack Func
+    /// </summary>
+    public class UdpState
+    {
+        public IPEndPoint Ep { get; set; }
+        public UdpClient Uc { get; set; }
+
+        public UdpState(IPEndPoint ep, UdpClient uc)
+        {
+            Ep = ep;
+            Uc = uc;
+        }
+    }
+
 }

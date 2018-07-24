@@ -10,22 +10,27 @@ using System.Net;
 
 namespace CLongServer.Ingame
 {
-    class UdpNetwork
+    class UdpNetwork : NetworkManager
     {
+        //UdpClient
         UdpClient clientUDP;
+        //Unicast
+        private IPEndPoint unicastEP = Program.ep;
+        //Multicast
+        public static string multicastIP = "239.0.0.182";
+        //동일 컴퓨터에서 포트번호 변경(multicast를 사용할때 클라이언트에서도 자기 자신을 bind해주어야하기때문에)
+        public static int multicastPort = 22000;
+        private IPEndPoint multicastEP = new IPEndPoint(IPAddress.Parse(multicastIP), multicastPort);
         
-        //Receive Buffer
-        private byte[] _tempBufferSocket = new byte[4096];
-        private List<byte[]> _bodyBufferListSocket = new List<byte[]>();
-        IPEndPoint multicastEp = Program.ep;
-        int headSize = 4;
+        //Head Size
+        private int headSize = 4;
 
         /// <summary>
         /// Constructor . Create UDPClient
         /// </summary>
         public UdpNetwork(IPEndPoint ep)
         {
-            clientUDP = new UdpClient(multicastEp);
+            clientUDP = new UdpClient(unicastEP);
             BeginReceiveUDP();
         }
 
@@ -34,19 +39,11 @@ namespace CLongServer.Ingame
         /// </summary>
         /// <param name="p"></param>
         /// <param name="c"></param>
-        public void SendUDP(Packet p, IPEndPoint ep)
+        public override void Send(Packet p)
         {
-            var packetStr = JsonConvert.SerializeObject(p, Formatting.Indented, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Objects
-            });
-            var bodyBuf = Encoding.UTF8.GetBytes(packetStr);
-            var headBuf = BitConverter.GetBytes(bodyBuf.Length);
-            List<byte> sendPacket = new List<byte>();
-            sendPacket.AddRange(headBuf);
-            sendPacket.AddRange(bodyBuf);
-            clientUDP.Send(sendPacket.ToArray(), sendPacket.Count, ep);
-            Console.WriteLine("[UDP] Socket - Send : [" + p.MsgName + "] to [" + ep + "]");
+            base.Send(p);
+            clientUDP.Send(sendPacket.ToArray(), sendPacket.Count, multicastEP);
+            Console.WriteLine("[UDP] Socket - Send : [" + p.MsgName + "] to [" + multicastEP + "]");
         }
 
 
@@ -60,19 +57,19 @@ namespace CLongServer.Ingame
             Array.Clear(_tempBufferSocket, 0, _tempBufferSocket.Length);
             try
             {
-                clientUDP.BeginReceive(OnRecevieUDPCallBack, udpInfo);
+                clientUDP.BeginReceive(OnReceiveUDPCallBack, udpInfo);
             }
             catch (Exception e)
             {
                 Console.WriteLine("[UDP] Socket - Receive : " + e.ToString());
             }
         }
-
+        
         /// <summary>
         /// Receive CallBack Func;
         /// </summary>
         /// <param name="ar"></param>
-        public void OnRecevieUDPCallBack(IAsyncResult ar)
+        protected void OnReceiveUDPCallBack(IAsyncResult ar)
         {
             var tmpUDP = (UdpClient)((UdpState)ar.AsyncState).Uc;
             IPEndPoint tmpEP = (IPEndPoint)((UdpState)ar.AsyncState).Ep;
@@ -81,7 +78,6 @@ namespace CLongServer.Ingame
             {
                 _tempBufferSocket = tmpUDP.EndReceive(ar, ref tmpEP);
                 var tempDataSize = _tempBufferSocket.Length;
-                Console.WriteLine("확인 : " + tempDataSize);
                 Console.WriteLine("[UDP] Socket - Receive Data Size : " + tempDataSize);
                 if (tempDataSize == 0)
                 {
@@ -92,7 +88,7 @@ namespace CLongServer.Ingame
                 CheckPacketSocket(tempDataSize);
 
                 foreach (var p in _bodyBufferListSocket)
-                    DeserializePacket(_tempBufferSocket);
+                    DeserializePacket(p);
 
                 _bodyBufferListSocket.Clear();
                 BeginReceiveUDP();
@@ -116,7 +112,7 @@ namespace CLongServer.Ingame
             });
 
             Console.WriteLine("[UDP] Socket - ReceiveData msg : " + receivedPacket.MsgName);
-            // CorrespondData(receivedPacket);
+            CorrespondDataUDP(receivedPacket);
         }
 
         /// <summary>
@@ -145,27 +141,13 @@ namespace CLongServer.Ingame
         {
             switch (p.MsgName)
             {
-                case "QueueEntry":
-
+                case "ClientDir":
+                    Send(p);
                     break;
                 default:
                     Console.WriteLine("[UDP] Socket :  Mismatching Message");
                     break;
             }
-        }
-
-
-    }
-
-    public class UdpState
-    {
-        public IPEndPoint Ep { get; set; }
-        public UdpClient Uc { get; set; }
-
-        public UdpState(IPEndPoint ep, UdpClient uc)
-        {
-            Ep = ep;
-            Uc = uc;
         }
     }
 }

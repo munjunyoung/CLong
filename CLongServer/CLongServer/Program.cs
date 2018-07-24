@@ -11,7 +11,7 @@ namespace CLongServer
     internal class Program
     {
         private TcpListener tcpServer;
-        private Int32 portNumber = 23000;
+        public static Int32 portNumber = 23000;
         public static IPEndPoint ep;
         //Thread signal
         private ManualResetEvent tcpClientConnected = new ManualResetEvent(false);
@@ -20,6 +20,7 @@ namespace CLongServer
         {
             Program newProgram = new Program();
             newProgram.TcpStart();
+           
         }
         
         /// <summary>
@@ -31,7 +32,6 @@ namespace CLongServer
             tcpServer = new TcpListener(ep);
             tcpServer.Start();
             Console.WriteLine("[TCPSERVER] : TCP Server Start! \n");
-            
             //begin accept
             DoBeginAcceptTcpClient();
         }
@@ -54,10 +54,7 @@ namespace CLongServer
         {
             TcpListener listener = (TcpListener)ar.AsyncState;
             ClientTCP newClient= new ClientTCP(listener.EndAcceptTcpClient(ar));
-            newClient.ipePoint = (IPEndPoint)listener.LocalEndpoint;
-            newClient.BeginReceiveTCP();
             Console.WriteLine("[TCPSERVER] : New Client Connected Completed");
-
             tcpServer.BeginAcceptTcpClient(OnConnectTcpCallBack, tcpServer);
         }
     }

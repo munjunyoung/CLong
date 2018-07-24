@@ -61,6 +61,7 @@
     <Compile Include="Ingame\GameRoomManager.cs" />
     <Compile Include="Ingame\UdpNetwork.cs" />
     <Compile Include="MatchingManager.cs" />
+    <Compile Include="NetworkManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
