@@ -7,10 +7,13 @@ using tcpNet;
 
 public class NetworkProcess : MonoBehaviour {
 
+
+    public bool Ingame = false;
     public delegate void myEventHandler<T>(Packet p);
     public event myEventHandler<Packet> ProcessHandlerTCP;
-    public event myEventHandler<Packet> ProcessHandlerUDP;
-
+    public delegate void udpEventHandler<T>(Packet p);
+    public event udpEventHandler<Packet> ProcessHandlerUDP;
+    
     private void Update()
     {
         //Process packet data for unity Thread
@@ -26,10 +29,7 @@ public class NetworkProcess : MonoBehaviour {
         {
             RequestDataTCP(NetworkManagerTCP.receivedPacketTCP.Dequeue());
         }
-        if(NetworkManagerUDP.receivedPacketUDP.Count>0)
-        {
-            RequestDataUDP(NetworkManagerUDP.receivedPacketUDP.Dequeue());
-        }
+       
     }
     /// <summary>
     /// data process
@@ -37,21 +37,24 @@ public class NetworkProcess : MonoBehaviour {
     /// <param name="p"></param>
     private void RequestDataTCP(Packet p)
     {
-        if (!NetworkManagerTCP.ingame)
+        if (!Ingame)
         {
             switch (p.MsgName)
             {
                 case "MatchingComplete":
                     //.. Show matchingComplete UI
                     Debug.Log("[Network Process] TCP : Matching Complete");
+                    
                     break;
                 case "StartGameReq":
                     var numData = JsonConvert.DeserializeObject<StartGameReq>(p.Data);
                     //서버에서 게임룸생성후 list에 client를 추가했을시 보내는 패킷
-                    NetworkManagerTCP.ingame = true;
+                    Ingame = true;
                     ProcessHandlerTCP += GameObject.Find("IngameNetworkManager").GetComponent<IngameProcess>().IngameDataRequestTCP;
+                    NetworkManagerUDP.CreateUDPClient();
                     ProcessHandlerUDP += GameObject.Find("IngameNetworkManager").GetComponent<IngameProcess>().IngameDataRequestUDP;
                     NetworkManagerTCP.SendTCP(new StartGameReq());
+                    StartCoroutine("ProcessDataUDP");
                     Debug.Log("[Network Process] TCP : Ingame Start");
                     //..IngameScene Load
                     break;
@@ -76,4 +79,20 @@ public class NetworkProcess : MonoBehaviour {
         ProcessHandlerUDP(p);
     }
 
+    /// <summary>
+    /// Couroutine for UDP data process
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator ProcessDataUDP()
+    {
+        while (Ingame)
+        {
+            if (NetworkManagerUDP.receivedPacketUDP.Count > 0)
+            {
+                RequestDataUDP(NetworkManagerUDP.receivedPacketUDP.Dequeue());
+            }
+            yield return new WaitForSeconds(.01f);    
+        }
+    }
+    
 }

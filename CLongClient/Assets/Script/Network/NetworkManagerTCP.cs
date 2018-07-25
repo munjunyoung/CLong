@@ -23,9 +23,7 @@ namespace tcpNet
         private static int headSize = 4;
 
         public static Queue<Packet> receivedPacketTCP = new Queue<Packet>();
-        public static bool ingame = false;
-
-        static bool queuetest = false;
+        
         /// <summary>
         /// Connect to server;
         /// </summary>

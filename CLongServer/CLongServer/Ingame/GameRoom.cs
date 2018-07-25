@@ -20,6 +20,7 @@ namespace CLongServer.Ingame
         
         public List<ClientTCP> clientList = new List<ClientTCP>();
         List<Vector3> StartPosList = new List<Vector3>();
+        public Dictionary<int, ClientTCP> playerDic = new Dictionary<int, ClientTCP>();
 
         //Move
         float updatePeriod = 0.01f;
@@ -47,6 +48,7 @@ namespace CLongServer.Ingame
         /// <param name="c"></param>
         public void AddClientInGameRoom(ClientTCP c)
         {
+          
             c.numberInGame = clientList.Count();
             c.currentPos = StartPosList[c.numberInGame];
             c.ingame = true;
@@ -108,9 +110,6 @@ namespace CLongServer.Ingame
                     c.MoveThread.Start();
                     for (int i = 0; i < 4; i++)
                         c.moveTimer.Add(new Stopwatch());
-                    break;
-                case "PositionInfo":
-                    c.Send(p);
                     break;
                 case "KeyDown":
                     var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);

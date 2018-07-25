@@ -9,7 +9,6 @@ public class PlayerMoving : Player
     
     List<KeyCode> KeyList = new List<KeyCode>();
     
-    float moveSpeed = 5f;
     CharacterController playerController;
 
     //Rotation
@@ -64,10 +63,11 @@ public class PlayerMoving : Player
     }
 
     #region Client
+    /*
     /// <summary>
     /// Player Moving
     /// </summary>
-    protected override void Move()
+    protected void Moving()
     {
         if (Input.GetKey(KeyList[(int)Key.W]))
         {
@@ -85,7 +85,7 @@ public class PlayerMoving : Player
         {
             this.transform.Translate(1f * Time.deltaTime * moveSpeed, 0f, 0f);
         }
-    }
+    }*/
 
     /// <summary>
     /// Player Turning
@@ -112,70 +112,77 @@ public class PlayerMoving : Player
         if (Input.GetKeyDown(KeyList[(int)Key.W]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(clientNum, KeyList[(int)Key.W].ToString()));
+            movementsKey[(int)Key.W] = true;
         }
         if (Input.GetKeyDown(KeyList[(int)Key.S]))
-        {
-            NetworkManagerTCP.SendTCP(new KeyDown(clientNum, KeyList[(int)Key.S].ToString()));
+        {   NetworkManagerTCP.SendTCP(new KeyDown(clientNum, KeyList[(int)Key.S].ToString()));
+            movementsKey[(int)Key.S] = true;
         }
         if (Input.GetKeyDown(KeyList[(int)Key.A]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(clientNum, KeyList[(int)Key.A].ToString()));
+            movementsKey[(int)Key.A] = true;
         }
         if (Input.GetKeyDown(KeyList[(int)Key.D]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(clientNum, KeyList[(int)Key.D].ToString()));
+            movementsKey[(int)Key.D] = true;
         }
 
         if (Input.GetKeyUp(KeyList[(int)Key.W]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(clientNum, KeyList[(int)Key.W].ToString()));
+            movementsKey[(int)Key.W] = false;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.S]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(clientNum, KeyList[(int)Key.S].ToString()));
+            movementsKey[(int)Key.S] = false;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.A]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(clientNum, KeyList[(int)Key.A].ToString()));
+            movementsKey[(int)Key.A] = false;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.D]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(clientNum, KeyList[(int)Key.D].ToString()));
+            movementsKey[(int)Key.D] = false;
         }
 
         //Run
         if(Input.GetKeyDown(KeyList[(int)Key.LeftShift]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(clientNum, KeyList[(int)Key.LeftShift].ToString()));
-            moveSpeed = 10f;
+            movementsKey[(int)Key.LeftShift] = true;
         }
         if(Input.GetKeyUp(KeyList[(int)Key.LeftShift]))
-        {
+        {;
             NetworkManagerTCP.SendTCP(new KeyUP(clientNum, KeyList[(int)Key.LeftShift].ToString()));
-            moveSpeed = 5f;
+            movementsKey[(int)Key.LeftShift] = false;
         }
         
         //Seat
         if(Input.GetKeyDown(KeyList[(int)Key.LeftControl]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(clientNum, KeyList[(int)Key.LeftControl].ToString()));
-            moveSpeed = 3f;
+            movementsKey[(int)Key.LeftControl] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftControl]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(clientNum, KeyList[(int)Key.LeftControl].ToString()));
-            moveSpeed = 5f;
+            movementsKey[(int)Key.LeftControl] = false;
         }
         //Creep
         if (Input.GetKeyDown(KeyList[(int)Key.Z]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(clientNum, KeyList[(int)Key.Z].ToString()));
-            moveSpeed = 1f;
+            movementsKey[(int)Key.Z] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.Z]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(clientNum, KeyList[(int)Key.Z].ToString()));
-            moveSpeed = 5f;
+            movementsKey[(int)Key.Z] = false;
         }
     }
 
@@ -185,11 +192,11 @@ public class PlayerMoving : Player
     void SendAngleYData()
     {
         if (Input.GetAxis("Mouse X")!=0 || Input.GetAxis("Mouse Y") != 0)
-        {
+        {           
             if (mousePacketSendFrame < mouseDelay)
             {
                // NetworkManagerTCP.SendTCP(new ClientDir(0, this.transform.eulerAngles.y));
-                NetworkManagerUDP.SendUdp(new ClientDir(0, this.transform.eulerAngles.y));
+                NetworkManagerUDP.SendUdp(new ClientDir(clientNum, this.transform.eulerAngles.y));
                 mousePacketSendFrame++;
             }
             else

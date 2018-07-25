@@ -8,9 +8,8 @@ public class IngameProcess : MonoBehaviour
     public CameraManager camManagerSc;
     //playerIns Prefab
     public GameObject playerPrefab;
-
+    //Player check
     public GameObject[] playerList = new GameObject[100];
-    //Player 
     public int clientPlayerNum = -1;
 
 
@@ -29,7 +28,7 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "ClientMoveSync":
                 var posData = JsonConvert.DeserializeObject<ClientMoveSync>(p.Data);
-                //playerList[posData.ClientNum].transform.position = new Vector3(posData.CurrentPos.X, posData.CurrentPos.Y, posData.CurrentPos.Z);
+                playerList[posData.ClientNum].transform.position = new Vector3(posData.CurrentPos.X, posData.CurrentPos.Y, posData.CurrentPos.Z);
                 break;
             case "KeyDown":
                 var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
@@ -45,6 +44,10 @@ public class IngameProcess : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Request Data through UDP
+    /// </summary>
+    /// <param name="p"></param>
     public void IngameDataRequestUDP(Packet p)
     {
         switch(p.MsgName)
@@ -70,7 +73,6 @@ public class IngameProcess : MonoBehaviour
     /// <param name="key"></param>
     public void KeyDownOtherClient(int num, string key)
     {
-        Debug.Log("keyDown 캐릭터 num : " + num);
         switch (key)
         {
             case "W":

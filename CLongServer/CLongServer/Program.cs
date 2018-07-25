@@ -30,6 +30,7 @@ namespace CLongServer
         {
             ep = new IPEndPoint(IPAddress.Any, portNumber);
             tcpServer = new TcpListener(ep);
+            
             tcpServer.Start();
             Console.WriteLine("[TCPSERVER] : TCP Server Start! \n");
             //begin accept

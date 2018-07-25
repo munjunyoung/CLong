@@ -35,8 +35,11 @@ public class NetworkManagerUDP
     public static void CreateUDPClient()
     {
         //receive client local ip 접속
-        clientUDP = new UdpClient(multicastPort);
+        
+        clientUDP = new UdpClient();
+        clientUDP.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
         clientEP = new IPEndPoint(IPAddress.Any, multicastPort);
+        clientUDP.Client.Bind(clientEP);
         //멀티캐스트 접속
         clientUDP.JoinMulticastGroup(IPAddress.Parse(multicastIP));
         BeginMulticastReceive();
