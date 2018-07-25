@@ -18,7 +18,7 @@ namespace CLongServer.Ingame
         public bool gameStartState = false;
         public int gameRoomNumber = 0;
         
-        public List<ClientTCP> clientList = new List<ClientTCP>();
+        //public List<ClientTCP> clientList = new List<ClientTCP>();
         List<Vector3> StartPosList = new List<Vector3>();
         public Dictionary<int, ClientTCP> playerDic = new Dictionary<int, ClientTCP>();
 
@@ -48,28 +48,29 @@ namespace CLongServer.Ingame
         /// <param name="c"></param>
         public void AddClientInGameRoom(ClientTCP c)
         {
-          
-            c.numberInGame = clientList.Count();
+            c.numberInGame = playerDic.Count();
+            Console.WriteLine("확인 : " + playerDic.Count());
             c.currentPos = StartPosList[c.numberInGame];
             c.ingame = true;
             c.ProcessHandler += IngameDataRequestTCP;
             udpServer.ProcessHandler += IngameDataRequestUDP;
-            clientList.Add(c);
+            playerDic.Add(c.numberInGame, c);
             //게임시작 통보
-            clientList[c.numberInGame].Send(new StartGameReq());
+            playerDic[c.numberInGame].Send(new StartGameReq());
             //해당 클라이언트 생성 통보
-            clientList[c.numberInGame].Send(new ClientIns(c.numberInGame, c.currentPos, true));
+            
+            playerDic[c.numberInGame].Send(new ClientIns(c.numberInGame, c.currentPos, true));
             //다른 클라이언트들에게 현재 생성하는 클라이언트 생성 통보
             //현재 생성되는 클라이언트에선 이미 존재하고있는 클라이언트들의 존재 생성
-            foreach(var cl in clientList)
+            foreach(var cl in playerDic)
             {
-                if (c.numberInGame != cl.numberInGame)
+                if (c.numberInGame != cl.Key)
                 {
-                    cl.Send(new ClientIns(c.numberInGame, c.currentPos, false));
-                    clientList[c.numberInGame].Send(new ClientIns(cl.numberInGame, cl.currentPos, false));
+                    cl.Value.Send(new ClientIns(c.numberInGame, c.currentPos, false));
+                    c.Send(new ClientIns(cl.Value.numberInGame, cl.Value.currentPos, false));
                 }
             }
-            Console.WriteLine("[GAME ROOM] People Count  : [" + clientList.Count + "]");
+            Console.WriteLine("[GAME ROOM] People Count  : [" + playerDic.Count + "]");
         }
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace CLongServer.Ingame
         /// <param name="c"></param>
         public void FindClient(ClientTCP c)
         {
-            //clientList.Find
+            //Find
         }
         
         /// <summary>
@@ -87,7 +88,7 @@ namespace CLongServer.Ingame
         /// <param name="c"></param>
         public void ClientRemove(ClientTCP c)
         {
-            clientList[c.numberInGame] = null;
+            playerDic.Remove(c.numberInGame);
 
         }
         #endregion
@@ -114,22 +115,22 @@ namespace CLongServer.Ingame
                 case "KeyDown":
                     var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
                     KeyDownFunc(c, keyDownData.DownKey);
-                    foreach (var cl in clientList)
+                    foreach (var cl in playerDic)
                     {
-                        if (cl.numberInGame != c.numberInGame)
-                            cl.Send(p);
+                        if (cl.Key != c.numberInGame)
+                            cl.Value.Send(p);
                     }
                     break;
                 case "KeyUP":
                     var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
                     KeyUpFunc(c, keyUpData.UpKey);
                     c.Send(new ClientMoveSync(c.numberInGame, c.currentPos));
-                    foreach (var cl in clientList)
+                    foreach (var cl in playerDic)
                     {
-                        if(cl.numberInGame != c.numberInGame)
+                        if(cl.Key != c.numberInGame)
                         {
-                            cl.Send(p);
-                            cl.Send(new ClientMoveSync(c.numberInGame, c.currentPos));
+                            cl.Value.Send(p);
+                            cl.Value.Send(new ClientMoveSync(c.numberInGame, c.currentPos));
                         }
                     }
                     
@@ -150,7 +151,7 @@ namespace CLongServer.Ingame
             {
                 case "ClientDir":
                     var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
-                    clientList[clientDirData.ClientNum].directionAngle = clientDirData.DirectionY;
+                    playerDic[clientDirData.ClientNum].directionAngle = clientDirData.DirectionY;
                     udpServer.Send(p);
                     break;
                 default:

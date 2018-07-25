@@ -9,7 +9,7 @@ namespace CLongServer.Ingame
     class GameRoomManager
     {
         public static List<GameRoom> roomList = new List<GameRoom>();
-
+        public static Dictionary<int, GameRoom> roomDic = new Dictionary<int, GameRoom>();
         /// <summary>
         /// add Gaemroom in List
         /// </summary>
@@ -19,7 +19,7 @@ namespace CLongServer.Ingame
             room.gameRoomNumber = roomList.Count;
             roomList.Add(room);
            
-            Console.WriteLine("[GAME ROOM MANAGER] : Add GameRoom ! .. this gameroom in people count : " + roomList[0].clientList.Count());
+            Console.WriteLine("[GAME ROOM MANAGER] : Add GameRoom ! .. this gameroom in people count : " + roomList[0].playerDic.Count());
         }
 
         /// <summary>
