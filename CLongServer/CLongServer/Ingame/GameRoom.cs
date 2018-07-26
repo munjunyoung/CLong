@@ -49,7 +49,6 @@ namespace CLongServer.Ingame
         public void AddClientInGameRoom(ClientTCP c)
         {
             c.numberInGame = playerDic.Count();
-            Console.WriteLine("확인 : " + playerDic.Count());
             c.currentPos = StartPosList[c.numberInGame];
             c.ingame = true;
             c.ProcessHandler += IngameDataRequestTCP;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WeaponBase
+public class WeaponBase : MonoBehaviour
 {
     private WeaponScript go;
     private string weaponType;
@@ -17,14 +17,4 @@ public class WeaponBase
     {
         //go.makeeffect();
     }
-}
-
-public class AR : WeaponBase
-{
-
-}
-
-public class AK : AR
-{
-
 }
