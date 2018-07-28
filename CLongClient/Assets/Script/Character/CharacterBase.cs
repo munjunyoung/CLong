@@ -9,14 +9,13 @@ public class CharacterBase : MonoBehaviour  {
     //Health
     public int health;
     //waepon
-    WeaponBase equipWeapon;
+    public string weaponName;
+    public GameObject weaponPrefab;
+    protected WeaponBase weaponSc;
     //Move
     public bool[] movementsKey = new bool[20];
     protected float moveSpeed = 5f;
-
-    Material mat;
     
-
     protected virtual void FixedUpdate()
     {
         Move();

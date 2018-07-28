@@ -63,29 +63,6 @@ public class PlayerMoving : Player
     }
 
     #region Client
-    /*
-    /// <summary>
-    /// Player Moving
-    /// </summary>
-    protected void Moving()
-    {
-        if (Input.GetKey(KeyList[(int)Key.W]))
-        {
-           this.transform.Translate(0f, 0f, 1f * Time.deltaTime * moveSpeed);
-        }
-        if (Input.GetKey(KeyList[(int)Key.S]))
-        {
-            this.transform.Translate(0f, 0f, -1f * Time.deltaTime * moveSpeed);
-        }
-        if (Input.GetKey(KeyList[(int)Key.A]))
-        {
-            this.transform.Translate(-1f * Time.deltaTime * moveSpeed, 0f, 0f);
-        }
-        if (Input.GetKey(KeyList[(int)Key.D]))
-        {
-            this.transform.Translate(1f * Time.deltaTime * moveSpeed, 0f, 0f);
-        }
-    }*/
 
     /// <summary>
     /// Player Turning

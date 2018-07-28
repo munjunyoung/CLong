@@ -2,15 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerWeaponManager : MonoBehaviour {
-
-    private GameObject weaponPrefab;
-
+public class PlayerWeaponManager : Player
+{ 
     private void Start()
     {
         //Prefab 불러오기
+        weaponName = "AK";
+        WeaponEquip(weaponName);
+    }
+
+    /// <summary>
+    /// Weapon Equip - Create Weapon
+    /// </summary>
+    /// <param name="st"></param>
+    private void WeaponEquip(string st)
+    {
         InsWeapon("AK");
-     
     }
 
     /// <summary>
@@ -20,18 +27,13 @@ public class PlayerWeaponManager : MonoBehaviour {
     private void InsWeapon(string name)
     {
         weaponPrefab = Instantiate(Resources.Load("Prefab/Weapon/AR/" + name)) as GameObject;
-        var weaponEquipObject =  transform.Find("WeaponEquip");
+        var weaponEquipObject = transform.Find("WeaponEquip");
         weaponPrefab.transform.parent = weaponEquipObject.transform;
         weaponPrefab.transform.localPosition = Vector3.zero;
         weaponPrefab.transform.localEulerAngles = Vector3.zero;
-        weaponPrefab.transform.localScale = Vector3.one;
-        
-        
-    }
-
-    void WeaponEquip()
-    {
-        
+        //WeaponBase
+        weaponSc = weaponPrefab.GetComponent<WeaponBase>();
+        Debug.Log("WeaponSc  : " + weaponSc.ToString());
     }
     /// <summary>
     /// player Change Weapon by input key

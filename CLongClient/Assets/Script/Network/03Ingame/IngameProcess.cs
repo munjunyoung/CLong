@@ -140,7 +140,8 @@ public class IngameProcess : MonoBehaviour
             camManagerSc.playerUpperBody = playerList[clientPlayerNum].transform.Find("PlayerUpperBody");
             
             playerList[clientPlayerNum].AddComponent<PlayerMoving>();
-            playerList[clientPlayerNum].AddComponent<PlayerWeaponManager>();
+            playerList[clientPlayerNum].AddComponent<PlayerShooting>();
+            //playerList[clientPlayerNum].AddComponent<PlayerWeaponManager>();
             playerList[clientPlayerNum].GetComponent<PlayerMoving>().clientNum = clientPlayerNum;
         }
         //다른 클라이언트 일 경우
