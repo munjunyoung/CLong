@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerShooting : PlayerWeaponManager
+public class PlayerShooting : MonoBehaviour
 {
-    protected override void FixedUpdate()
-    {
-        Shooting();
-    }
+/*
     /// <summary>
     /// 무기 상태에 따라서 shooting의 종류가 바뀌어야함
     /// </summary>
@@ -21,6 +18,6 @@ public class PlayerShooting : PlayerWeaponManager
             else
                 Debug.Log("WeaponSc : " + weaponSc.ToString());
         }
-    }
+    }*/
 
 }

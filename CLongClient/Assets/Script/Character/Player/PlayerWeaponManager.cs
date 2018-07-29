@@ -2,8 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerWeaponManager : Player
-{ 
+public class PlayerWeaponManager : MonoBehaviour
+{
+    //waepon
+    public string weaponName;
+    public GameObject weaponPrefab;
+    protected WeaponBase weaponSc;
+
     private void Start()
     {
         //Prefab 불러오기

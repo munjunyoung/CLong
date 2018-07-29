@@ -11,6 +11,8 @@ public class IngameProcess : MonoBehaviour
     //Player check
     public GameObject[] playerList = new GameObject[100];
     public int clientPlayerNum = -1;
+    //Player InputManager reference
+    public InputManager inputSc;
 
 
     //private List<GameObject> playerList = new List<GameObject>();
@@ -76,16 +78,16 @@ public class IngameProcess : MonoBehaviour
         switch (key)
         {
             case "W":
-                playerList[num].GetComponent<OtherMoving>().movementsKey[(int)Key.W] = true;
+                playerList[num].GetComponent<Player>().keyState[(int)Key.W] = true;
                 break;
             case "S":
-                playerList[num].GetComponent<OtherMoving>().movementsKey[(int)Key.S] = true;
+                playerList[num].GetComponent<Player>().keyState[(int)Key.S] = true;
                 break;
             case "A":
-                playerList[num].GetComponent<OtherMoving>().movementsKey[(int)Key.A] = true;
+                playerList[num].GetComponent<Player>().keyState[(int)Key.A] = true;
                 break;
             case "D":
-                playerList[num].GetComponent<OtherMoving>().movementsKey[(int)Key.D] = true;
+                playerList[num].GetComponent<Player>().keyState[(int)Key.D] = true;
                 break;
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
@@ -104,16 +106,16 @@ public class IngameProcess : MonoBehaviour
         switch (key)
         {
             case "W":
-                playerList[num].GetComponent<OtherMoving>().movementsKey[(int)Key.W] = false;
+                playerList[num].GetComponent<Player>().keyState[(int)Key.W] = false;
                 break;
             case "S":
-                playerList[num].GetComponent<OtherMoving>().movementsKey[(int)Key.S] = false;
+                playerList[num].GetComponent<Player>().keyState[(int)Key.S] = false;
                 break;
             case "A":
-                playerList[num].GetComponent<OtherMoving>().movementsKey[(int)Key.A] = false;
+                playerList[num].GetComponent<Player>().keyState[(int)Key.A] = false;
                 break;
             case "D":
-                playerList[num].GetComponent<OtherMoving>().movementsKey[(int)Key.D] = false;    
+                playerList[num].GetComponent<Player>().keyState[(int)Key.D] = false;    
                 break;
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
@@ -138,17 +140,17 @@ public class IngameProcess : MonoBehaviour
             camManagerSc = GameObject.Find("Main Camera").GetComponent<CameraManager>();
             camManagerSc.playerObject = playerList[clientPlayerNum].transform;
             camManagerSc.playerUpperBody = playerList[clientPlayerNum].transform.Find("PlayerUpperBody");
-            
-            playerList[clientPlayerNum].AddComponent<PlayerMoving>();
-            playerList[clientPlayerNum].AddComponent<PlayerShooting>();
-            //playerList[clientPlayerNum].AddComponent<PlayerWeaponManager>();
-            playerList[clientPlayerNum].GetComponent<PlayerMoving>().clientNum = clientPlayerNum;
+            //Player Sc;
+            playerList[clientPlayerNum].AddComponent<Player>().clientNum = clientPlayerNum;
+            inputSc.myPlayer = playerList[clientPlayerNum].GetComponent<Player>();
+            inputSc.playerUpperBody = inputSc.myPlayer.transform.Find("PlayerUpperBody").gameObject;
+         
         }
         //다른 클라이언트 일 경우
         else
         {
-            playerList[num].AddComponent<OtherMoving>();
-            playerList[num].GetComponent<OtherMoving>().clientNum = num;
+            playerList[num].AddComponent<Player>();
+            playerList[num].GetComponent<Player>().clientNum = num;
         }
     }
 
