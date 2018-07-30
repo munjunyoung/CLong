@@ -186,7 +186,13 @@ namespace CLongServer
             var tempSize = 0;
             while (totalSize > tempSize)
             {
-                var bodySize = _tempBufferSocket[tempSize];
+                //bodySize
+                int bodySize = _tempBufferSocket[tempSize];
+                if (_tempBufferSocket[tempSize+1]!=0)
+                {
+                    bodySize += (256*_tempBufferSocket[tempSize + 1]);
+                }
+                
                 byte[] bodyBuf = new byte[1024];
 
                 Array.Copy(_tempBufferSocket, tempSize + headSize, bodyBuf, 0, bodySize);

@@ -18,33 +18,29 @@ public class WeaponBase : MonoBehaviour
     //Shell
     protected string shellType; //사용하는 총알의 종류
     protected GameObject shellPrefab; // 총알 오브젝트 PREFAB
-
+    
     protected virtual void Start()
     {
     }
-
     /// <summary>
     /// Shoot
     /// </summary>
-    public virtual void Shoot()
+    public virtual void Shoot(Vector3 pos, Vector3 rot)
     {
-        if (GunSpeedCount < GunSpeed)
-        {
-            ShellIns(shellType);
-            GunSpeedCount = 0;
-        }
-        GunSpeed++;
+        //연사속도관련
+        ShellIns(shellType, pos, rot);
     }
 
     /// <summary>
     /// Create Shell
     /// </summary>
     /// <param name="st"></param>
-    protected virtual void ShellIns(string st)
+    protected virtual void ShellIns(string st, Vector3 pos, Vector3 rot)
     {
         shellPrefab = Instantiate(Resources.Load("Prefab/Weapon/Shell/" + st)) as GameObject;
-        var weaponFireTransform = transform.Find("FirePosition").transform;
-        shellPrefab.transform.localPosition = weaponFireTransform.position;
-        shellPrefab.transform.localEulerAngles = Vector3.zero;
+        //var weaponFireTransform = transform.Find("FirePosition").transform;
+        shellPrefab.transform.localPosition = pos;
+        shellPrefab.transform.localEulerAngles = rot;
+        shellPrefab.GetComponent<ShellScript>().shellSpeed = shellSpeed;
     }
 }

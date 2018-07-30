@@ -6,11 +6,21 @@ using CLongLib;
 public class Player : MonoBehaviour
 {
     public int clientNum;
-
+    //add Script
+    public PlayerWeaponManager weaponManagerSc;
+    
     public bool[] keyState = new bool[20];
     //Move
     protected float moveSpeed = 5f;
+    //Weapon
     
+
+    private void Awake()
+    {
+        AddScript();
+    }
+    
+
     private void FixedUpdate()
     {
         Move();
@@ -55,5 +65,22 @@ public class Player : MonoBehaviour
         {
             moveSpeed = 5f;
         }
+    }
+
+    /// <summary>
+    /// Player Shoot Func , call weaponManager Shoot Func
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="rot"></param>
+    public void Shoot(Vector3 pos, Vector3 rot)
+    {
+        weaponManagerSc.Shoot(pos, rot);
+    }
+    /// <summary>
+    /// Total Add Script Func
+    /// </summary>
+    private void AddScript()
+    {
+        weaponManagerSc =  this.gameObject.AddComponent<PlayerWeaponManager>();
     }
 }

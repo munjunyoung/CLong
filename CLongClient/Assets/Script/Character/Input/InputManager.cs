@@ -20,10 +20,10 @@ public class InputManager : MonoBehaviour {
     //Turning Send Packet
     float mousePacketSendFrame = 0f;
     float mouseDelay = 1f;
-    
+    //Shooting
+
     private void Start()
     {
-        
         KeySet();
     }
 
@@ -32,7 +32,6 @@ public class InputManager : MonoBehaviour {
         if (myPlayer != null)
         {
             Tunring();
-            SendAngleYData();
         }
     }
     
@@ -41,6 +40,7 @@ public class InputManager : MonoBehaviour {
         if (myPlayer != null)
         {
             SendKeyData();
+            SendAngleYData();
         }
     }
 
@@ -128,6 +128,11 @@ public class InputManager : MonoBehaviour {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
             myPlayer.keyState[(int)Key.Z] = false;
         }
+        //Shooting
+        if(Input.GetMouseButtonDown(0))
+        {
+            NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.eulerAngles)));
+        }
     }
 
 
@@ -158,7 +163,7 @@ public class InputManager : MonoBehaviour {
             if (mousePacketSendFrame < mouseDelay)
             {
                 // NetworkManagerTCP.SendTCP(new ClientDir(0, this.transform.eulerAngles.y));
-                NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, this.transform.eulerAngles.y));
+                NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y));
                 mousePacketSendFrame++;
             }
             else
@@ -166,6 +171,22 @@ public class InputManager : MonoBehaviour {
         }
     }
     #endregion
+    /*
+    #region Shooting
+    /// 무기 상태에 따라서 shooting의 종류가 바뀌어야함
+    /// </summary>
+    /// <param name="Speed"></param>
+    void Shooting(int num)
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (myPlayer.weaponManagerSc.weaponSc != null)
+                myPlayer.weaponManagerSc.weaponSc[num].Shoot(myPlayer.weaponManagerSc.fireTransform);
+        }
+    }
+
+    #endregion*/
+
     /// <summary>
     /// setting Key List;
     /// </summary>

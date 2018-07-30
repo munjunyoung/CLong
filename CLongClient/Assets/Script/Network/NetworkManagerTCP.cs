@@ -70,11 +70,12 @@ namespace tcpNet
                     TypeNameHandling = TypeNameHandling.Objects
                 });
                 var bodyBuf = Encoding.UTF8.GetBytes(packetStr);
+                //BitConverter.GetBytes()
                 var headBuf = BitConverter.GetBytes(bodyBuf.Length);
                 List<byte> sendPacket = new List<byte>();
                 sendPacket.AddRange(headBuf);
                 sendPacket.AddRange(bodyBuf);
-
+                
                 socketTcp.BeginSend(sendPacket.ToArray(), 0, sendPacket.Count, SocketFlags.None, OnSendTCPCallBack, socketTcp);
                 Debug.Log("[TCP] Socket - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
             }
@@ -179,7 +180,11 @@ namespace tcpNet
             var tempSize = 0;
             while (totalSize > tempSize)
             {
-                var bodySize = _tempBufferSocket[tempSize];
+                int bodySize = _tempBufferSocket[tempSize];
+                if (_tempBufferSocket[tempSize + 1] != 0)
+                {
+                    bodySize += (256 * _tempBufferSocket[tempSize + 1]);
+                }
                 byte[] bodyBuf = new byte[1024];
 
                 Array.Copy(_tempBufferSocket, tempSize + headSize, bodyBuf, 0, bodySize);

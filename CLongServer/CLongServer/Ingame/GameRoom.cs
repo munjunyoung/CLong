@@ -134,6 +134,13 @@ namespace CLongServer.Ingame
                     }
                     
                     break;
+                case "InsShell":
+                    var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
+                    foreach(var cl in playerDic)
+                    {
+                        cl.Value.Send(p);
+                    }
+                    break;
                 case "ExitReq":
                     c.Close();
 

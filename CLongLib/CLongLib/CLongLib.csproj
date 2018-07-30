@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="03Ingame\GameStartPacket.cs" />
     <Compile Include="03Ingame\MovePacket.cs" />
+    <Compile Include="03Ingame\ShootingPacket.cs" />
     <Compile Include="CommonPacket.cs" />
     <Compile Include="PacketStructure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

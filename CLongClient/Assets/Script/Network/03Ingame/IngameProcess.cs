@@ -40,6 +40,10 @@ public class IngameProcess : MonoBehaviour
                 var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
                 KeyUpOtherClient(keyUpData.ClientNum, keyUpData.UpKey);
                 break;
+            case "InsShell":
+                var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
+                playerList[shellData.ClientNum].GetComponent<Player>().Shoot(ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
+                break;
             default:
                 Debug.Log("[Ingame Proces] TCP : Mismatching Message");
                 break;
@@ -52,12 +56,12 @@ public class IngameProcess : MonoBehaviour
     /// <param name="p"></param>
     public void IngameDataRequestUDP(Packet p)
     {
-        switch(p.MsgName)
+        switch (p.MsgName)
         {
             case "ClientDir":
                 var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
                 //자신의 플레이어가 아닐경우에만
-                if(clientPlayerNum != clientDirData.ClientNum)
+                if (clientPlayerNum != clientDirData.ClientNum)
                 {
                     playerList[clientDirData.ClientNum].transform.eulerAngles = new Vector3(0, clientDirData.DirectionY, 0);
                 }
@@ -115,7 +119,7 @@ public class IngameProcess : MonoBehaviour
                 playerList[num].GetComponent<Player>().keyState[(int)Key.A] = false;
                 break;
             case "D":
-                playerList[num].GetComponent<Player>().keyState[(int)Key.D] = false;    
+                playerList[num].GetComponent<Player>().keyState[(int)Key.D] = false;
                 break;
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
@@ -131,7 +135,7 @@ public class IngameProcess : MonoBehaviour
         //배정되는 클라이언트 num에 prefab생성
         playerList[num] = Instantiate(playerPrefab);
         playerList[num].transform.position = pos;
-
+        playerList[num].AddComponent<Player>().clientNum = num;
         //클라이언트 일 경우
         if (clientCheck)
         {
@@ -141,10 +145,9 @@ public class IngameProcess : MonoBehaviour
             camManagerSc.playerObject = playerList[clientPlayerNum].transform;
             camManagerSc.playerUpperBody = playerList[clientPlayerNum].transform.Find("PlayerUpperBody");
             //Player Sc;
-            playerList[clientPlayerNum].AddComponent<Player>().clientNum = clientPlayerNum;
             inputSc.myPlayer = playerList[clientPlayerNum].GetComponent<Player>();
             inputSc.playerUpperBody = inputSc.myPlayer.transform.Find("PlayerUpperBody").gameObject;
-         
+
         }
         //다른 클라이언트 일 경우
         else
@@ -153,8 +156,6 @@ public class IngameProcess : MonoBehaviour
             playerList[num].GetComponent<Player>().clientNum = num;
         }
     }
-
-
 
     #region ChangeVector
     /// <summary>
