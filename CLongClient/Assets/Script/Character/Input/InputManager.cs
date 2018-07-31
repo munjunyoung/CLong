@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using CLongLib;
 using tcpNet;
+using UnityEngine.UI;
 
 public class InputManager : MonoBehaviour {
 
@@ -21,10 +22,16 @@ public class InputManager : MonoBehaviour {
     float mousePacketSendFrame = 0f;
     float mouseDelay = 1f;
     //Shooting
+    int shootPeriodCount = 0;
+    //for Set Health UI
+    public int currentHealth = 100;
+    public Slider healthSlider;
+   
 
     private void Start()
     {
         KeySet();
+        healthSlider.value = currentHealth;
     }
 
     private void FixedUpdate()
@@ -53,44 +60,43 @@ public class InputManager : MonoBehaviour {
         if (Input.GetKeyDown(KeyList[(int)Key.W]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.W].ToString()));
-            myPlayer.keyState[(int)Key.W] = true;
-            
+            //myPlayer.keyState[(int)Key.W] = true;
         }
         if (Input.GetKeyDown(KeyList[(int)Key.S]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.S].ToString()));
-            myPlayer.keyState[(int)Key.S] = true;
+            //myPlayer.keyState[(int)Key.S] = true;
         }
         if (Input.GetKeyDown(KeyList[(int)Key.A]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.A].ToString()));
-            myPlayer.keyState[(int)Key.A] = true;
+            //myPlayer.keyState[(int)Key.A] = true;
         }
         if (Input.GetKeyDown(KeyList[(int)Key.D]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.D].ToString()));
-            myPlayer.keyState[(int)Key.D] = true;
+            //myPlayer.keyState[(int)Key.D] = true;
         }
 
         if (Input.GetKeyUp(KeyList[(int)Key.W]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.W].ToString()));
-            myPlayer.keyState[(int)Key.W] = false;
+            //myPlayer.keyState[(int)Key.W] = false;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.S]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.S].ToString()));
-            myPlayer.keyState[(int)Key.S] = false;
+            //myPlayer.keyState[(int)Key.S] = false;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.A]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.A].ToString()));
-            myPlayer.keyState[(int)Key.A] = false;
+            //myPlayer.keyState[(int)Key.A] = false;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.D]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.D].ToString()));
-            myPlayer.keyState[(int)Key.D] = false;
+            //myPlayer.keyState[(int)Key.D] = false;
         }
 
         //Run
@@ -129,9 +135,14 @@ public class InputManager : MonoBehaviour {
             myPlayer.keyState[(int)Key.Z] = false;
         }
         //Shooting
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
-            NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.eulerAngles)));
+            if (shootPeriodCount > myPlayer.weaponManagerSc.weaponSc[myPlayer.weaponManagerSc.currentWeaponEquipNum].ShootPeriod)
+            {
+                NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.eulerAngles)));
+                shootPeriodCount = 0;
+            }
+            shootPeriodCount++;
         }
     }
 
@@ -163,7 +174,7 @@ public class InputManager : MonoBehaviour {
             if (mousePacketSendFrame < mouseDelay)
             {
                 // NetworkManagerTCP.SendTCP(new ClientDir(0, this.transform.eulerAngles.y));
-                NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y));
+                NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y, playerUpperBody.transform.eulerAngles.x));
                 mousePacketSendFrame++;
             }
             else
@@ -186,6 +197,17 @@ public class InputManager : MonoBehaviour {
     }
 
     #endregion*/
+
+    /// <summary>
+    /// set player HealthUI 
+    /// when takeDamge, and startGame Setting
+    /// </summary>
+    public void SetHealthUI() {
+        if(currentHealth<=0)
+            healthSlider.value = 0;
+        else
+            healthSlider.value = currentHealth;
+    }
 
     /// <summary>
     /// setting Key List;

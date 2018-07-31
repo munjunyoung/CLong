@@ -40,7 +40,10 @@ namespace CLongServer
         public Vector3 currentPos;
         public float directionAngle = 0f;
         public float speed = 5f;
-        public float height = 1f;        
+        public float height = 1f;
+
+        //Health
+        public int currentHealth = 100;
 
         /// <summary>
         /// Constructor .. Stream Save;
@@ -201,7 +204,6 @@ namespace CLongServer
             }
         }
 
-
         /// <summary>
         /// CorrespondData
         /// </summary>
@@ -224,9 +226,7 @@ namespace CLongServer
             {
                 ProcessHandler(this, p);
             }
-        } 
-        
-    
+        }
 
         #region Stream
         //StreamTest용
@@ -336,6 +336,5 @@ namespace CLongServer
         }
 
         #endregion
-
     }
 }

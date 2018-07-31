@@ -42,7 +42,15 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "InsShell":
                 var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
-                playerList[shellData.ClientNum].GetComponent<Player>().Shoot(ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
+                playerList[shellData.ClientNum].GetComponent<Player>().Shoot(shellData.ClientNum, ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
+                break;
+            case "TakeDamage":
+                var damageData = JsonConvert.DeserializeObject<TakeDamage>(p.Data);
+                playerList[damageData.ClientNum].GetComponent<Player>().TakeDamage(damageData.Damage);
+                break;
+            case "Death":
+                var deathData = JsonConvert.DeserializeObject<Death>(p.Data);
+                playerList[deathData.ClientNum].GetComponent<Player>().Death();
                 break;
             default:
                 Debug.Log("[Ingame Proces] TCP : Mismatching Message");
@@ -63,7 +71,8 @@ public class IngameProcess : MonoBehaviour
                 //자신의 플레이어가 아닐경우에만
                 if (clientPlayerNum != clientDirData.ClientNum)
                 {
-                    playerList[clientDirData.ClientNum].transform.eulerAngles = new Vector3(0, clientDirData.DirectionY, 0);
+                    playerList[clientDirData.ClientNum].transform.localEulerAngles = new Vector3(0, clientDirData.DirectionY, 0);
+                    playerList[clientDirData.ClientNum].transform.Find("PlayerUpperBody").transform.localEulerAngles = new Vector3(clientDirData.DirectionX, 0, 0);
                 }
                 break;
             default:
@@ -106,7 +115,6 @@ public class IngameProcess : MonoBehaviour
     /// <param name="key"></param>
     public void KeyUpOtherClient(int num, string key)
     {
-        Debug.Log("keyUP 캐릭터 num : " + num);
         switch (key)
         {
             case "W":
@@ -146,13 +154,12 @@ public class IngameProcess : MonoBehaviour
             camManagerSc.playerUpperBody = playerList[clientPlayerNum].transform.Find("PlayerUpperBody");
             //Player Sc;
             inputSc.myPlayer = playerList[clientPlayerNum].GetComponent<Player>();
+            playerList[clientPlayerNum].GetComponent<Player>().clientCheck = true;
             inputSc.playerUpperBody = inputSc.myPlayer.transform.Find("PlayerUpperBody").gameObject;
-
         }
         //다른 클라이언트 일 경우
         else
         {
-            playerList[num].AddComponent<Player>();
             playerList[num].GetComponent<Player>().clientNum = num;
         }
     }

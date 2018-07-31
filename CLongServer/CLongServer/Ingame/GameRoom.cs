@@ -13,11 +13,11 @@ using System.Net;
 
 namespace CLongServer.Ingame
 {
-    class GameRoom 
+    class GameRoom
     {
         public bool gameStartState = false;
         public int gameRoomNumber = 0;
-        
+
         //public List<ClientTCP> clientList = new List<ClientTCP>();
         List<Vector3> StartPosList = new List<Vector3>();
         public Dictionary<int, ClientTCP> playerDic = new Dictionary<int, ClientTCP>();
@@ -26,7 +26,7 @@ namespace CLongServer.Ingame
         float updatePeriod = 0.01f;
         System.Threading.Timer threadingTimer;
         System.Timers.Timer timerTimer = new System.Timers.Timer();
-        
+
         //UDP
         public UdpNetwork udpServer;
 
@@ -51,17 +51,18 @@ namespace CLongServer.Ingame
             c.numberInGame = playerDic.Count();
             c.currentPos = StartPosList[c.numberInGame];
             c.ingame = true;
+            c.currentHealth = 100;
             c.ProcessHandler += IngameDataRequestTCP;
             udpServer.ProcessHandler += IngameDataRequestUDP;
             playerDic.Add(c.numberInGame, c);
             //게임시작 통보
             playerDic[c.numberInGame].Send(new StartGameReq());
             //해당 클라이언트 생성 통보
-            
+
             playerDic[c.numberInGame].Send(new ClientIns(c.numberInGame, c.currentPos, true));
             //다른 클라이언트들에게 현재 생성하는 클라이언트 생성 통보
             //현재 생성되는 클라이언트에선 이미 존재하고있는 클라이언트들의 존재 생성
-            foreach(var cl in playerDic)
+            foreach (var cl in playerDic)
             {
                 if (c.numberInGame != cl.Key)
                 {
@@ -80,7 +81,7 @@ namespace CLongServer.Ingame
         {
             //Find
         }
-        
+
         /// <summary>
         /// Remove Client (Socket Close)
         /// </summary>
@@ -116,34 +117,44 @@ namespace CLongServer.Ingame
                     KeyDownFunc(c, keyDownData.DownKey);
                     foreach (var cl in playerDic)
                     {
-                        if (cl.Key != c.numberInGame)
-                            cl.Value.Send(p);
+                        cl.Value.Send(p);
                     }
                     break;
                 case "KeyUP":
                     var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
-                    KeyUpFunc(c, keyUpData.UpKey);
-                    c.Send(new ClientMoveSync(c.numberInGame, c.currentPos));
+                    KeyUpFunc(c, keyUpData.UpKey); 
                     foreach (var cl in playerDic)
                     {
-                        if(cl.Key != c.numberInGame)
-                        {
-                            cl.Value.Send(p);
-                            cl.Value.Send(new ClientMoveSync(c.numberInGame, c.currentPos));
-                        }
+                        cl.Value.Send(p);
+                        cl.Value.Send(new ClientMoveSync(c.numberInGame, c.currentPos));
                     }
-                    
+
                     break;
                 case "InsShell":
                     var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
-                    foreach(var cl in playerDic)
+                    foreach (var cl in playerDic)
                     {
                         cl.Value.Send(p);
                     }
                     break;
+                case "TakeDamage":
+                    var damageData = JsonConvert.DeserializeObject<TakeDamage>(p.Data);
+                    c.currentHealth += -damageData.Damage;
+                    Console.WriteLine("[" + c.numberInGame + "] CurrentHealth : " + c.currentHealth);
+                    if(c.currentHealth<=0)
+                    {
+                        c.currentHealth = 0;
+                        foreach (var cl in playerDic)
+                            cl.Value.Send(new Death(c.numberInGame));
+                    }
+                    else
+                    {
+                        foreach(var cl in playerDic)
+                            cl.Value.Send(p);
+                    }
+                    break;
                 case "ExitReq":
                     c.Close();
-
                     break;
                 default:
                     Console.WriteLine("[INGAME PROCESS] TCP : Mismatching Message");
@@ -153,7 +164,7 @@ namespace CLongServer.Ingame
 
         private void IngameDataRequestUDP(Packet p)
         {
-            switch(p.MsgName)
+            switch (p.MsgName)
             {
                 case "ClientDir":
                     var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
@@ -162,7 +173,7 @@ namespace CLongServer.Ingame
                     break;
                 default:
                     Console.WriteLine("[INGAME PROCESS] UDP : Mismatching Message");
-                    break;  
+                    break;
             }
         }
         #region Move thread Stopwatch
@@ -173,7 +184,7 @@ namespace CLongServer.Ingame
         private void KeyDownFunc(ClientTCP c, string key)
         {
             Console.WriteLine("[INGAME PROCESS] TCP : Down Key - " + key);
-            
+
             switch (key)
             {
                 case "W":

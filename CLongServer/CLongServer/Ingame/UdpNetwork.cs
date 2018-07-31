@@ -60,7 +60,7 @@ namespace CLongServer.Ingame
             sendPacket.AddRange(headBuf);
             sendPacket.AddRange(bodyBuf);
             clientUDP.Send(sendPacket.ToArray(), sendPacket.Count, multicastEP);
-            Console.WriteLine("[UDP] Socket - Send : [" + p.MsgName + "] to [" + multicastEP + "]");
+            //Console.WriteLine("[UDP] Socket - Send : [" + p.MsgName + "] to [" + multicastEP + "]");
         }
 
 
@@ -95,7 +95,7 @@ namespace CLongServer.Ingame
             {
                 _tempBufferSocket = tmpUDP.EndReceive(ar, ref tmpEP);
                 var tempDataSize = _tempBufferSocket.Length;
-                Console.WriteLine("[UDP] Socket - Receive Data Size : " + tempDataSize);
+                //Console.WriteLine("[UDP] Socket - Receive Data Size : " + tempDataSize);
                 if (tempDataSize == 0)
                 {
                     Console.WriteLine("[UDP] Socket -  Receive Data Size is zero");
@@ -131,7 +131,7 @@ namespace CLongServer.Ingame
             });
 
             RequestDataUDP(receivedPacket);
-            Console.WriteLine("[UDP] Socket - ReceiveData msg : " + receivedPacket.MsgName);
+            //Console.WriteLine("[UDP] Socket - ReceiveData msg : " + receivedPacket.MsgName);
         }
 
         /// <summary>

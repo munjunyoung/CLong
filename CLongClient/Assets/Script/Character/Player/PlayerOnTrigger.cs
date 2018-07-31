@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using CLongLib;
+using tcpNet;
 
-public class OtherMoving : Other
+public class PlayerOnTrigger : MonoBehaviour
 {
-    
-    
+   
 }
+

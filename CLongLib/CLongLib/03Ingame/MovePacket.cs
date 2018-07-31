@@ -44,11 +44,13 @@ namespace CLongLib
     {
         public int ClientNum { get; set; }
         public float DirectionY { get; set; }
+        public float DirectionX { get; set; }
         
-        public ClientDir(int n, float d)
+        public ClientDir(int n, float y, float x)
         {
             ClientNum = n;
-            DirectionY = d;
+            DirectionY = y;
+            DirectionX = x;
         }
     }
     

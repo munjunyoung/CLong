@@ -5,6 +5,8 @@ using UnityEngine;
 public class ShellScript : MonoBehaviour {
 
     public float shellSpeed;
+    public float clientNum;
+    public int damage;
 	// Use this for initialization
 	private void Start () {
         Destroy(this.gameObject, 3f);
@@ -14,4 +16,5 @@ public class ShellScript : MonoBehaviour {
 	private void FixedUpdate () {
         this.transform.Translate(Vector3.forward * shellSpeed * Time.deltaTime);
 	}
+    
 }

@@ -7,7 +7,7 @@ public class PlayerWeaponManager : MonoBehaviour
     //waepon
     public string weaponName;
     public List<WeaponBase> weaponSc = new List<WeaponBase>();
-    public int weaponEquipNum;
+    public int currentWeaponEquipNum;
     //Shoot Transform to send to Server
     public Transform fireTransform;
 
@@ -15,7 +15,7 @@ public class PlayerWeaponManager : MonoBehaviour
     {
         //Prefab 불러오기
         weaponName = "AK";
-        weaponEquipNum = 0;
+        currentWeaponEquipNum = 0;
         WeaponEquip(weaponName);
     }
     
@@ -26,7 +26,7 @@ public class PlayerWeaponManager : MonoBehaviour
     private void WeaponEquip(string st)
     {
         //현재 장착한 weapon Num
-        weaponEquipNum = 0;
+        currentWeaponEquipNum = 0;
         InsWeapon("AK");
         //... 2,3,4,5 weapon ins
     }
@@ -46,7 +46,6 @@ public class PlayerWeaponManager : MonoBehaviour
         fireTransform = weaponPrefab.transform.Find("FirePosition");
         //WeaponBase
         weaponSc.Add(weaponPrefab.GetComponent<WeaponBase>());
-        Debug.Log("WeaponSc  : " + weaponSc.ToString());
     }
     /// <summary>
     /// player Change Weapon by input key
@@ -59,8 +58,8 @@ public class PlayerWeaponManager : MonoBehaviour
     /// </summary>
     /// <param name="pos"></param>
     /// <param name="rot"></param>
-    public void Shoot(Vector3 pos, Vector3 rot)
+    public void Shoot(int num, Vector3 pos, Vector3 rot)
     {
-        weaponSc[weaponEquipNum].Shoot(pos, rot);
+        weaponSc[currentWeaponEquipNum].Shoot(num, pos, rot);
     }
 }
