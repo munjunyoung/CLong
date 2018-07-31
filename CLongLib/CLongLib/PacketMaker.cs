@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
@@ -61,35 +63,17 @@ namespace CLongLib
     }
 
     /// <summary>
-    /// Login request from CLIENT to SERVER.
+    /// Udp ReceiveCallBack Func
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Login_Req
+    public class UdpState
     {
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
-        public string id;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
-        public string password;
-    }
+        public IPEndPoint Ep { get; set; }
+        public UdpClient Uc { get; set; }
 
-    /// <summary>
-    /// Login ackknowledgement from SERVER to CLIENT
-    /// </summary>
-    public struct Login_Ack
-    {
-        public bool connected;
-    }
-
-    /// <summary>
-    /// Matching start/cancel request from CLIENT to SERVER.
-    /// </summary>
-    public struct Match_Req
-    {
-        public bool matching;
-    }
-
-    public struct Match_Ack
-    {
-        public bool matching;
+        public UdpState(IPEndPoint ep, UdpClient uc)
+        {
+            Ep = ep;
+            Uc = uc;
+        }
     }
 }

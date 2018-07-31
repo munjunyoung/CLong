@@ -25,20 +25,4 @@ namespace CLongLib
             Client = b;
         }
     }
-    
-    /// <summary>
-    /// Udp ReceiveCallBack Func
-    /// </summary>
-    public class UdpState
-    {
-        public IPEndPoint Ep { get; set; }
-        public UdpClient Uc { get; set; }
-
-        public UdpState(IPEndPoint ep, UdpClient uc)
-        {
-            Ep = ep;
-            Uc = uc;
-        }
-    }
-
 }
