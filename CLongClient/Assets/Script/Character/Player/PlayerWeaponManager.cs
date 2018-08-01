@@ -1,34 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class PlayerWeaponManager : MonoBehaviour
 {
     //waepon
     public string weaponName;
-    public List<WeaponBase> weaponSc = new List<WeaponBase>();
-    public int currentWeaponEquipNum;
+    public Dictionary<int, WeaponBase> weaponDic = new Dictionary<int, WeaponBase>();
+    public int currentWeaponEquipNum; // 현재 장착하고 있는 무기 번호
+    public string[] equipWeaponArray = new string[2];
+    private List<Transform> equipPos = new List<Transform>();
     //Shoot Transform to send to Server
     public Transform fireTransform;
 
     private void Start()
     {
-        //Prefab 불러오기
-        weaponName = "AK";
         currentWeaponEquipNum = 0;
-        WeaponEquip(weaponName);
+        SetEquipPos();
+        WeaponEquip(equipWeaponArray);
+
     }
-    
+   
     /// <summary>
     /// Weapon Equip - Create Weapon
     /// </summary>
     /// <param name="st"></param>
-    private void WeaponEquip(string st)
+    private void WeaponEquip(string[] st)
     {
         //현재 장착한 weapon Num
         currentWeaponEquipNum = 0;
-        InsWeapon("AK");
+        InsWeapon(st[0]);
+        InsWeapon(st[1]);
         //... 2,3,4,5 weapon ins
+        fireTransform = weaponDic[currentWeaponEquipNum].transform.Find("FirePosition");
     }
     
     /// <summary>
@@ -38,20 +43,61 @@ public class PlayerWeaponManager : MonoBehaviour
     private void InsWeapon(string name)
     {
         var weaponPrefab = Instantiate(Resources.Load("Prefab/Weapon/AR/" + name)) as GameObject;
-        var weaponEquipObject = transform.Find("PlayerUpperBody").transform.Find("WeaponEquip");
-        weaponPrefab.transform.parent = weaponEquipObject.transform;
-        weaponPrefab.transform.localPosition = Vector3.zero;
-        weaponPrefab.transform.localEulerAngles = Vector3.zero;
-        //FireTransform 
-        fireTransform = weaponPrefab.transform.Find("FirePosition");
+      
         //WeaponBase
-        weaponSc.Add(weaponPrefab.GetComponent<WeaponBase>());
+        weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum = weaponDic.Count();
+        weaponDic.Add(weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum, weaponPrefab.GetComponent<WeaponBase>());
+        if (weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum == 0)
+            weaponDic[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum].transform.parent = equipPos[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
+        else if (weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum == 1)
+            weaponDic[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum].transform.parent = equipPos[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
+        
+        weaponDic[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum].transform.localPosition = Vector3.zero;
+        weaponDic[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+        //FireTransform 
     }
+
+    /// <summary>
+    /// 무기생성후 위치할 포지션 LIST SET
+    /// </summary>
+    private void SetEquipPos()
+    {
+        equipPos.Add(transform.Find("PlayerUpperBody").transform.Find("WeaponEquip"));
+        equipPos.Add(transform.Find("WeaponBackEquip"));
+    }
+
     /// <summary>
     /// player Change Weapon by input key
     /// </summary>
     /// <param name="weapon"></param>
-    private void WeaponChange(WeaponBase weapon, Input key) { }
+    public void WeaponChange(int num)
+    {
+        switch(num)
+        {
+            case 1:
+                currentWeaponEquipNum = 0;
+                weaponDic[0].transform.parent = equipPos[0];
+                weaponDic[0].transform.localPosition = Vector3.zero;
+                weaponDic[0].transform.localEulerAngles = Vector3.zero;
+                weaponDic[1].transform.parent = equipPos[1];
+                weaponDic[1].transform.localPosition = Vector3.zero;
+                weaponDic[1].transform.localEulerAngles = Vector3.zero;
+                break;
+            case 2:
+                currentWeaponEquipNum = 1;
+                weaponDic[1].transform.parent = equipPos[0];
+                weaponDic[1].transform.localPosition = Vector3.zero;
+                weaponDic[1].transform.localEulerAngles = Vector3.zero;
+                weaponDic[0].transform.parent = equipPos[1];
+                weaponDic[0].transform.localPosition = Vector3.zero;
+                weaponDic[0].transform.localEulerAngles = Vector3.zero;
+                break;
+            default:
+                Debug.Log("해당하는 번호가 아님");
+                break;
+        }
+        fireTransform = weaponDic[currentWeaponEquipNum].transform.Find("FirePosition");
+    }
 
     /// <summary>
     /// Call WeaponSc Shoot Func
@@ -60,6 +106,6 @@ public class PlayerWeaponManager : MonoBehaviour
     /// <param name="rot"></param>
     public void Shoot(int num, Vector3 pos, Vector3 rot)
     {
-        weaponSc[currentWeaponEquipNum].Shoot(num, pos, rot);
+        weaponDic[currentWeaponEquipNum].Shoot(num, pos, rot);
     }
 }

@@ -9,7 +9,7 @@ using System.Numerics;
 using System.Threading;
 using System.Diagnostics;
 using System.Net;
-
+using CLongServer.Ingame;
 
 namespace CLongServer
 {
@@ -41,6 +41,10 @@ namespace CLongServer
         public float directionAngle = 0f;
         public float speed = 5f;
         public float height = 1f;
+
+        //Weapon
+        public Weapon[] weaponEqupArray = new Weapon[2];
+        public int currentEquipWeaponNum = 0;
 
         //Health
         public int currentHealth = 100;

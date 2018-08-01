@@ -1,6 +1,5 @@
 ﻿
-
-public class AKscript : ARBase
+class M4Script : ARBase
 {
     /// <summary>
     /// Set AK
@@ -8,10 +7,11 @@ public class AKscript : ARBase
     protected override void Start()
     {
         weaponType = "AR";
-        weaponName = "AK";
-        shellType = "7mm";
-        damage = 50;
+        weaponName = "M4";
+        shellType = "5mm";
+        damage = 30;
         shellSpeed = 50;
         ShootPeriod = 5;
     }
 }
+

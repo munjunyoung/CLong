@@ -17,12 +17,14 @@ namespace CLongLib
         public int ClientNum { get; set; }
         public Vector3 StartPos { get; set; }
         public bool Client { get; set; }
+        public string[] WeaponArray { get; set; }
 
-        public ClientIns(int n, Vector3 p, bool b)
+        public ClientIns(int n, Vector3 p, bool b, string[] w)
         {
             ClientNum = n;
             StartPos = p;
             Client = b;
+            WeaponArray = w;
         }
     }
 }

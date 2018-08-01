@@ -137,3 +137,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9414305e3d4fbfc4f8a537745fc3eb85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShootPeriod: 0
+  equipWeaponNum: 0

@@ -103,46 +103,60 @@ public class InputManager : MonoBehaviour {
         if (Input.GetKeyDown(KeyList[(int)Key.LeftShift]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.LeftShift].ToString()));
-            myPlayer.keyState[(int)Key.LeftShift] = true;
+            //myPlayer.keyState[(int)Key.LeftShift] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftShift]))
         {
-            ;
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.LeftShift].ToString()));
-            myPlayer.keyState[(int)Key.LeftShift] = false;
+            //myPlayer.keyState[(int)Key.LeftShift] = false;
         }
 
         //Seat
         if (Input.GetKeyDown(KeyList[(int)Key.LeftControl]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.LeftControl].ToString()));
-            myPlayer.keyState[(int)Key.LeftControl] = true;
+            //myPlayer.keyState[(int)Key.LeftControl] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftControl]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.LeftControl].ToString()));
-            myPlayer.keyState[(int)Key.LeftControl] = false;
+            //myPlayer.keyState[(int)Key.LeftControl] = false;
         }
         //Creep
         if (Input.GetKeyDown(KeyList[(int)Key.Z]))
         {
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
-            myPlayer.keyState[(int)Key.Z] = true;
+            //myPlayer.keyState[(int)Key.Z] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.Z]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
-            myPlayer.keyState[(int)Key.Z] = false;
+            //myPlayer.keyState[(int)Key.Z] = false;
         }
+
         //Shooting
         if (Input.GetMouseButton(0))
         {
-            if (shootPeriodCount > myPlayer.weaponManagerSc.weaponSc[myPlayer.weaponManagerSc.currentWeaponEquipNum].ShootPeriod)
+            if (shootPeriodCount > myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].ShootPeriod)
             {
                 NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.eulerAngles)));
                 shootPeriodCount = 0;
             }
             shootPeriodCount++;
+        }
+
+        //WeaponSwap
+        
+        if (Input.GetKeyDown(KeyList[(int)Key.Alpha1]))
+        {
+            //이미 장착한 번호와 같은경우 전송 안되도록
+            if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 0)
+                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha1].ToString()));
+        }
+        else if (Input.GetKeyDown(KeyList[(int)Key.Alpha2])) 
+        {
+            if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 1)
+                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
         }
     }
 
@@ -202,7 +216,8 @@ public class InputManager : MonoBehaviour {
     /// set player HealthUI 
     /// when takeDamge, and startGame Setting
     /// </summary>
-    public void SetHealthUI() {
+    public void SetHealthUI(int h) {
+        currentHealth = h;
         if(currentHealth<=0)
             healthSlider.value = 0;
         else
@@ -225,5 +240,7 @@ public class InputManager : MonoBehaviour {
         KeyList.Add(KeyCode.LeftControl);
         //Creep
         KeyList.Add(KeyCode.Z);
+        KeyList.Add(KeyCode.Alpha1);
+        KeyList.Add(KeyCode.Alpha2);
     }
 }

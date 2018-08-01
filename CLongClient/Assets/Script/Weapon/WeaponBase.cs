@@ -13,11 +13,12 @@ public class WeaponBase : MonoBehaviour
     protected int shellSpeed; // 총알이 날아가는 속도
     public int ShootPeriod; // 연사속도
     protected int reboundIntensity; // 반동세기
-
-    Material material;
+    //Material material;
     //Shell
     protected string shellType; //사용하는 총알의 종류
     protected GameObject shellPrefab; // 총알 오브젝트 PREFAB
+    //Equip
+    public int equipWeaponNum; //무기별 장착 번호
     
     protected virtual void Start()
     {
@@ -25,10 +26,10 @@ public class WeaponBase : MonoBehaviour
     /// <summary>
     /// Shoot
     /// </summary>
-    public virtual void Shoot(int num, Vector3 pos, Vector3 rot)
+    public virtual void Shoot(int clientNum, Vector3 pos, Vector3 rot)
     {
         //연사속도관련
-        ShellIns(shellType, num, pos, rot);
+        ShellIns(shellType, clientNum, pos, rot);
     }
 
     /// <summary>

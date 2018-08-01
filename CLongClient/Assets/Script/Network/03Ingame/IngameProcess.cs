@@ -26,7 +26,7 @@ public class IngameProcess : MonoBehaviour
         {
             case "ClientIns":
                 var clientInsData = JsonConvert.DeserializeObject<ClientIns>(p.Data);
-                InsClient(clientInsData.ClientNum, ToUnityVectorChange(clientInsData.StartPos), clientInsData.Client);
+                InsClient(clientInsData.ClientNum, ToUnityVectorChange(clientInsData.StartPos), clientInsData.Client, clientInsData.WeaponArray);
                 break;
             case "ClientMoveSync":
                 var posData = JsonConvert.DeserializeObject<ClientMoveSync>(p.Data);
@@ -34,19 +34,19 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "KeyDown":
                 var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
-                KeyDownOtherClient(keyDownData.ClientNum, keyDownData.DownKey);
+                KeyDownClient(keyDownData.ClientNum, keyDownData.DownKey);
                 break;
             case "KeyUP":
                 var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
-                KeyUpOtherClient(keyUpData.ClientNum, keyUpData.UpKey);
+                KeyUpClient(keyUpData.ClientNum, keyUpData.UpKey);
                 break;
             case "InsShell":
                 var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
                 playerList[shellData.ClientNum].GetComponent<Player>().Shoot(shellData.ClientNum, ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
                 break;
-            case "TakeDamage":
-                var damageData = JsonConvert.DeserializeObject<TakeDamage>(p.Data);
-                playerList[damageData.ClientNum].GetComponent<Player>().TakeDamage(damageData.Damage);
+            case "SyncHealth":
+                var healthData = JsonConvert.DeserializeObject<SyncHealth>(p.Data);
+                inputSc.SetHealthUI(healthData.CurrentHealth);
                 break;
             case "Death":
                 var deathData = JsonConvert.DeserializeObject<Death>(p.Data);
@@ -86,7 +86,7 @@ public class IngameProcess : MonoBehaviour
     /// </summary>
     /// <param name="num"></param>
     /// <param name="key"></param>
-    public void KeyDownOtherClient(int num, string key)
+    public void KeyDownClient(int num, string key)
     {
         switch (key)
         {
@@ -102,6 +102,22 @@ public class IngameProcess : MonoBehaviour
             case "D":
                 playerList[num].GetComponent<Player>().keyState[(int)Key.D] = true;
                 break;
+            case "LeftShift":
+                playerList[num].GetComponent<Player>().moveSpeed = 10f;
+                break;
+            case "LeftControl":
+                playerList[num].GetComponent<Player>().moveSpeed = 3f;
+                break;
+            case "Z":
+                playerList[num].GetComponent<Player>().moveSpeed = 1f;
+                break;
+            case "Alpha1":
+                playerList[num].GetComponent<Player>().weaponManagerSc.WeaponChange(1);
+                break;
+            case "Alpha2":
+                playerList[num].GetComponent<Player>().weaponManagerSc.WeaponChange(2);
+                break;
+
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
                 break;
@@ -113,7 +129,7 @@ public class IngameProcess : MonoBehaviour
     /// </summary>
     /// <param name="num"></param>
     /// <param name="key"></param>
-    public void KeyUpOtherClient(int num, string key)
+    public void KeyUpClient(int num, string key)
     {
         switch (key)
         {
@@ -129,6 +145,16 @@ public class IngameProcess : MonoBehaviour
             case "D":
                 playerList[num].GetComponent<Player>().keyState[(int)Key.D] = false;
                 break;
+            case "LeftShift":
+                playerList[num].GetComponent<Player>().moveSpeed = 5f;
+                break;
+            case "LeftControl":
+                playerList[num].GetComponent<Player>().moveSpeed = 5f;
+                break;
+            case "Z":
+                playerList[num].GetComponent<Player>().moveSpeed = 5f;
+                break;
+
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
                 break;
@@ -138,7 +164,7 @@ public class IngameProcess : MonoBehaviour
     /// <summary>
     /// Client 생성
     /// </summary>
-    public void InsClient(int num, Vector3 pos, bool clientCheck)
+    public void InsClient(int num, Vector3 pos, bool clientCheck, string[] w)
     {
         //배정되는 클라이언트 num에 prefab생성
         playerList[num] = Instantiate(playerPrefab);
@@ -149,7 +175,6 @@ public class IngameProcess : MonoBehaviour
         {
             clientPlayerNum = num;
             //플레이어 오브젝트 cam
-            camManagerSc = GameObject.Find("Main Camera").GetComponent<CameraManager>();
             camManagerSc.playerObject = playerList[clientPlayerNum].transform;
             camManagerSc.playerUpperBody = playerList[clientPlayerNum].transform.Find("PlayerUpperBody");
             //Player Sc;
@@ -162,6 +187,8 @@ public class IngameProcess : MonoBehaviour
         {
             playerList[num].GetComponent<Player>().clientNum = num;
         }
+        playerList[num].GetComponent<Player>().weaponManagerSc.equipWeaponArray = w;
+
     }
 
     #region ChangeVector

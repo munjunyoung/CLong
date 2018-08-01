@@ -17,8 +17,7 @@ namespace CLongServer.Ingame
     {
         public bool gameStartState = false;
         public int gameRoomNumber = 0;
-
-        //public List<ClientTCP> clientList = new List<ClientTCP>();
+        
         List<Vector3> StartPosList = new List<Vector3>();
         public Dictionary<int, ClientTCP> playerDic = new Dictionary<int, ClientTCP>();
 
@@ -51,23 +50,29 @@ namespace CLongServer.Ingame
             c.numberInGame = playerDic.Count();
             c.currentPos = StartPosList[c.numberInGame];
             c.ingame = true;
+            //Health Set
             c.currentHealth = 100;
+            //Weapon Set
+            c.weaponEqupArray[0] = new AK();
+            c.weaponEqupArray[1] = new M4();
+            string[] sendWeaponArray = { c.weaponEqupArray[0].weaponName, c.weaponEqupArray[1].weaponName };
+            //Handler Set
             c.ProcessHandler += IngameDataRequestTCP;
             udpServer.ProcessHandler += IngameDataRequestUDP;
+            //Dic add
             playerDic.Add(c.numberInGame, c);
             //게임시작 통보
             playerDic[c.numberInGame].Send(new StartGameReq());
             //해당 클라이언트 생성 통보
-
-            playerDic[c.numberInGame].Send(new ClientIns(c.numberInGame, c.currentPos, true));
+            playerDic[c.numberInGame].Send(new ClientIns(c.numberInGame, c.currentPos, true, sendWeaponArray));
             //다른 클라이언트들에게 현재 생성하는 클라이언트 생성 통보
             //현재 생성되는 클라이언트에선 이미 존재하고있는 클라이언트들의 존재 생성
             foreach (var cl in playerDic)
             {
                 if (c.numberInGame != cl.Key)
                 {
-                    cl.Value.Send(new ClientIns(c.numberInGame, c.currentPos, false));
-                    c.Send(new ClientIns(cl.Value.numberInGame, cl.Value.currentPos, false));
+                    cl.Value.Send(new ClientIns(c.numberInGame, c.currentPos, false, sendWeaponArray));
+                    c.Send(new ClientIns(cl.Value.numberInGame, cl.Value.currentPos, false, sendWeaponArray));
                 }
             }
             Console.WriteLine("[GAME ROOM] People Count  : [" + playerDic.Count + "]");
@@ -144,13 +149,18 @@ namespace CLongServer.Ingame
                     if(c.currentHealth<=0)
                     {
                         c.currentHealth = 0;
+                        c.Send(new SyncHealth(c.numberInGame, c.currentHealth));
                         foreach (var cl in playerDic)
+                        {
+                            //TakeDamage등 맞았을때 이펙트 생성을위한 전송이 필요함
                             cl.Value.Send(new Death(c.numberInGame));
+                        }
                     }
                     else
                     {
-                        foreach(var cl in playerDic)
-                            cl.Value.Send(p);
+                        c.Send(new SyncHealth(c.numberInGame, c.currentHealth));
+                        //foreach (var cl in playerDic)
+                            //TakeDamage등 맞았을때 이펙트 생성을위한 전송이 필요함
                     }
                     break;
                 case "ExitReq":
@@ -215,12 +225,20 @@ namespace CLongServer.Ingame
                     //기기 이벤트
                     c.speed = 1f;
                     break;
+                    //무기 스왑
+                case "Alpha1":
+                    if(c.currentEquipWeaponNum!=1)
+                        c.currentEquipWeaponNum = 1;
+                    break;
+                case "Alpha2":
+                    if(c.currentEquipWeaponNum!=2)
+                        c.currentEquipWeaponNum = 2;
+                    break;
                 default:
                     Console.Write("[INGAME PROCESS] Not Saved DownKey :" + key);
                     break;
             }
         }
-
 
         /// <summary>
         /// Client Move Thread callback func
@@ -368,6 +386,7 @@ namespace CLongServer.Ingame
         }
 
         #endregion
+        
 
         /// <summary>
         /// change increase Zpos value, according to Direction
@@ -396,11 +415,14 @@ namespace CLongServer.Ingame
             return returnVector;
         }
 
+        /// <summary>
+        /// Pos Sync
+        /// </summary>
         private void ClientPosSync()
         {
 
         }
-
+        
         /// <summary>
         /// Start Pos 
         /// </summary>

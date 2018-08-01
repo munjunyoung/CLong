@@ -15,24 +15,13 @@ public class Player : MonoBehaviour
 
     public bool[] keyState = new bool[20];
     //Move
-    protected float moveSpeed = 5f;
-    //Weapon
-    private InputManager inputSc;
-
+    public float moveSpeed = 5f;
 
     private void Awake()
     {
         AddScript();
 
     }
-
-    private void Start()
-    {
-        if (clientCheck)
-            inputSc = GameObject.Find("AllSceneManager").GetComponent<InputManager>();
-    }
-
-
     private void FixedUpdate()
     {
         Move();
@@ -59,24 +48,6 @@ public class Player : MonoBehaviour
         {
             this.transform.Translate(1f * Time.deltaTime * moveSpeed, 0, 0);
         }
-
-        //달리기
-        if (keyState[(int)Key.LeftShift])
-        {
-            moveSpeed = 10f;
-        }
-        else if (keyState[(int)Key.LeftControl])
-        {
-            moveSpeed = 3f;
-        }
-        else if (keyState[(int)Key.Z])
-        {
-            moveSpeed = 1f;
-        }
-        else
-        {
-            moveSpeed = 5f;
-        }
     }
 
     /// <summary>
@@ -88,20 +59,14 @@ public class Player : MonoBehaviour
     {
         weaponManagerSc.Shoot(num, pos, rot);
     }
-
+    
     /// <summary>
-    /// When player Take Damage 
+    /// 맞은위치 pos을 받아와 데미지 이펙트 처리
     /// </summary>
-    public void TakeDamage(int damage)
+    /// <param name="pos"></param>
+    public void TakeDamage(Vector3 pos)
     {
-        //피가 나오거나 이펙트가 생기는 부분또한 다른 플레이어들 처리해야하므로..? 
-        if (clientCheck)
-        {
-            inputSc.currentHealth += -damage;
-            inputSc.SetHealthUI();
-        }
-        
-        Debug.Log("Takedamage함수에서 아팡");
+
     }
 
     /// <summary>
@@ -109,11 +74,6 @@ public class Player : MonoBehaviour
     /// </summary>
     public void Death()
     {
-        if (clientCheck)
-        {
-            inputSc.currentHealth = 0;
-            inputSc.SetHealthUI();
-        }
         //모두 정지
         Debug.Log("저 터져욧");
         Destroy(this.gameObject);
@@ -129,10 +89,9 @@ public class Player : MonoBehaviour
                 if (clientCheck)
                 {
                     //TakeDamage(other.GetComponent<ShellScript>().damage);
-                    
                     NetworkManagerTCP.SendTCP(new TakeDamage(clientNum, other.GetComponent<ShellScript>().damage));
                 }
-                Debug.Log("Trigger에서 아팡");
+                Debug.Log("Trigger에서 아팡 데미지 : " + other.GetComponent<ShellScript>().damage);
                 Debug.Log("GameObject : " + this.gameObject.ToString());
                 Destroy(other.gameObject);
             }
