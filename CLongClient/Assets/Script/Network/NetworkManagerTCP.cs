@@ -38,7 +38,6 @@ namespace tcpNet
             {
                 Debug.Log("[TCP] Socket : ConeectToServer E : " + e);
             }
-            
         }
 
         /// <summary>
@@ -53,8 +52,6 @@ namespace tcpNet
           
             BeginReceiveTCP();
         }
-
-        
 
         #region Socket
         /// <summary>

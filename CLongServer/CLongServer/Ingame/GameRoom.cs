@@ -28,7 +28,7 @@ namespace CLongServer.Ingame
 
         //UDP
         public UdpNetwork udpServer;
-
+        
         #region GameRoom
         /// <summary>
         /// Constructor
@@ -274,14 +274,14 @@ namespace CLongServer.Ingame
         private void MoveForward(ClientTCP c)
         {
             double time = Math.Truncate(c.moveTimer[(int)Key.W].Elapsed.TotalMilliseconds);
-            if (time.Equals(updatePeriod * 1000))
+            //if (time.Equals(updatePeriod * 1000))
+            if (time>=(updatePeriod * 1000))
             {
                 c.currentPos += (ChangeZValue(c, updatePeriod * c.speed));
-                c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
+              
                 c.moveTimer[(int)Key.W].Restart();
-                Console.WriteLine("Client Current Pos : " + c.currentPos);
+               // Console.WriteLine("W Client Current Pos : " + c.currentPos);
             }
-
         }
 
         /// <summary>
@@ -291,12 +291,12 @@ namespace CLongServer.Ingame
         private void MoveBack(ClientTCP c)
         {
             double time = Math.Truncate(c.moveTimer[(int)Key.S].Elapsed.TotalMilliseconds);
-            if (time.Equals(updatePeriod * 1000))
-            {
+            if (time>=(updatePeriod * 1000))
+            { 
                 c.currentPos -= (ChangeZValue(c, updatePeriod * c.speed));
-                c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
+                //c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
                 c.moveTimer[(int)Key.S].Restart();
-                Console.WriteLine("Client Current Pos : " + c.currentPos);
+               // Console.WriteLine("S Client Current Pos : " + c.currentPos);
             }
         }
 
@@ -307,12 +307,12 @@ namespace CLongServer.Ingame
         private void MoveLeft(ClientTCP c)
         {
             double time = Math.Truncate(c.moveTimer[(int)Key.A].Elapsed.TotalMilliseconds);
-            if (time.Equals(updatePeriod * 1000))
-            {
+             if (time>=(updatePeriod * 1000))
+             {
                 c.currentPos -= ChangeXValue(c, updatePeriod * c.speed);
-                c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
+                //c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
                 c.moveTimer[(int)Key.A].Restart();
-                Console.WriteLine("Client Current Pos : " + c.currentPos);
+               // Console.WriteLine("A Client Current Pos : " + c.currentPos);
             }
         }
 
@@ -323,12 +323,12 @@ namespace CLongServer.Ingame
         private void MoveRight(ClientTCP c)
         {
             double time = Math.Truncate(c.moveTimer[(int)Key.D].Elapsed.TotalMilliseconds);
-            if (time.Equals(updatePeriod * 1000))
+            if (time>=(updatePeriod * 1000))
             {
                 c.currentPos += ChangeXValue(c, updatePeriod * c.speed);
-                c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
+                //c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
                 c.moveTimer[(int)Key.D].Restart();
-                Console.WriteLine("Client Current Pos : " + c.currentPos);
+               // Console.WriteLine("D Client Current Pos : " + c.currentPos);
             }
         }
 
@@ -343,19 +343,19 @@ namespace CLongServer.Ingame
             {
                 case "W":
                     StopForwardStopWatch(c, Key.W);
-                    c.moveMentsKey[0] = false;
+                    c.moveMentsKey[(int)Key.W] = false;
                     break;
                 case "S":
                     StopForwardStopWatch(c, Key.S);
-                    c.moveMentsKey[1] = false;
+                    c.moveMentsKey[(int)Key.S] = false;
                     break;
                 case "A":
                     StopForwardStopWatch(c, Key.A);
-                    c.moveMentsKey[2] = false;
+                    c.moveMentsKey[(int)Key.A] = false;
                     break;
                 case "D":
                     StopForwardStopWatch(c, Key.D);
-                    c.moveMentsKey[3] = false;
+                    c.moveMentsKey[(int)Key.D] = false;
                     break;
                 case "LeftShift":
                     //뛰기 이벤트
@@ -381,6 +381,7 @@ namespace CLongServer.Ingame
         /// </summary>
         private void StopForwardStopWatch(ClientTCP c, Key key)
         {
+            Console.WriteLine("Stop Key : [" + (int)key + "] " +key);
             c.moveTimer[(int)key].Reset();
             c.moveTimer[(int)key].Stop();
         }
@@ -396,8 +397,8 @@ namespace CLongServer.Ingame
         /// <returns></returns>
         private Vector3 ChangeZValue(ClientTCP c, float value)
         {
-            var x = (float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 5);
-            var z = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 5);
+            var x = (float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 3);
+            var z = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 3);
             Vector3 returnVector = new Vector3(value * x, 0, value * z);
             return returnVector;
         }
@@ -409,8 +410,8 @@ namespace CLongServer.Ingame
         /// <returns></returns>
         private Vector3 ChangeXValue(ClientTCP c, float value)
         {
-            var x = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 5);
-            var z = -(float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 5);
+            var x = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 3);
+            var z = -(float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 3);
             Vector3 returnVector = new Vector3(value * x, 0, value * z);
             return returnVector;
         }

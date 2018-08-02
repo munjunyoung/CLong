@@ -22,7 +22,4 @@ namespace CLongLib
             Rot = rot;
         }
     }
-
-   
-
 }

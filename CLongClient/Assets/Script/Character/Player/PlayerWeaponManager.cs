@@ -43,17 +43,17 @@ public class PlayerWeaponManager : MonoBehaviour
     private void InsWeapon(string name)
     {
         var weaponPrefab = Instantiate(Resources.Load("Prefab/Weapon/AR/" + name)) as GameObject;
-      
+        var prefabWeaponSc = weaponPrefab.GetComponent<WeaponBase>();
         //WeaponBase
-        weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum = weaponDic.Count();
-        weaponDic.Add(weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum, weaponPrefab.GetComponent<WeaponBase>());
-        if (weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum == 0)
-            weaponDic[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum].transform.parent = equipPos[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
-        else if (weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum == 1)
-            weaponDic[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum].transform.parent = equipPos[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
+        prefabWeaponSc.equipWeaponNum = weaponDic.Count();
+        weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
+        if (prefabWeaponSc.equipWeaponNum == 0)
+            weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPos[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
+        else if (prefabWeaponSc.equipWeaponNum == 1)
+            weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPos[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
         
-        weaponDic[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum].transform.localPosition = Vector3.zero;
-        weaponDic[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+        weaponDic[prefabWeaponSc.equipWeaponNum].transform.localPosition = Vector3.zero;
+        weaponDic[prefabWeaponSc.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
         //FireTransform 
     }
 

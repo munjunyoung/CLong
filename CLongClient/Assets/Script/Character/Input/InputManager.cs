@@ -5,7 +5,8 @@ using CLongLib;
 using tcpNet;
 using UnityEngine.UI;
 
-public class InputManager : MonoBehaviour {
+public class InputManager : MonoBehaviour
+{
 
     //Client
     public Player myPlayer;
@@ -41,7 +42,7 @@ public class InputManager : MonoBehaviour {
             Tunring();
         }
     }
-    
+
     private void Update()
     {
         if (myPlayer != null)
@@ -102,35 +103,41 @@ public class InputManager : MonoBehaviour {
         //Run
         if (Input.GetKeyDown(KeyList[(int)Key.LeftShift]))
         {
-            NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.LeftShift].ToString()));
+            if (myPlayer.currentActionState == (int)(ActionState.None))
+                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.LeftShift].ToString()));
             //myPlayer.keyState[(int)Key.LeftShift] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftShift]))
         {
-            NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.LeftShift].ToString()));
+            if (myPlayer.currentActionState == (int)(ActionState.Run))
+                NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.LeftShift].ToString()));
             //myPlayer.keyState[(int)Key.LeftShift] = false;
         }
 
         //Seat
         if (Input.GetKeyDown(KeyList[(int)Key.LeftControl]))
         {
-            NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.LeftControl].ToString()));
+            if (myPlayer.currentActionState == (int)(ActionState.None))
+                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.LeftControl].ToString()));
             //myPlayer.keyState[(int)Key.LeftControl] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftControl]))
         {
-            NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.LeftControl].ToString()));
+            if (myPlayer.currentActionState == (int)(ActionState.Seat))
+                NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.LeftControl].ToString()));
             //myPlayer.keyState[(int)Key.LeftControl] = false;
         }
         //Creep
         if (Input.GetKeyDown(KeyList[(int)Key.Z]))
         {
-            NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
+            if (myPlayer.currentActionState == (int)(ActionState.None))
+                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
             //myPlayer.keyState[(int)Key.Z] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.Z]))
         {
-            NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
+            if (myPlayer.currentActionState == (int)(ActionState.Lie))
+                NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
             //myPlayer.keyState[(int)Key.Z] = false;
         }
 
@@ -146,14 +153,14 @@ public class InputManager : MonoBehaviour {
         }
 
         //WeaponSwap
-        
+
         if (Input.GetKeyDown(KeyList[(int)Key.Alpha1]))
         {
             //이미 장착한 번호와 같은경우 전송 안되도록
             if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 0)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha1].ToString()));
         }
-        else if (Input.GetKeyDown(KeyList[(int)Key.Alpha2])) 
+        else if (Input.GetKeyDown(KeyList[(int)Key.Alpha2]))
         {
             if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 1)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
@@ -216,9 +223,10 @@ public class InputManager : MonoBehaviour {
     /// set player HealthUI 
     /// when takeDamge, and startGame Setting
     /// </summary>
-    public void SetHealthUI(int h) {
+    public void SetHealthUI(int h)
+    {
         currentHealth = h;
-        if(currentHealth<=0)
+        if (currentHealth <= 0)
             healthSlider.value = 0;
         else
             healthSlider.value = currentHealth;

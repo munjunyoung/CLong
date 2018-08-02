@@ -17,6 +17,12 @@ public class Player : MonoBehaviour
     //Move
     public float moveSpeed = 5f;
 
+    //Action State
+    public int currentActionState;
+
+    //testTimer;
+    public float timer;
+
     private void Awake()
     {
         AddScript();
@@ -79,6 +85,10 @@ public class Player : MonoBehaviour
         Destroy(this.gameObject);
     }
 
+    /// <summary>
+    /// OnTrigger
+    /// </summary>
+    /// <param name="other"></param>
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Shell")

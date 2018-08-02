@@ -9,7 +9,7 @@ public class IngameProcess : MonoBehaviour
     //playerIns Prefab
     public GameObject playerPrefab;
     //Player check
-    public GameObject[] playerList = new GameObject[100];
+    public Player[] playerList = new Player[100];
     public int clientPlayerNum = -1;
     //Player InputManager reference
     public InputManager inputSc;
@@ -42,7 +42,7 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "InsShell":
                 var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
-                playerList[shellData.ClientNum].GetComponent<Player>().Shoot(shellData.ClientNum, ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
+                playerList[shellData.ClientNum].Shoot(shellData.ClientNum, ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
                 break;
             case "SyncHealth":
                 var healthData = JsonConvert.DeserializeObject<SyncHealth>(p.Data);
@@ -50,7 +50,7 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "Death":
                 var deathData = JsonConvert.DeserializeObject<Death>(p.Data);
-                playerList[deathData.ClientNum].GetComponent<Player>().Death();
+                playerList[deathData.ClientNum].Death();
                 break;
             default:
                 Debug.Log("[Ingame Proces] TCP : Mismatching Message");
@@ -91,31 +91,34 @@ public class IngameProcess : MonoBehaviour
         switch (key)
         {
             case "W":
-                playerList[num].GetComponent<Player>().keyState[(int)Key.W] = true;
+                playerList[num].keyState[(int)Key.W] = true;
                 break;
             case "S":
-                playerList[num].GetComponent<Player>().keyState[(int)Key.S] = true;
+                playerList[num].keyState[(int)Key.S] = true;
                 break;
             case "A":
-                playerList[num].GetComponent<Player>().keyState[(int)Key.A] = true;
+                playerList[num].keyState[(int)Key.A] = true;
                 break;
             case "D":
-                playerList[num].GetComponent<Player>().keyState[(int)Key.D] = true;
+                playerList[num].keyState[(int)Key.D] = true;
                 break;
             case "LeftShift":
-                playerList[num].GetComponent<Player>().moveSpeed = 10f;
+                playerList[num].currentActionState = (int)ActionState.Run;
+                playerList[num].moveSpeed = 10f;
                 break;
             case "LeftControl":
-                playerList[num].GetComponent<Player>().moveSpeed = 3f;
+                playerList[num].currentActionState = (int)ActionState.Seat;
+                playerList[num].moveSpeed = 3f;
                 break;
             case "Z":
-                playerList[num].GetComponent<Player>().moveSpeed = 1f;
+                playerList[num].currentActionState = (int)ActionState.Lie;
+                playerList[num].moveSpeed = 1f;
                 break;
             case "Alpha1":
-                playerList[num].GetComponent<Player>().weaponManagerSc.WeaponChange(1);
+                playerList[num].weaponManagerSc.WeaponChange(1);
                 break;
             case "Alpha2":
-                playerList[num].GetComponent<Player>().weaponManagerSc.WeaponChange(2);
+                playerList[num].weaponManagerSc.WeaponChange(2);
                 break;
 
             default:
@@ -134,27 +137,29 @@ public class IngameProcess : MonoBehaviour
         switch (key)
         {
             case "W":
-                playerList[num].GetComponent<Player>().keyState[(int)Key.W] = false;
+                playerList[num].keyState[(int)Key.W] = false;
                 break;
             case "S":
-                playerList[num].GetComponent<Player>().keyState[(int)Key.S] = false;
+                playerList[num].keyState[(int)Key.S] = false;
                 break;
             case "A":
-                playerList[num].GetComponent<Player>().keyState[(int)Key.A] = false;
+                playerList[num].keyState[(int)Key.A] = false;
                 break;
             case "D":
-                playerList[num].GetComponent<Player>().keyState[(int)Key.D] = false;
+                playerList[num].keyState[(int)Key.D] = false;
                 break;
             case "LeftShift":
-                playerList[num].GetComponent<Player>().moveSpeed = 5f;
+                playerList[num].currentActionState = (int)ActionState.None;
+                playerList[num].moveSpeed = 5f;
                 break;
             case "LeftControl":
-                playerList[num].GetComponent<Player>().moveSpeed = 5f;
+                playerList[num].currentActionState = (int)ActionState.None;
+                playerList[num].moveSpeed = 5f;
                 break;
             case "Z":
-                playerList[num].GetComponent<Player>().moveSpeed = 5f;
+                playerList[num].currentActionState = (int)ActionState.None;
+                playerList[num].moveSpeed = 5f;
                 break;
-
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
                 break;
@@ -167,9 +172,10 @@ public class IngameProcess : MonoBehaviour
     public void InsClient(int num, Vector3 pos, bool clientCheck, string[] w)
     {
         //배정되는 클라이언트 num에 prefab생성
-        playerList[num] = Instantiate(playerPrefab);
-        playerList[num].transform.position = pos;
-        playerList[num].AddComponent<Player>().clientNum = num;
+        var tmpPrefab = Instantiate(playerPrefab);
+        tmpPrefab.AddComponent<Player>().clientNum = num;
+        tmpPrefab.transform.position = pos;
+        playerList[num] = tmpPrefab.GetComponent<Player>();
         //클라이언트 일 경우
         if (clientCheck)
         {
@@ -178,16 +184,16 @@ public class IngameProcess : MonoBehaviour
             camManagerSc.playerObject = playerList[clientPlayerNum].transform;
             camManagerSc.playerUpperBody = playerList[clientPlayerNum].transform.Find("PlayerUpperBody");
             //Player Sc;
-            inputSc.myPlayer = playerList[clientPlayerNum].GetComponent<Player>();
-            playerList[clientPlayerNum].GetComponent<Player>().clientCheck = true;
+            inputSc.myPlayer = playerList[clientPlayerNum];
+            playerList[clientPlayerNum].clientCheck = true;
             inputSc.playerUpperBody = inputSc.myPlayer.transform.Find("PlayerUpperBody").gameObject;
         }
         //다른 클라이언트 일 경우
         else
         {
-            playerList[num].GetComponent<Player>().clientNum = num;
+            playerList[num].clientNum = num;
         }
-        playerList[num].GetComponent<Player>().weaponManagerSc.equipWeaponArray = w;
+        playerList[num].weaponManagerSc.equipWeaponArray = w;
 
     }
 

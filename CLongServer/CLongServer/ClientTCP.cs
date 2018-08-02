@@ -48,7 +48,9 @@ namespace CLongServer
 
         //Health
         public int currentHealth = 100;
-
+        //Action State
+        public int actionState;
+        
         /// <summary>
         /// Constructor .. Stream Save;
         /// </summary>

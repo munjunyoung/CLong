@@ -91,7 +91,7 @@ public class NetworkProcess : MonoBehaviour {
             {
                 RequestDataUDP(NetworkManagerUDP.receivedPacketUDP.Dequeue());
             }
-            yield return new WaitForSeconds(.01f);    
+            yield return null;   
         }
     }
     

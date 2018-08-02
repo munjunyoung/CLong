@@ -20,6 +20,9 @@ public class WeaponBase : MonoBehaviour
     //Equip
     public int equipWeaponNum; //무기별 장착 번호
     
+    /// <summary>
+    /// 상속
+    /// </summary>
     protected virtual void Start()
     {
     }
@@ -40,10 +43,11 @@ public class WeaponBase : MonoBehaviour
     {
         shellPrefab = Instantiate(Resources.Load("Prefab/Weapon/Shell/" + st)) as GameObject;
         //var weaponFireTransform = transform.Find("FirePosition").transform;
-        shellPrefab.transform.localPosition = pos;
-        shellPrefab.transform.localEulerAngles = rot;
-        shellPrefab.GetComponent<ShellScript>().shellSpeed = shellSpeed;
-        shellPrefab.GetComponent<ShellScript>().clientNum = num;
-        shellPrefab.GetComponent<ShellScript>().damage = damage;
+        var tmpShellSc = shellPrefab.GetComponent<ShellScript>();
+        tmpShellSc.transform.localPosition = pos;
+        tmpShellSc.transform.localEulerAngles = rot;
+        tmpShellSc.shellSpeed = shellSpeed;
+        tmpShellSc.clientNum = num;
+        tmpShellSc.damage = damage;
     }
 }
