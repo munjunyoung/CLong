@@ -16,25 +16,26 @@ public class Player : MonoBehaviour
     public bool[] keyState = new bool[20];
     //Move
     public float moveSpeed = 5f;
+    //
+    public Collider mapCollider;
 
     //Action State
     public int currentActionState;
 
-    //testTimer;
-    public float timer;
-
     private void Awake()
     {
         AddScript();
-
+        mapCollider = GameObject.Find("Map").GetComponent<Collider>();
     }
     private void FixedUpdate()
     {
         Move();
+        Jump();
+        Fall();
     }
 
     /// <summary>
-    /// EnemyMove
+    /// Player Move
     /// </summary>
     void Move()
     {
@@ -53,6 +54,25 @@ public class Player : MonoBehaviour
         if (keyState[(int)Key.D])
         {
             this.transform.Translate(1f * Time.deltaTime * moveSpeed, 0, 0);
+        }
+    }
+
+    /// <summary>
+    /// Jump
+    /// </summary>
+    void Jump()
+    {
+        if(keyState[(int)Key.Space])
+        {
+            this.transform.Translate(0, 5f * Time.deltaTime, 0f);
+        }
+    }
+
+    void Fall()
+    {
+       if(!IsGrounded())
+        {
+            this.transform.Translate(0, -3* Time.deltaTime, 0f);
         }
     }
 
@@ -114,5 +134,11 @@ public class Player : MonoBehaviour
     private void AddScript()
     {
         weaponManagerSc = this.gameObject.AddComponent<PlayerWeaponManager>();
+    }
+
+    public bool IsGrounded()
+    {
+        Debug.Log(mapCollider.bounds.extents.y);
+        return Physics.Raycast(transform.position, Vector3.down, mapCollider.bounds.extents.y+ 0.5f);
     }
 }

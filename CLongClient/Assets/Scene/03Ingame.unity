@@ -665,7 +665,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1992748904974308, guid: 21fc7141cbe31214dac6701d3f44608a, type: 2}
       propertyPath: m_TagString
-      value: Map
+      value: Ground
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 21fc7141cbe31214dac6701d3f44608a, type: 2}

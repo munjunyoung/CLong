@@ -47,7 +47,6 @@ public class NetworkProcess : MonoBehaviour {
                     
                     break;
                 case "StartGameReq":
-                    var numData = JsonConvert.DeserializeObject<StartGameReq>(p.Data);
                     //서버에서 게임룸생성후 list에 client를 추가했을시 보내는 패킷
                     Ingame = true;
                     ProcessHandlerTCP += GameObject.Find("IngameNetworkManager").GetComponent<IngameProcess>().IngameDataRequestTCP;

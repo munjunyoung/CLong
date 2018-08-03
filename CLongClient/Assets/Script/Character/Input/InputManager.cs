@@ -153,7 +153,6 @@ public class InputManager : MonoBehaviour
         }
 
         //WeaponSwap
-
         if (Input.GetKeyDown(KeyList[(int)Key.Alpha1]))
         {
             //이미 장착한 번호와 같은경우 전송 안되도록
@@ -164,6 +163,16 @@ public class InputManager : MonoBehaviour
         {
             if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 1)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
+        }
+
+        //Jump
+        if(Input.GetKeyDown(KeyList[(int)Key.Space]))
+        {
+            if(!myPlayer.keyState[(int)Key.Space]&&myPlayer.IsGrounded())
+                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
+            //myPlayer.transform.Translate
+            //rigidbody.movePosition;
+            //rigidbody.AddForce;
         }
     }
 
@@ -203,21 +212,6 @@ public class InputManager : MonoBehaviour
         }
     }
     #endregion
-    /*
-    #region Shooting
-    /// 무기 상태에 따라서 shooting의 종류가 바뀌어야함
-    /// </summary>
-    /// <param name="Speed"></param>
-    void Shooting(int num)
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (myPlayer.weaponManagerSc.weaponSc != null)
-                myPlayer.weaponManagerSc.weaponSc[num].Shoot(myPlayer.weaponManagerSc.fireTransform);
-        }
-    }
-
-    #endregion*/
 
     /// <summary>
     /// set player HealthUI 
@@ -246,9 +240,14 @@ public class InputManager : MonoBehaviour
         KeyList.Add(KeyCode.LeftShift);
         //Seat
         KeyList.Add(KeyCode.LeftControl);
-        //Creep
+        //
         KeyList.Add(KeyCode.Z);
+        //Swap
         KeyList.Add(KeyCode.Alpha1);
         KeyList.Add(KeyCode.Alpha2);
+        //Jump
+        KeyList.Add(KeyCode.Space);
     }
+
+  
 }

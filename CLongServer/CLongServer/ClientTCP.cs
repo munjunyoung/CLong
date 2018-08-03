@@ -48,8 +48,19 @@ namespace CLongServer
 
         //Health
         public int currentHealth = 100;
-        //Action State
+        
+        //Action State 0 = None , 1 = Run , 2 = Seat , 3 = Lie , 4 = Fall
         public int actionState;
+
+        //Jump
+        public Stopwatch JumpTimer = new Stopwatch();
+        public Stopwatch JumpPeriodTimer = new Stopwatch();
+        public bool jumpState = false;
+        public bool isGrounded = false;
+
+        //Fall
+        public Stopwatch FallTimer = new Stopwatch();
+        
         
         /// <summary>
         /// Constructor .. Stream Save;

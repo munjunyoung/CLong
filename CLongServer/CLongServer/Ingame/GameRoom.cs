@@ -186,6 +186,7 @@ namespace CLongServer.Ingame
                     break;
             }
         }
+
         #region Move thread Stopwatch
         /// <summary>
         /// key down func
@@ -212,6 +213,11 @@ namespace CLongServer.Ingame
                 case "D":
                     c.moveTimer[(int)Key.D].Start();
                     c.moveMentsKey[(int)Key.D] = true;
+                    break;
+                case "Space":
+                    c.JumpTimer.Start();
+                    c.JumpPeriodTimer.Start();
+                    c.jumpState = true;
                     break;
                 case "LeftShift":
                     //뛰기 이벤트
@@ -267,6 +273,10 @@ namespace CLongServer.Ingame
                     Move(c, Key.D, true, true);
                     //MoveRight(c);
                 }
+                if(c.jumpState)
+                {
+                    Jump(c);
+                }
             }
         }
 
@@ -276,14 +286,56 @@ namespace CLongServer.Ingame
         /// <param name="c"></param>
         private void Move(ClientTCP c, Key k, bool xAxis, bool positive)
         {
-            double time = Math.Truncate(c.moveTimer[(int)k].Elapsed.TotalMilliseconds);
-            //if (time.Equals(updatePeriod * 1000))
+            double time = c.moveTimer[(int)k].ElapsedMilliseconds;
             if (time >= (updatePeriod * 1000))
             {
                 c.currentPos += (ChangeAngleValue(c, updatePeriod * c.speed, xAxis, positive));
                 c.moveTimer[(int)k].Restart();
-                 Console.WriteLine("Client Current Pos : " + c.currentPos);
+                Console.WriteLine("Client Current Pos : " + c.currentPos);
             }
+        }
+        
+        /// <summary>
+        /// Jump Change
+        /// </summary>
+        /// <param name="c"></param>
+        private void Jump(ClientTCP c)
+        {
+            double time = c.JumpPeriodTimer.ElapsedMilliseconds;
+            //1초후엔 줄어들도록
+            //Timer를 두개쓴이유는 totalmilisecond가 소수점단위로 찍히고 랜덤으로 찍힘으로 mod = 0 주기로 하게되면 주기가 정확하게 되지않는다
+            if (c.JumpTimer.Elapsed.TotalMilliseconds<= 200)
+            {
+                if (time >= (updatePeriod * 1000))
+                {
+                    c.currentPos += new Vector3(0f, updatePeriod*5, 0f);
+                    c.JumpPeriodTimer.Restart();
+                }
+                Console.WriteLine("Client Current Pos : " + c.currentPos);
+            }/*
+            else if(c.JumpTimer.Elapsed.TotalMilliseconds>500&&c.JumpTimer.Elapsed.TotalMilliseconds<=1000)
+            {
+                if(time>=(updatePeriod*1000))
+                {
+                    c.currentPos -= new Vector3(0f, updatePeriod *5, 0f);
+                    c.JumpPeriodTimer.Restart();
+                }
+                Console.WriteLine("Client Current Pos : " + c.currentPos);
+            }*/
+            else
+            {
+                c.Send(new KeyUP(c.numberInGame, Key.Space.ToString()));
+                c.jumpState = false;
+                c.JumpPeriodTimer.Reset();
+                c.JumpPeriodTimer.Stop();
+                c.JumpTimer.Reset();
+                c.JumpTimer.Stop();
+            }
+        }
+
+        private void Fall(ClientTCP c)
+        {
+            
         }
 
         /// <summary>
@@ -344,6 +396,8 @@ namespace CLongServer.Ingame
                     //기기 이벤트
                     c.speed = 5f;
                     break;
+                case "Space":
+                    break;
                 default:
                     Console.Write("[INGAME PROCESS] Not Saved upKey : " + key);
                     break;
@@ -356,14 +410,11 @@ namespace CLongServer.Ingame
         /// </summary>
         private void StopForwardStopWatch(ClientTCP c, Key key)
         {
-            Console.WriteLine("Stop Key : [" + (int)key + "] " + key);
             c.moveTimer[(int)key].Reset();
             c.moveTimer[(int)key].Stop();
         }
         #endregion
         
-    
-     
         /// <summary>
         /// Pos Sync
         /// </summary>
@@ -377,11 +428,11 @@ namespace CLongServer.Ingame
         /// </summary>
         public void SetStartPos()
         {
-            StartPosList.Add(new Vector3(0, 1, 0));
-            StartPosList.Add(new Vector3(10, 1, 10));
-            StartPosList.Add(new Vector3(20, 1, 10));
-            StartPosList.Add(new Vector3(30, 1, 10));
-            StartPosList.Add(new Vector3(40, 1, 10));
+            StartPosList.Add(new Vector3(0, 1f, 0));
+            StartPosList.Add(new Vector3(10, 1f, 10));
+            StartPosList.Add(new Vector3(20, 1f, 10));
+            StartPosList.Add(new Vector3(30, 1f, 10));
+            StartPosList.Add(new Vector3(40, 1f, 10));
         }
     }
 }

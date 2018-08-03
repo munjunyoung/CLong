@@ -6,8 +6,7 @@ public class CameraManager : MonoBehaviour {
 
     public Transform playerObject;
     public Transform playerUpperBody;
-
-    private float camMoveSmoothingValue = 25f;
+    
     private float camBackDistance = 5f;
     private float camHeightDistance = 3f;
 

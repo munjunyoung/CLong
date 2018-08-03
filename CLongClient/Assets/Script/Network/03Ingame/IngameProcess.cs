@@ -120,7 +120,9 @@ public class IngameProcess : MonoBehaviour
             case "Alpha2":
                 playerList[num].weaponManagerSc.WeaponChange(2);
                 break;
-
+            case "Space":
+                playerList[num].keyState[(int)Key.Space] = true;
+                break;
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
                 break;
@@ -159,6 +161,9 @@ public class IngameProcess : MonoBehaviour
             case "Z":
                 playerList[num].currentActionState = (int)ActionState.None;
                 playerList[num].moveSpeed = 5f;
+                break;
+            case "Space":
+                playerList[num].keyState[(int)Key.Space] = false;
                 break;
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
