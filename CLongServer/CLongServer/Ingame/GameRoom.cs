@@ -17,7 +17,7 @@ namespace CLongServer.Ingame
     {
         public bool gameStartState = false;
         public int gameRoomNumber = 0;
-        
+
         List<Vector3> StartPosList = new List<Vector3>();
         public Dictionary<int, ClientTCP> playerDic = new Dictionary<int, ClientTCP>();
 
@@ -28,7 +28,7 @@ namespace CLongServer.Ingame
 
         //UDP
         public UdpNetwork udpServer;
-        
+
         #region GameRoom
         /// <summary>
         /// Constructor
@@ -127,7 +127,7 @@ namespace CLongServer.Ingame
                     break;
                 case "KeyUP":
                     var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
-                    KeyUpFunc(c, keyUpData.UpKey); 
+                    KeyUpFunc(c, keyUpData.UpKey);
                     foreach (var cl in playerDic)
                     {
                         cl.Value.Send(p);
@@ -146,7 +146,7 @@ namespace CLongServer.Ingame
                     var damageData = JsonConvert.DeserializeObject<TakeDamage>(p.Data);
                     c.currentHealth += -damageData.Damage;
                     Console.WriteLine("[" + c.numberInGame + "] CurrentHealth : " + c.currentHealth);
-                    if(c.currentHealth<=0)
+                    if (c.currentHealth <= 0)
                     {
                         c.currentHealth = 0;
                         c.Send(new SyncHealth(c.numberInGame, c.currentHealth));
@@ -160,7 +160,7 @@ namespace CLongServer.Ingame
                     {
                         c.Send(new SyncHealth(c.numberInGame, c.currentHealth));
                         //foreach (var cl in playerDic)
-                            //TakeDamage등 맞았을때 이펙트 생성을위한 전송이 필요함
+                        //TakeDamage등 맞았을때 이펙트 생성을위한 전송이 필요함
                     }
                     break;
                 case "ExitReq":
@@ -225,13 +225,13 @@ namespace CLongServer.Ingame
                     //기기 이벤트
                     c.speed = 1f;
                     break;
-                    //무기 스왑
+                //무기 스왑
                 case "Alpha1":
-                    if(c.currentEquipWeaponNum!=1)
+                    if (c.currentEquipWeaponNum != 1)
                         c.currentEquipWeaponNum = 1;
                     break;
                 case "Alpha2":
-                    if(c.currentEquipWeaponNum!=2)
+                    if (c.currentEquipWeaponNum != 2)
                         c.currentEquipWeaponNum = 2;
                     break;
                 default:
@@ -250,86 +250,61 @@ namespace CLongServer.Ingame
             {
                 if (c.moveMentsKey[(int)Key.W])
                 {
-                    MoveForward(c);
+                    Move(c, Key.W, false, true);
                 }
                 if (c.moveMentsKey[(int)Key.S])
                 {
-                    MoveBack(c);
+                    Move(c, Key.S, false, false);
+                    //MoveBack(c);
                 }
                 if (c.moveMentsKey[(int)Key.A])
                 {
-                    MoveLeft(c);
+                    Move(c, Key.A, true, false);
+                    //MoveLeft(c);
                 }
                 if (c.moveMentsKey[(int)Key.D])
                 {
-                    MoveRight(c);
+                    Move(c, Key.D, true, true);
+                    //MoveRight(c);
                 }
             }
         }
 
         /// <summary>
-        /// 앞으로 이동
+        /// Calc Move
         /// </summary>
         /// <param name="c"></param>
-        private void MoveForward(ClientTCP c)
+        private void Move(ClientTCP c, Key k, bool xAxis, bool positive)
         {
-            double time = Math.Truncate(c.moveTimer[(int)Key.W].Elapsed.TotalMilliseconds);
+            double time = Math.Truncate(c.moveTimer[(int)k].Elapsed.TotalMilliseconds);
             //if (time.Equals(updatePeriod * 1000))
-            if (time>=(updatePeriod * 1000))
+            if (time >= (updatePeriod * 1000))
             {
-                c.currentPos += (ChangeZValue(c, updatePeriod * c.speed));
-              
-                c.moveTimer[(int)Key.W].Restart();
-               // Console.WriteLine("W Client Current Pos : " + c.currentPos);
+                c.currentPos += (ChangeAngleValue(c, updatePeriod * c.speed, xAxis, positive));
+                c.moveTimer[(int)k].Restart();
+                 Console.WriteLine("Client Current Pos : " + c.currentPos);
             }
         }
 
         /// <summary>
-        /// 뒤로이동
+        /// Changed ths increase of vector3 value, by Direction angle
         /// </summary>
         /// <param name="c"></param>
-        private void MoveBack(ClientTCP c)
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private Vector3 ChangeAngleValue(ClientTCP c, float value, bool axis, bool positive)
         {
-            double time = Math.Truncate(c.moveTimer[(int)Key.S].Elapsed.TotalMilliseconds);
-            if (time>=(updatePeriod * 1000))
-            { 
-                c.currentPos -= (ChangeZValue(c, updatePeriod * c.speed));
-                //c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
-                c.moveTimer[(int)Key.S].Restart();
-               // Console.WriteLine("S Client Current Pos : " + c.currentPos);
-            }
-        }
+            var TmpAngle = c.directionAngle;
+            if (axis)//x축이동일 경우 90도 추가
+                TmpAngle = c.directionAngle + 90f;
+            var x = (float)Math.Round(Math.Sin(TmpAngle * (Math.PI / 180.0)), 3);
+            var z = (float)Math.Round(Math.Cos(TmpAngle * (Math.PI / 180.0)), 3);
+            Vector3 returnVector = new Vector3(value * x, 0, value * z);
 
-        /// <summary>
-        /// 왼쪽으로 이동
-        /// </summary>
-        /// <param name="c"></param>
-        private void MoveLeft(ClientTCP c)
-        {
-            double time = Math.Truncate(c.moveTimer[(int)Key.A].Elapsed.TotalMilliseconds);
-             if (time>=(updatePeriod * 1000))
-             {
-                c.currentPos -= ChangeXValue(c, updatePeriod * c.speed);
-                //c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
-                c.moveTimer[(int)Key.A].Restart();
-               // Console.WriteLine("A Client Current Pos : " + c.currentPos);
-            }
-        }
-
-        /// <summary>
-        /// 오른쪽으로 이동
-        /// </summary>
-        /// <param name="c"></param>
-        private void MoveRight(ClientTCP c)
-        {
-            double time = Math.Truncate(c.moveTimer[(int)Key.D].Elapsed.TotalMilliseconds);
-            if (time>=(updatePeriod * 1000))
-            {
-                c.currentPos += ChangeXValue(c, updatePeriod * c.speed);
-                //c.currentPos = new Vector3(c.currentPos.X, c.height, c.currentPos.Z);
-                c.moveTimer[(int)Key.D].Restart();
-               // Console.WriteLine("D Client Current Pos : " + c.currentPos);
-            }
+            if (positive)
+                return returnVector;
+            else
+                return -returnVector;
         }
 
         /// <summary>
@@ -381,41 +356,14 @@ namespace CLongServer.Ingame
         /// </summary>
         private void StopForwardStopWatch(ClientTCP c, Key key)
         {
-            Console.WriteLine("Stop Key : [" + (int)key + "] " +key);
+            Console.WriteLine("Stop Key : [" + (int)key + "] " + key);
             c.moveTimer[(int)key].Reset();
             c.moveTimer[(int)key].Stop();
         }
-
         #endregion
         
-
-        /// <summary>
-        /// change increase Zpos value, according to Direction
-        /// </summary>
-        /// <param name="c"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        private Vector3 ChangeZValue(ClientTCP c, float value)
-        {
-            var x = (float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 3);
-            var z = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 3);
-            Vector3 returnVector = new Vector3(value * x, 0, value * z);
-            return returnVector;
-        }
-        /// <summary>
-        /// change increase Xpos value, according to Direction
-        /// </summary>
-        /// <param name="c"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        private Vector3 ChangeXValue(ClientTCP c, float value)
-        {
-            var x = (float)Math.Round(Math.Cos(c.directionAngle * (Math.PI / 180.0)), 3);
-            var z = -(float)Math.Round(Math.Sin(c.directionAngle * (Math.PI / 180.0)), 3);
-            Vector3 returnVector = new Vector3(value * x, 0, value * z);
-            return returnVector;
-        }
-
+    
+     
         /// <summary>
         /// Pos Sync
         /// </summary>
@@ -423,7 +371,7 @@ namespace CLongServer.Ingame
         {
 
         }
-        
+
         /// <summary>
         /// Start Pos 
         /// </summary>
