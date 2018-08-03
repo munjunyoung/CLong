@@ -27,7 +27,7 @@ public class InputManager : MonoBehaviour
     //for Set Health UI
     public int currentHealth = 100;
     public Slider healthSlider;
-   
+    
 
     private void Start()
     {
@@ -140,6 +140,12 @@ public class InputManager : MonoBehaviour
                 NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
             //myPlayer.keyState[(int)Key.Z] = false;
         }
+        //Jump
+        if (Input.GetKeyDown(KeyList[(int)Key.Space]))
+        {
+            if (myPlayer.IsGroundedFunc())
+                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
+        }
 
         //Shooting
         if (Input.GetMouseButton(0))
@@ -165,18 +171,19 @@ public class InputManager : MonoBehaviour
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
         }
 
-        //Jump
-        if(Input.GetKeyDown(KeyList[(int)Key.Space]))
+        //Gravity (이부분은 우선적으로 변경한다, 현재 서버에 맵관련 데이터가 없기 때문에)
+        if (!myPlayer.IsGroundedFunc())
         {
-            if(!myPlayer.keyState[(int)Key.Space]&&myPlayer.IsGrounded())
-                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
-            //myPlayer.transform.Translate
-            //rigidbody.movePosition;
-            //rigidbody.AddForce;
+            if (myPlayer.IsGroundedServer) //떨어지는 상태가 아닐경우
+                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, false));
+        }
+        else
+        {
+            if (!myPlayer.IsGroundedServer)
+                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, true));
         }
     }
-
-
+    
     #region Turning
     /// <summary>
     /// Player Turning

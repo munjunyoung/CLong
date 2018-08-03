@@ -29,6 +29,8 @@ namespace CLongServer.Ingame
         //UDP
         public UdpNetwork udpServer;
 
+        //Map
+        public float[,] map;
         #region GameRoom
         /// <summary>
         /// Constructor
@@ -99,7 +101,7 @@ namespace CLongServer.Ingame
         #endregion
 
         /// <summary>
-        /// IngameData Process 
+        /// IngameData TCP Process 
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="p"></param>
@@ -134,6 +136,17 @@ namespace CLongServer.Ingame
                         cl.Value.Send(new ClientMoveSync(c.numberInGame, c.currentPos));
                     }
 
+                    break;
+                case "IsGrounded":
+                    var groundData = JsonConvert.DeserializeObject<IsGrounded>(p.Data);
+                    c.isGrounded = groundData.State;
+                    foreach (var cl in playerDic)
+                        cl.Value.Send(p);
+
+                    if (!c.isGrounded)
+                        c.FallTimer.Start();
+                    else
+                        c.FallTimer.Reset();
                     break;
                 case "InsShell":
                     var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
@@ -172,6 +185,10 @@ namespace CLongServer.Ingame
             }
         }
 
+        /// <summary>
+        /// IngameData UDP Process
+        /// </summary>
+        /// <param name="p"></param>
         private void IngameDataRequestUDP(Packet p)
         {
             switch (p.MsgName)
@@ -217,8 +234,9 @@ namespace CLongServer.Ingame
                 case "Space":
                     c.JumpTimer.Start();
                     c.JumpPeriodTimer.Start();
-                    c.jumpState = true;
+                    c.actionState = (int)ActionState.Jump;
                     break;
+                ///Client에서 모두 구분해주므로 action State 변경이 서버쪽에선 필요가없어졌으나 좀더 고려해 볼 것
                 case "LeftShift":
                     //뛰기 이벤트
                     c.speed = 10f;
@@ -247,36 +265,28 @@ namespace CLongServer.Ingame
         }
 
         /// <summary>
-        /// Client Move Thread callback func
+        /// Client Move Thread callback func 
         /// </summary>
         /// <param name="c"></param>
         private void CalcMovement(ClientTCP c)
         {
             while (true)
             {
+                //Move
                 if (c.moveMentsKey[(int)Key.W])
-                {
                     Move(c, Key.W, false, true);
-                }
                 if (c.moveMentsKey[(int)Key.S])
-                {
                     Move(c, Key.S, false, false);
-                    //MoveBack(c);
-                }
                 if (c.moveMentsKey[(int)Key.A])
-                {
                     Move(c, Key.A, true, false);
-                    //MoveLeft(c);
-                }
                 if (c.moveMentsKey[(int)Key.D])
-                {
                     Move(c, Key.D, true, true);
-                    //MoveRight(c);
-                }
-                if(c.jumpState)
-                {
+                //jump
+                if (c.actionState.Equals((int)ActionState.Jump))
                     Jump(c);
-                }
+                //Gravity -> When Player is not on the ground; ex : Jump, Fall..
+                if (!c.isGrounded)
+                    Fall(c);
             }
         }
 
@@ -294,7 +304,7 @@ namespace CLongServer.Ingame
                 Console.WriteLine("Client Current Pos : " + c.currentPos);
             }
         }
-        
+
         /// <summary>
         /// Jump Change
         /// </summary>
@@ -304,38 +314,40 @@ namespace CLongServer.Ingame
             double time = c.JumpPeriodTimer.ElapsedMilliseconds;
             //1초후엔 줄어들도록
             //Timer를 두개쓴이유는 totalmilisecond가 소수점단위로 찍히고 랜덤으로 찍힘으로 mod = 0 주기로 하게되면 주기가 정확하게 되지않는다
-            if (c.JumpTimer.Elapsed.TotalMilliseconds<= 200)
+            if (c.JumpTimer.Elapsed.TotalMilliseconds <= 200)
             {
                 if (time >= (updatePeriod * 1000))
                 {
-                    c.currentPos += new Vector3(0f, updatePeriod*5, 0f);
+                    c.currentPos += new Vector3(0f, updatePeriod * 20f, 0f);
                     c.JumpPeriodTimer.Restart();
+                    Console.WriteLine("Client Current Pos : " + c.currentPos);
                 }
-                Console.WriteLine("Client Current Pos : " + c.currentPos);
-            }/*
-            else if(c.JumpTimer.Elapsed.TotalMilliseconds>500&&c.JumpTimer.Elapsed.TotalMilliseconds<=1000)
-            {
-                if(time>=(updatePeriod*1000))
-                {
-                    c.currentPos -= new Vector3(0f, updatePeriod *5, 0f);
-                    c.JumpPeriodTimer.Restart();
-                }
-                Console.WriteLine("Client Current Pos : " + c.currentPos);
-            }*/
+            }
             else
             {
+                //Keyup을 보내는것으로 처리해버림
                 c.Send(new KeyUP(c.numberInGame, Key.Space.ToString()));
                 c.jumpState = false;
                 c.JumpPeriodTimer.Reset();
-                c.JumpPeriodTimer.Stop();
                 c.JumpTimer.Reset();
-                c.JumpTimer.Stop();
             }
         }
 
+        /// <summary>
+        /// Gravity calc Func
+        /// </summary>
+        /// <param name="c"></param>
         private void Fall(ClientTCP c)
         {
-            
+            double time = c.FallTimer.Elapsed.Milliseconds;
+
+            if (time >= (updatePeriod * 1000))
+            {
+                c.currentPos -= new Vector3(0f, updatePeriod * 10f, 0f);
+                c.FallTimer.Restart();
+                Console.WriteLine("Client Current Pos : " + c.currentPos);
+
+            }
         }
 
         /// <summary>
@@ -411,16 +423,15 @@ namespace CLongServer.Ingame
         private void StopForwardStopWatch(ClientTCP c, Key key)
         {
             c.moveTimer[(int)key].Reset();
-            c.moveTimer[(int)key].Stop();
+            //c.moveTimer[(int)key].Stop();
         }
         #endregion
-        
+
         /// <summary>
         /// Pos Sync
         /// </summary>
-        private void ClientPosSync()
+        private void ClientPosSync(ClientTCP c)
         {
-
         }
 
         /// <summary>

@@ -165,7 +165,7 @@ namespace tcpNet
             });
 
             receivedPacketTCP.Enqueue(receivedTempPacket);
-            Debug.Log("[TCP] Socket - ReceiveData msg : " + receivedTempPacket.MsgName);
+            Debug.Log("[TCP] Socket - ReceiveData msg : [" + receivedTempPacket.MsgName + "]");
         }
 
         /// <summary>

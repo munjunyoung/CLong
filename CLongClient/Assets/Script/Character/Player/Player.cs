@@ -16,16 +16,16 @@ public class Player : MonoBehaviour
     public bool[] keyState = new bool[20];
     //Move
     public float moveSpeed = 5f;
-    //
-    public Collider mapCollider;
 
     //Action State
     public int currentActionState;
 
+    //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
+    public bool IsGroundedServer = true;
+
     private void Awake()
     {
         AddScript();
-        mapCollider = GameObject.Find("Map").GetComponent<Collider>();
     }
     private void FixedUpdate()
     {
@@ -62,17 +62,18 @@ public class Player : MonoBehaviour
     /// </summary>
     void Jump()
     {
-        if(keyState[(int)Key.Space])
-        {
-            this.transform.Translate(0, 5f * Time.deltaTime, 0f);
-        }
+        if (keyState[(int)Key.Space])
+            this.transform.Translate(0, 20f * Time.deltaTime, 0f);
     }
 
+    /// <summary>
+    /// Gravity
+    /// </summary>
     void Fall()
     {
-       if(!IsGrounded())
+        if (!IsGroundedServer)
         {
-            this.transform.Translate(0, -3* Time.deltaTime, 0f);
+            this.transform.Translate(0, -10 * Time.deltaTime, 0f);
         }
     }
 
@@ -85,7 +86,7 @@ public class Player : MonoBehaviour
     {
         weaponManagerSc.Shoot(num, pos, rot);
     }
-    
+
     /// <summary>
     /// 맞은위치 pos을 받아와 데미지 이펙트 처리
     /// </summary>
@@ -136,9 +137,22 @@ public class Player : MonoBehaviour
         weaponManagerSc = this.gameObject.AddComponent<PlayerWeaponManager>();
     }
 
-    public bool IsGrounded()
+    /// <summary>
+    /// 현재 땅위에 있는지 확인
+    /// </summary>
+    /// <returns></returns>
+    public bool IsGroundedFunc()
     {
-        Debug.Log(mapCollider.bounds.extents.y);
-        return Physics.Raycast(transform.position, Vector3.down, mapCollider.bounds.extents.y+ 0.5f);
+        Ray ray = new Ray(transform.position, Vector3.down);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, 1.1f))
+        {
+            if (hit.collider.tag == "Ground")
+                return true;
+
+            Debug.Log(hit.collider.tag);
+        }
+
+        return false;
     }
 }

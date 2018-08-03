@@ -40,6 +40,10 @@ public class IngameProcess : MonoBehaviour
                 var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
                 KeyUpClient(keyUpData.ClientNum, keyUpData.UpKey);
                 break;
+            case "IsGrounded":
+                var groundData = JsonConvert.DeserializeObject<IsGrounded>(p.Data);
+                playerList[groundData.ClientNum].IsGroundedServer = groundData.State;
+                break;
             case "InsShell":
                 var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
                 playerList[shellData.ClientNum].Shoot(shellData.ClientNum, ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));

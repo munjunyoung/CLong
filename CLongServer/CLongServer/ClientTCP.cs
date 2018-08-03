@@ -56,11 +56,10 @@ namespace CLongServer
         public Stopwatch JumpTimer = new Stopwatch();
         public Stopwatch JumpPeriodTimer = new Stopwatch();
         public bool jumpState = false;
-        public bool isGrounded = false;
 
-        //Fall
+        //Fall 
         public Stopwatch FallTimer = new Stopwatch();
-        
+        public bool isGrounded = true;
         
         /// <summary>
         /// Constructor .. Stream Save;

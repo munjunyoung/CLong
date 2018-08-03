@@ -68,4 +68,19 @@ namespace CLongLib
             CurrentPos = p;
         }
     }
+
+    /// <summary>
+    /// 땅위에 있는지 확인
+    /// </summary>
+    public class IsGrounded : Packet
+    {
+        public int ClientNum { get; set; }
+        public bool State { get; set; }
+
+        public IsGrounded(int n, bool s)
+        {
+            ClientNum = n;
+            State = s;
+        }
+    }
 }
