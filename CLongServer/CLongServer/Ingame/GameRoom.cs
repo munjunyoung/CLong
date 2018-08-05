@@ -28,9 +28,7 @@ namespace CLongServer.Ingame
 
         //UDP
         public UdpNetwork udpServer;
-
-        //Map
-        public float[,] map;
+        
         #region GameRoom
         /// <summary>
         /// Constructor

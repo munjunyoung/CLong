@@ -20,15 +20,21 @@ public class Player : MonoBehaviour
     //Action State
     public int currentActionState;
 
+    //Character Controller
+    public CharacterController playerController;
+
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
     public bool IsGroundedServer = true;
+    Vector3 moveDirction = Vector3.zero;
 
     private void Awake()
     {
         AddScript();
+        playerController = GetComponent<CharacterController>();
     }
     private void FixedUpdate()
     {
+        Debug.Log("GROUND : " + playerController.isGrounded);
         Move();
         Jump();
         Fall();
