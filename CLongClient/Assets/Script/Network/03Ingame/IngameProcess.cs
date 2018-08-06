@@ -183,7 +183,9 @@ public class IngameProcess : MonoBehaviour
         //배정되는 클라이언트 num에 prefab생성
         var tmpPrefab = Instantiate(playerPrefab);
         tmpPrefab.AddComponent<Player>().clientNum = num;
+        
         tmpPrefab.transform.position = pos;
+        
         playerList[num] = tmpPrefab.GetComponent<Player>();
         //클라이언트 일 경우
         if (clientCheck)

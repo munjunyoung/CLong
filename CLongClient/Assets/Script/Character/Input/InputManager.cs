@@ -27,7 +27,7 @@ public class InputManager : MonoBehaviour
     //for Set Health UI
     public int currentHealth = 100;
     public Slider healthSlider;
-    
+
 
     private void Start()
     {
@@ -60,21 +60,25 @@ public class InputManager : MonoBehaviour
         //Move Direction Key
         if (Input.GetKeyDown(KeyList[(int)Key.W]))
         {
+            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.W].ToString()));
             //myPlayer.keyState[(int)Key.W] = true;
         }
         if (Input.GetKeyDown(KeyList[(int)Key.S]))
         {
+            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.S].ToString()));
             //myPlayer.keyState[(int)Key.S] = true;
         }
         if (Input.GetKeyDown(KeyList[(int)Key.A]))
         {
+            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.A].ToString()));
             //myPlayer.keyState[(int)Key.A] = true;
         }
         if (Input.GetKeyDown(KeyList[(int)Key.D]))
         {
+            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.D].ToString()));
             //myPlayer.keyState[(int)Key.D] = true;
         }
@@ -82,21 +86,25 @@ public class InputManager : MonoBehaviour
         if (Input.GetKeyUp(KeyList[(int)Key.W]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.W].ToString()));
+            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
             //myPlayer.keyState[(int)Key.W] = false;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.S]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.S].ToString()));
+            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
             //myPlayer.keyState[(int)Key.S] = false;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.A]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.A].ToString()));
+            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
             //myPlayer.keyState[(int)Key.A] = false;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.D]))
         {
             NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.D].ToString()));
+            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
             //myPlayer.keyState[(int)Key.D] = false;
         }
 
@@ -143,10 +151,10 @@ public class InputManager : MonoBehaviour
         //Jump
         if (Input.GetKeyDown(KeyList[(int)Key.Space]))
         {
-            if (myPlayer.IsGroundedFunc())
+            if (myPlayer.playerController.isGrounded)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
         }
-
+        
         //Shooting
         if (Input.GetMouseButton(0))
         {
@@ -171,19 +179,27 @@ public class InputManager : MonoBehaviour
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
         }
 
-        //Gravity (이부분은 우선적으로 변경한다, 현재 서버에 맵관련 데이터가 없기 때문에)
-        if (!myPlayer.IsGroundedFunc())
+        
+        // Gravity (이부분은 우선적으로 변경한다, 현재 서버에 맵관련 데이터가 없기 때문에)
+        if (myPlayer.playerController.isGrounded)
         {
-            if (myPlayer.IsGroundedServer) //떨어지는 상태가 아닐경우
+            if (myPlayer.IsGroundedServer) //착지 했을경우(메시지를 한번만 보내기 위해) myplayer.isGrounded를 수정
+            {
                 NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, false));
+                NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
+            }
         }
+        //클라이언트상에선 현재 땅에 떨어졌을경우 서버에 전송하여 myplayer의 IsgroundedServer변수가 바뀌면 함수를 실행하게 하기 위해
         else
         {
             if (!myPlayer.IsGroundedServer)
+            {
                 NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, true));
+                NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
+            }
         }
     }
-    
+
     #region Turning
     /// <summary>
     /// Player Turning
@@ -256,5 +272,5 @@ public class InputManager : MonoBehaviour
         KeyList.Add(KeyCode.Space);
     }
 
-  
+
 }

@@ -22,10 +22,12 @@ public class Player : MonoBehaviour
 
     //Character Controller
     public CharacterController playerController;
+    private Vector3 moveDirection = Vector3.zero;
 
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
-    public bool IsGroundedServer = true;
-    Vector3 moveDirction = Vector3.zero;
+    public bool IsGroundedServer = false;
+    public float Gravity = 10f;
+    public float jumpTimer = 0f;
 
     private void Awake()
     {
@@ -34,10 +36,8 @@ public class Player : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        Debug.Log("GROUND : " + playerController.isGrounded);
         Move();
-        Jump();
-        Fall();
+       
     }
 
     /// <summary>
@@ -45,23 +45,41 @@ public class Player : MonoBehaviour
     /// </summary>
     void Move()
     {
-        if (keyState[(int)Key.W])
-        {
-            this.transform.Translate(0, 0, 1f * Time.deltaTime * moveSpeed);
-        }
-        if (keyState[(int)Key.S])
-        {
-            this.transform.Translate(0, 0, -1f * Time.deltaTime * moveSpeed);
-        }
-        if (keyState[(int)Key.A])
-        {
-            this.transform.Translate(-1f * Time.deltaTime * moveSpeed, 0, 0);
-        }
-        if (keyState[(int)Key.D])
-        {
-            this.transform.Translate(1f * Time.deltaTime * moveSpeed, 0, 0);
-        }
-    }
+
+        Debug.Log(transform.forward);
+        //Vertical
+        if(keyState[(int)Key.W]&&keyState[(int)Key.S])
+            moveDirection = new Vector3(moveDirection.x, 0, 0);
+        else if (keyState[(int)Key.W])
+            moveDirection = new Vector3(moveDirection.x, 0 , 1f);
+        else if (keyState[(int)Key.S])
+            moveDirection = new Vector3(moveDirection.x, 0 , -1f);
+        else
+            moveDirection = new Vector3(moveDirection.x, 0, 0f);
+        //Horizontal
+        if(keyState[(int)Key.A]&&keyState[(int)Key.D])
+            moveDirection = new Vector3(0, 0, moveDirection.z);
+        else if (keyState[(int)Key.A])
+            moveDirection = new Vector3(-1f,0 , moveDirection.z);
+        else if (keyState[(int)Key.D])
+            moveDirection = new Vector3(1f, 0, moveDirection.z);
+        else
+            moveDirection = new Vector3(0f, 0, moveDirection.z);
+        
+        moveDirection = transform.TransformDirection(moveDirection);
+        moveDirection *= moveSpeed;
+
+        Jump();
+        //Gravity
+        //Debug.Log(IsGroundedServer);
+        //Debug.Log("controller : " + playerController.isGrounded);
+        //Debug.Log("server + " + IsGroundedServer);
+        if (!IsGroundedServer)
+        moveDirection.y -= (Gravity * Time.deltaTime);
+
+       //  Debug.Log(playerController.isGrounded);
+        playerController.Move(moveDirection * Time.deltaTime);
+    }   
 
     /// <summary>
     /// Jump
@@ -69,17 +87,17 @@ public class Player : MonoBehaviour
     void Jump()
     {
         if (keyState[(int)Key.Space])
-            this.transform.Translate(0, 20f * Time.deltaTime, 0f);
-    }
-
-    /// <summary>
-    /// Gravity
-    /// </summary>
-    void Fall()
-    {
-        if (!IsGroundedServer)
         {
-            this.transform.Translate(0, -10 * Time.deltaTime, 0f);
+            if (jumpTimer < 0.5f)
+            {
+                jumpTimer += Time.deltaTime;
+                moveDirection.y = 20f;
+            }
+            else
+            {
+                jumpTimer = 0f;
+                keyState[(int)Key.Space] = false;
+            }
         }
     }
 
@@ -141,24 +159,5 @@ public class Player : MonoBehaviour
     private void AddScript()
     {
         weaponManagerSc = this.gameObject.AddComponent<PlayerWeaponManager>();
-    }
-
-    /// <summary>
-    /// 현재 땅위에 있는지 확인
-    /// </summary>
-    /// <returns></returns>
-    public bool IsGroundedFunc()
-    {
-        Ray ray = new Ray(transform.position, Vector3.down);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 1.1f))
-        {
-            if (hit.collider.tag == "Ground")
-                return true;
-
-            Debug.Log(hit.collider.tag);
-        }
-
-        return false;
     }
 }
