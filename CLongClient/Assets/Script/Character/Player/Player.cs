@@ -25,7 +25,7 @@ public class Player : MonoBehaviour
     private Vector3 moveDirection = Vector3.zero;
 
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
-    public bool IsGroundedServer = false;
+    public bool IsGroundedFromServer = false;
     public float Gravity = 10f;
     public float jumpTimer = 0f;
 
@@ -33,6 +33,9 @@ public class Player : MonoBehaviour
     {
         AddScript();
         playerController = GetComponent<CharacterController>();
+        //처음 시작할때 중력적용을 해두지 않으면 isgrounded가 false로 처리됨
+        moveDirection.y -= (Gravity * Time.deltaTime);
+        playerController.Move(moveDirection);
     }
     private void FixedUpdate()
     {
@@ -45,42 +48,34 @@ public class Player : MonoBehaviour
     /// </summary>
     void Move()
     {
+        var w = keyState[(int)Key.W] ? 1 : 0;
+        var s = keyState[(int)Key.S] ? -1 : 0;
+        var a = keyState[(int)Key.A] ? -1 : 0;
+        var d = keyState[(int)Key.D] ? 1 : 0;
 
-        Debug.Log(transform.forward);
-        //Vertical
-        if(keyState[(int)Key.W]&&keyState[(int)Key.S])
-            moveDirection = new Vector3(moveDirection.x, 0, 0);
-        else if (keyState[(int)Key.W])
-            moveDirection = new Vector3(moveDirection.x, 0 , 1f);
-        else if (keyState[(int)Key.S])
-            moveDirection = new Vector3(moveDirection.x, 0 , -1f);
-        else
-            moveDirection = new Vector3(moveDirection.x, 0, 0f);
-        //Horizontal
-        if(keyState[(int)Key.A]&&keyState[(int)Key.D])
-            moveDirection = new Vector3(0, 0, moveDirection.z);
-        else if (keyState[(int)Key.A])
-            moveDirection = new Vector3(-1f,0 , moveDirection.z);
-        else if (keyState[(int)Key.D])
-            moveDirection = new Vector3(1f, 0, moveDirection.z);
-        else
-            moveDirection = new Vector3(0f, 0, moveDirection.z);
-        
-        moveDirection = transform.TransformDirection(moveDirection);
+        moveDirection = new Vector3(a + d, 0, w + s);
+        moveDirection.Normalize();
         moveDirection *= moveSpeed;
 
-        Jump();
-        //Gravity
-        //Debug.Log(IsGroundedServer);
+
         //Debug.Log("controller : " + playerController.isGrounded);
-        //Debug.Log("server + " + IsGroundedServer);
-        if (!IsGroundedServer)
-        moveDirection.y -= (Gravity * Time.deltaTime);
+        //Debug.Log("server + " + IsGroundedFromServer);
 
-       //  Debug.Log(playerController.isGrounded);
-        playerController.Move(moveDirection * Time.deltaTime);
-    }   
+        //Gravity
+        Fall();
+        //Jump
+        Jump();
 
+         playerController.Move(moveDirection * Time.deltaTime);
+        //  Debug.Log(playerController.isGrounded);
+        //playerController.Move(moveDirection * Time.deltaTime);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Ground : " + collision.transform.tag);
+          
+    }
     /// <summary>
     /// Jump
     /// </summary>
@@ -99,6 +94,15 @@ public class Player : MonoBehaviour
                 keyState[(int)Key.Space] = false;
             }
         }
+    }
+
+    /// <summary>
+    /// Gravity
+    /// </summary>
+    void Fall()
+    {
+        if (!playerController.isGrounded)
+            moveDirection.y -= (Gravity * Time.deltaTime);
     }
 
     /// <summary>

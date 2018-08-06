@@ -42,7 +42,7 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "IsGrounded":
                 var groundData = JsonConvert.DeserializeObject<IsGrounded>(p.Data);
-                playerList[groundData.ClientNum].IsGroundedServer = groundData.State;
+                playerList[groundData.ClientNum].IsGroundedFromServer = groundData.State;
                 break;
             case "InsShell":
                 var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);

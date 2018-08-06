@@ -28,6 +28,8 @@ public class InputManager : MonoBehaviour
     public int currentHealth = 100;
     public Slider healthSlider;
 
+    //SendCheck;
+    bool sendCheck = false;
 
     private void Start()
     {
@@ -38,9 +40,7 @@ public class InputManager : MonoBehaviour
     private void FixedUpdate()
     {
         if (myPlayer != null)
-        {
             Tunring();
-        }
     }
 
     private void Update()
@@ -154,7 +154,7 @@ public class InputManager : MonoBehaviour
             if (myPlayer.playerController.isGrounded)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
         }
-        
+
         //Shooting
         if (Input.GetMouseButton(0))
         {
@@ -179,25 +179,26 @@ public class InputManager : MonoBehaviour
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
         }
 
-        
+        /*
         // Gravity (이부분은 우선적으로 변경한다, 현재 서버에 맵관련 데이터가 없기 때문에)
         if (myPlayer.playerController.isGrounded)
         {
-            if (myPlayer.IsGroundedServer) //착지 했을경우(메시지를 한번만 보내기 위해) myplayer.isGrounded를 수정
+            //if (myPlayer.IsGroundedFromServer) //착지 했을경우(메시지를 한번만 보내기 위해) myplayer.isGrounded를 수정
             {
-                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, false));
                 NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
+                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, false));
             }
         }
         //클라이언트상에선 현재 땅에 떨어졌을경우 서버에 전송하여 myplayer의 IsgroundedServer변수가 바뀌면 함수를 실행하게 하기 위해
         else
         {
-            if (!myPlayer.IsGroundedServer)
+            //if (!myPlayer.IsGroundedFromServer)
             {
-                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, true));
                 NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
+                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, true));
             }
         }
+        */
     }
 
     #region Turning
@@ -259,11 +260,14 @@ public class InputManager : MonoBehaviour
         KeyList.Add(KeyCode.A);
         KeyList.Add(KeyCode.S);
         KeyList.Add(KeyCode.D);
+
         //Run
         KeyList.Add(KeyCode.LeftShift);
+
         //Seat
         KeyList.Add(KeyCode.LeftControl);
-        //
+
+        //Sneak
         KeyList.Add(KeyCode.Z);
         //Swap
         KeyList.Add(KeyCode.Alpha1);
