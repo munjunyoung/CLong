@@ -14,7 +14,6 @@ public class InputManager : MonoBehaviour
     //KeyList
     List<KeyCode> KeyList = new List<KeyCode>();
     //Rotation
-    public GameObject playerUpperBody;
     private float xSens = 1.0f;
     private float ySens = 1.0f;
     private float xRot = 0f;
@@ -29,7 +28,8 @@ public class InputManager : MonoBehaviour
     public Slider healthSlider;
 
     //SendCheck;
-    bool sendCheck = false;
+    bool sendCheckFall = false;
+    bool sendCheckGround = false;
 
     private void Start()
     {
@@ -151,7 +151,7 @@ public class InputManager : MonoBehaviour
         //Jump
         if (Input.GetKeyDown(KeyList[(int)Key.Space]))
         {
-            if (myPlayer.playerController.isGrounded)
+            //if (IsGroundedFunc())
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
         }
 
@@ -178,27 +178,32 @@ public class InputManager : MonoBehaviour
             if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 1)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
         }
-
+        
         /*
         // Gravity (이부분은 우선적으로 변경한다, 현재 서버에 맵관련 데이터가 없기 때문에)
-        if (myPlayer.playerController.isGrounded)
+        if (IsGroundedFunc())
         {
-            //if (myPlayer.IsGroundedFromServer) //착지 했을경우(메시지를 한번만 보내기 위해) myplayer.isGrounded를 수정
+            if (!sendCheckGround) //착지 했을경우(메시지를 한번만 보내기 위해) myplayer.isGrounded를 수정
             {
                 NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
-                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, false));
+                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, true));
+                sendCheckGround = true;
+                sendCheckFall = false;
             }
         }
         //클라이언트상에선 현재 땅에 떨어졌을경우 서버에 전송하여 myplayer의 IsgroundedServer변수가 바뀌면 함수를 실행하게 하기 위해
         else
         {
-            //if (!myPlayer.IsGroundedFromServer)
+            if (!sendCheckFall)
             {
                 NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
-                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, true));
+                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, false));
+                sendCheckFall = true;
+                sendCheckGround = false;
             }
         }
         */
+        
     }
 
     #region Turning
@@ -215,7 +220,7 @@ public class InputManager : MonoBehaviour
 
         //하체, 상체 따로 분리
         myPlayer.transform.localEulerAngles = new Vector3(0, xRot, 0);
-        playerUpperBody.transform.localEulerAngles = new Vector3(-yRot, 0, 0);
+        myPlayer.playerUpperBody.localEulerAngles = new Vector3(-yRot, 0, 0);
     }
 
     /// <summary>
@@ -228,7 +233,7 @@ public class InputManager : MonoBehaviour
             if (mousePacketSendFrame < mouseDelay)
             {
                 // NetworkManagerTCP.SendTCP(new ClientDir(0, this.transform.eulerAngles.y));
-                NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y, playerUpperBody.transform.eulerAngles.x));
+                NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y, myPlayer.playerUpperBody.eulerAngles.x));
                 mousePacketSendFrame++;
             }
             else
@@ -276,5 +281,20 @@ public class InputManager : MonoBehaviour
         KeyList.Add(KeyCode.Space);
     }
 
-
+    /// <summary>
+    /// 현재 땅위에 있는지 확인
+    /// </summary>
+    /// <returns></returns>
+    public bool IsGroundedFunc()
+    {
+        Ray ray = new Ray(myPlayer.transform.position, Vector3.down);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, 1.1f))
+        {
+            if (hit.collider.tag == "Ground")
+                return true;
+            
+        }
+        return false;
+    }
 }

@@ -16,5 +16,9 @@ public class ShellScript : MonoBehaviour {
 	private void FixedUpdate () {
         this.transform.Translate(Vector3.forward * shellSpeed * Time.deltaTime);
 	}
-    
+
+    private void OnTriggerEnter(Collider other)
+    {
+    }
+
 }

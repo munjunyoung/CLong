@@ -185,9 +185,7 @@ namespace CLongServer.Ingame
                     break;
             }
         }
-
-
-
+        
         /// <summary>
         /// Pos Sync
         /// </summary>
@@ -201,7 +199,7 @@ namespace CLongServer.Ingame
         public void SetStartPos()
         {
             //1.1f 인 이유는 skinwidth
-            StartPosList.Add(new Vector3(5,  1.1f, 5));
+            StartPosList.Add(new Vector3(5,  1f, 5));
             StartPosList.Add(new Vector3(10, 1f, 10));
             StartPosList.Add(new Vector3(20, 1f, 10));
             StartPosList.Add(new Vector3(30, 1f, 10));

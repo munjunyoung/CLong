@@ -76,7 +76,7 @@ public class IngameProcess : MonoBehaviour
                 if (clientPlayerNum != clientDirData.ClientNum)
                 {
                     playerList[clientDirData.ClientNum].transform.localEulerAngles = new Vector3(0, clientDirData.DirectionY, 0);
-                    playerList[clientDirData.ClientNum].transform.Find("PlayerUpperBody").transform.localEulerAngles = new Vector3(clientDirData.DirectionX, 0, 0);
+                    playerList[clientDirData.ClientNum].playerUpperBody.localEulerAngles = new Vector3(clientDirData.DirectionX, 0, 0);
                 }
                 break;
             default:
@@ -182,7 +182,7 @@ public class IngameProcess : MonoBehaviour
     {
         //배정되는 클라이언트 num에 prefab생성
         var tmpPrefab = Instantiate(playerPrefab);
-        tmpPrefab.AddComponent<Player>().clientNum = num;
+        tmpPrefab.GetComponent<Player>().clientNum = num;
         
         tmpPrefab.transform.position = pos;
         
@@ -193,11 +193,11 @@ public class IngameProcess : MonoBehaviour
             clientPlayerNum = num;
             //플레이어 오브젝트 cam
             camManagerSc.playerObject = playerList[clientPlayerNum].transform;
-            camManagerSc.playerUpperBody = playerList[clientPlayerNum].transform.Find("PlayerUpperBody");
+            camManagerSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
             //Player Sc;
             inputSc.myPlayer = playerList[clientPlayerNum];
             playerList[clientPlayerNum].clientCheck = true;
-            inputSc.playerUpperBody = inputSc.myPlayer.transform.Find("PlayerUpperBody").gameObject;
+            playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
         }
         //다른 클라이언트 일 경우
         else

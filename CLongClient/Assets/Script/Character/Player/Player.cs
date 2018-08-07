@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
     public int clientNum;
     //add Script
     public PlayerWeaponManager weaponManagerSc;
+    public Transform playerUpperBody;
 
     public bool[] keyState = new bool[20];
     //Move
@@ -26,21 +27,19 @@ public class Player : MonoBehaviour
 
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
     public bool IsGroundedFromServer = false;
-    public float Gravity = 10f;
-    public float jumpTimer = 0f;
+    private float gravity = 10f;
+    private float jumpSpeed = 30f;
+    private float jumpTimer = 0f;
+
+    public GameObject GroundCheckObject;
+    
 
     private void Awake()
     {
-        AddScript();
-        playerController = GetComponent<CharacterController>();
-        //처음 시작할때 중력적용을 해두지 않으면 isgrounded가 false로 처리됨
-        moveDirection.y -= (Gravity * Time.deltaTime);
-        playerController.Move(moveDirection);
     }
     private void FixedUpdate()
     {
         Move();
-       
     }
 
     /// <summary>
@@ -55,54 +54,53 @@ public class Player : MonoBehaviour
 
         moveDirection = new Vector3(a + d, 0, w + s);
         moveDirection.Normalize();
+
+        
+
+        moveDirection = transform.TransformDirection(moveDirection);
         moveDirection *= moveSpeed;
 
-
-        //Debug.Log("controller : " + playerController.isGrounded);
-        //Debug.Log("server + " + IsGroundedFromServer);
-
-        //Gravity
-        Fall();
         //Jump
         Jump();
+        //Gravity
+        Fall();
 
-         playerController.Move(moveDirection * Time.deltaTime);
+        playerController.Move(moveDirection * Time.deltaTime);
         //  Debug.Log(playerController.isGrounded);
         //playerController.Move(moveDirection * Time.deltaTime);
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        Debug.Log("Ground : " + collision.transform.tag);
-          
-    }
     /// <summary>
     /// Jump
     /// </summary>
     void Jump()
     {
-        if (keyState[(int)Key.Space])
+        if (!keyState[(int)Key.Space])
+            return;
+        //moveDirection.y = 30f;
+        //keyState[(int)Key.Space] = false;
+        
+        if (jumpTimer <= 0.2f)
         {
-            if (jumpTimer < 0.5f)
-            {
-                jumpTimer += Time.deltaTime;
-                moveDirection.y = 20f;
-            }
-            else
-            {
-                jumpTimer = 0f;
-                keyState[(int)Key.Space] = false;
-            }
+            jumpTimer += Time.deltaTime;
+            moveDirection.y = jumpSpeed;
+        }
+        else
+        {
+            jumpTimer = 0f;
+            keyState[(int)Key.Space] = false;
         }
     }
+
 
     /// <summary>
     /// Gravity
     /// </summary>
     void Fall()
     {
-        if (!playerController.isGrounded)
-            moveDirection.y -= (Gravity * Time.deltaTime);
+        if (IsGroundedFromServer)
+            return;
+        moveDirection.y -= gravity;
     }
 
     /// <summary>
@@ -121,7 +119,6 @@ public class Player : MonoBehaviour
     /// <param name="pos"></param>
     public void TakeDamage(Vector3 pos)
     {
-
     }
 
     /// <summary>
@@ -130,7 +127,7 @@ public class Player : MonoBehaviour
     public void Death()
     {
         //모두 정지
-        Debug.Log("저 터져욧");
+        Debug.Log("저 주거욧");
         Destroy(this.gameObject);
     }
 
@@ -164,4 +161,5 @@ public class Player : MonoBehaviour
     {
         weaponManagerSc = this.gameObject.AddComponent<PlayerWeaponManager>();
     }
+
 }
