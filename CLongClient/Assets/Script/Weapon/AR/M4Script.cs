@@ -12,6 +12,8 @@ class M4Script : ARBase
         damage = 30;
         shellSpeed = 50;
         ShootPeriod = 5;
+        reboundIntensity = 2;
+        reboundRecoveryTime = 2;
     }
 }
 

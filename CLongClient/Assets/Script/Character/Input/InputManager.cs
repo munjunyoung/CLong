@@ -27,9 +27,12 @@ public class InputManager : MonoBehaviour
     public int currentHealth = 100;
     public Slider healthSlider;
 
-    //SendCheck;
-    bool sendCheckFall = false;
-    bool sendCheckGround = false;
+    //Aim
+    public Camera cam;
+    private Vector3 shellDirection = Vector3.zero;
+    //Aim Rebound
+    public Transform[] aimImage = new Transform[4];
+    //public float ReboundTotalValue = 0; //반동상태 확인
 
     private void Start()
     {
@@ -49,6 +52,7 @@ public class InputManager : MonoBehaviour
         {
             SendKeyData();
             SendAngleYData();
+            ReturnAim();
         }
     }
 
@@ -160,7 +164,9 @@ public class InputManager : MonoBehaviour
         {
             if (shootPeriodCount > myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].ShootPeriod)
             {
-                NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.eulerAngles)));
+                ReboundShell();
+                NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(shellDirection)));
+                AimRebound();
                 shootPeriodCount = 0;
             }
             shootPeriodCount++;
@@ -177,33 +183,7 @@ public class InputManager : MonoBehaviour
         {
             if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 1)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
-        }
-        
-        /*
-        // Gravity (이부분은 우선적으로 변경한다, 현재 서버에 맵관련 데이터가 없기 때문에)
-        if (IsGroundedFunc())
-        {
-            if (!sendCheckGround) //착지 했을경우(메시지를 한번만 보내기 위해) myplayer.isGrounded를 수정
-            {
-                NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
-                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, true));
-                sendCheckGround = true;
-                sendCheckFall = false;
-            }
-        }
-        //클라이언트상에선 현재 땅에 떨어졌을경우 서버에 전송하여 myplayer의 IsgroundedServer변수가 바뀌면 함수를 실행하게 하기 위해
-        else
-        {
-            if (!sendCheckFall)
-            {
-                NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
-                NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, false));
-                sendCheckFall = true;
-                sendCheckGround = false;
-            }
-        }
-        */
-        
+        } 
     }
 
     #region Turning
@@ -242,6 +222,46 @@ public class InputManager : MonoBehaviour
     }
     #endregion
 
+    /// <summary>
+    /// 실제 총알이 도착할곳 리바운드
+    /// </summary>
+    void ReboundShell()
+    {
+        //정중앙 (반동추가)
+        var ShellDestination = cam.ScreenToWorldPoint(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+        shellDirection= (myPlayer.weaponManagerSc.fireTransform.position - ShellDestination).normalized;
+    }
+
+    /// <summary>
+    /// Rebound Image 벌어지기
+    /// </summary>
+    void AimRebound()
+    {
+        foreach(var a in aimImage)
+        {
+            //25이상 더이상 안벌어지도록
+            if (a.localPosition.x >= 30)
+            {
+                a.localPosition = Vector3.right * 30f;
+                return;
+            }
+            //Aim 이동
+            a.Translate(Vector3.right * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundIntensity);
+        }
+    }
+    
+    /// <summary>
+    /// Return Aim Image
+    /// </summary>
+    void ReturnAim()
+    {
+        if (aimImage[0].localPosition.x.Equals(10))
+            return;
+        
+        foreach(var a in aimImage)
+            a.localPosition = Vector3.Lerp(a.transform.localPosition, new Vector3(10f, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundRecoveryTime);
+    }
+    
     /// <summary>
     /// set player HealthUI 
     /// when takeDamge, and startGame Setting

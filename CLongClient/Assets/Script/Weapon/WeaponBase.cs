@@ -12,7 +12,8 @@ public class WeaponBase : MonoBehaviour
     protected int damage; // 총기 데미지
     protected int shellSpeed; // 총알이 날아가는 속도
     public int ShootPeriod; // 연사속도
-    protected int reboundIntensity; // 반동세기
+    public float reboundIntensity; // 반동세기
+    public float reboundRecoveryTime;//반동회복?
     //Material material;
     //Shell
     protected string shellType; //사용하는 총알의 종류

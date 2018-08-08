@@ -31,6 +31,8 @@ public class Player : MonoBehaviour
     private float jumpSpeed = 30f;
     private float jumpTimer = 0f;
 
+    //Rebound
+
     public GameObject GroundCheckObject;
     
 
@@ -111,6 +113,7 @@ public class Player : MonoBehaviour
     public void Shoot(int num, Vector3 pos, Vector3 rot)
     {
         weaponManagerSc.Shoot(num, pos, rot);
+        
     }
 
     /// <summary>

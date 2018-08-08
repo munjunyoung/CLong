@@ -13,5 +13,7 @@ public class AKscript : ARBase
         damage = 50;
         shellSpeed = 50;
         ShootPeriod = 5;
+        reboundIntensity = 3;
+        reboundRecoveryTime = 2f;
     }
 }

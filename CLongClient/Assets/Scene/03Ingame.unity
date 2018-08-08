@@ -345,6 +345,12 @@ MonoBehaviour:
   myPlayer: {fileID: 0}
   currentHealth: 100
   healthSlider: {fileID: 1965001197}
+  cam: {fileID: 783572679}
+  aimImage:
+  - {fileID: 1678395980}
+  - {fileID: 1749623792}
+  - {fileID: 1467514813}
+  - {fileID: 1416684623}
 --- !u!4 &522547198
 Transform:
   m_ObjectHideFlags: 0
