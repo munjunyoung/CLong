@@ -17,7 +17,8 @@ namespace CLongServer.Ingame
     {
         public bool gameStartState = false;
         public int gameRoomNumber = 0;
-
+        
+        //처음 시작 포지션 설정
         List<Vector3> StartPosList = new List<Vector3>();
         public Dictionary<int, ClientTCP> playerDic = new Dictionary<int, ClientTCP>();
 
@@ -29,6 +30,19 @@ namespace CLongServer.Ingame
         //UDP
         public UdpNetwork udpServer;
 
+        //Ingame
+        public int CurrentRount = 1;
+        enum TeamColor { BLUE=0, RED };
+        enum Result { WIN , LOSE, DRAW};
+
+        //한명죽음-> 다른사람죽었을때 라운드 정리 -> 2:0이면 매칭결과 -> 1:1 이면 3라운드 -> 2:1 매칭결과
+        //맞았을경우에 체크하므로 드로우가 나올경우가있음
+        //다른사람이 나갈경우 매칭결과 호출
+        //필요한것 -> 라운드 포인트를 저장할수 있는 팀관련 변수
+        
+
+
+
         #region GameRoom
         /// <summary>
         /// Constructor
@@ -39,6 +53,31 @@ namespace CLongServer.Ingame
             //UdpClient 생성
             udpServer = new UdpNetwork(Program.ep);
             SetStartPos();
+            
+        }
+
+        /// <summary>
+        /// 매칭결과
+        /// </summary>
+        public void MatchingResult()
+        {
+
+        }
+
+        /// <summary>
+        /// Round Process
+        /// </summary>
+        public void RoundProcess()
+        {
+            
+        }
+
+        /// <summary>
+        /// 라운드 
+        /// </summary>
+        public void RoundResult()
+        {
+            
         }
 
         /// <summary>
@@ -59,12 +98,13 @@ namespace CLongServer.Ingame
             //Handler Set
             c.ProcessHandler += IngameDataRequestTCP;
             udpServer.ProcessHandler += IngameDataRequestUDP;
+            
             //Dic add
             playerDic.Add(c.numberInGame, c);
             //게임시작 통보
             playerDic[c.numberInGame].Send(new StartGameReq());
             //해당 클라이언트 생성 통보
-            playerDic[c.numberInGame].Send(new ClientIns(c.numberInGame, c.currentPos, true, sendWeaponArray));
+            playerDic[c.numberInGame].Send(new ClientIns(c.numberInGame, c.currentPos, c.ingame, sendWeaponArray));
             //다른 클라이언트들에게 현재 생성하는 클라이언트 생성 통보
             //현재 생성되는 클라이언트에선 이미 존재하고있는 클라이언트들의 존재 생성
             foreach (var cl in playerDic)
@@ -159,7 +199,7 @@ namespace CLongServer.Ingame
                     }
                     break;
                 case "ExitReq":
-                    c.Close();
+                    ClosePlayer(c);
                     break;
                 default:
                     Console.WriteLine("[INGAME PROCESS] TCP : Mismatching Message");
@@ -194,6 +234,16 @@ namespace CLongServer.Ingame
         }
 
         /// <summary>
+        /// exit Player Remove
+        /// </summary>
+        /// <param name="c"></param>
+        private void ClosePlayer(ClientTCP c)
+        {
+            playerDic.Remove(c.numberInGame);
+            c.Close();
+        }
+
+        /// <summary>
         /// Start Pos 
         /// </summary>
         public void SetStartPos()
@@ -201,13 +251,9 @@ namespace CLongServer.Ingame
             //1.1f 인 이유는 skinwidth
             StartPosList.Add(new Vector3(5,  1f, 5));
             StartPosList.Add(new Vector3(10, 1f, 10));
-            StartPosList.Add(new Vector3(20, 1f, 10));
-            StartPosList.Add(new Vector3(30, 1f, 10));
-            StartPosList.Add(new Vector3(40, 1f, 10));
         }
     }
 }
-
 
 /*
   //StartGameReq 받았을 경우 스레드 초기화를위해

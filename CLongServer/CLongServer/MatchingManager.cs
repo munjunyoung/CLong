@@ -18,6 +18,7 @@ namespace CLongServer
        /// <param name="c"></param>
         public static void MatchingProcess(ClientTCP c)
         {
+            
             //처음 큐를 눌렀을 경우 RoomList를 검색한후 아직 시작하지 않은게임에 참가
             foreach(var r in GameRoomManager.roomList)
             {
@@ -27,7 +28,7 @@ namespace CLongServer
                     return;
                 }
             }
-
+            
             //방이 존재하지 않으면 queue list 추가
             ClientEnqueue(c);
         }

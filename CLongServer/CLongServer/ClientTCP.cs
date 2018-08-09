@@ -13,7 +13,7 @@ using CLongServer.Ingame;
 
 namespace CLongServer
 {
-    class ClientTCP
+    public class ClientTCP
     { 
         //Socket
         TcpClient clientTcp;

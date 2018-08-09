@@ -8,7 +8,6 @@ public class IngameNetwork : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         NetworkManagerTCP.TcpConnectToServer();
-        Application.runInBackground = true;
 	}
 
     private void Update()
@@ -21,6 +20,9 @@ public class IngameNetwork : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// 강제종료등 게임을 종료할 경우
+    /// </summary>
     private void OnApplicationQuit()
     {
         NetworkManagerTCP.SendTCP(new ExitReq());
