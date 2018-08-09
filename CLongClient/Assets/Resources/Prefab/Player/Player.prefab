@@ -71,9 +71,9 @@ GameObject:
   - component: {fileID: 4568179489527022}
   - component: {fileID: 33786042681379484}
   - component: {fileID: 23441289597963346}
+  - component: {fileID: 54389409853487792}
   - component: {fileID: 64057944407584514}
   - component: {fileID: 114270860242339742}
-  - component: {fileID: 54389409853487792}
   m_Layer: 0
   m_Name: GroundCheckObject
   m_TagString: Untagged
@@ -351,6 +351,7 @@ MonoBehaviour:
   equipWeaponArray:
   - 
   - 
+  equipPosObjectList: []
   fireTransform: {fileID: 0}
 --- !u!114 &114805133396981468
 MonoBehaviour:

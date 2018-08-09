@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class CameraManager : MonoBehaviour {
 
-    public Transform playerObject;
-    public Transform playerUpperBody;
-    
-    private float camBackDistance = 5f;
-    private float camHeightDistance = 3f;
+    public Transform playerObject = null;
+    public Transform playerUpperBody = null;
+    /// <summary>
+    /// Cam Distance -> 기본 : 5,3 조준 2~2,5 , 0
+    /// </summary>
+    public float camBackDistance = 5f;
+    public float camHeightDistance = 3f;
 
     private void Update()
     {
-        if (playerObject != null)
-        {
+        if (playerObject!=null)
             FollowCam();
-        }
     }
 
     /// <summary>
@@ -29,6 +29,7 @@ public class CameraManager : MonoBehaviour {
         transform.position = newPos;
         //transform.LookAt(playerUpperBody);
         transform.eulerAngles = new Vector3(playerUpperBody.eulerAngles.x, playerUpperBody.eulerAngles.y, 0);
+       
     }
     /// <summary>
     /// Zoom 

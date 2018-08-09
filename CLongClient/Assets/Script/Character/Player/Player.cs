@@ -30,15 +30,8 @@ public class Player : MonoBehaviour
     private float gravity = 10f;
     private float jumpSpeed = 30f;
     private float jumpTimer = 0f;
-
-    //Rebound
-
     public GameObject GroundCheckObject;
     
-
-    private void Awake()
-    {
-    }
     private void FixedUpdate()
     {
         Move();
@@ -56,9 +49,6 @@ public class Player : MonoBehaviour
 
         moveDirection = new Vector3(a + d, 0, w + s);
         moveDirection.Normalize();
-
-        
-
         moveDirection = transform.TransformDirection(moveDirection);
         moveDirection *= moveSpeed;
 
@@ -68,8 +58,6 @@ public class Player : MonoBehaviour
         Fall();
 
         playerController.Move(moveDirection * Time.deltaTime);
-        //  Debug.Log(playerController.isGrounded);
-        //playerController.Move(moveDirection * Time.deltaTime);
     }
 
     /// <summary>
@@ -79,8 +67,6 @@ public class Player : MonoBehaviour
     {
         if (!keyState[(int)Key.Space])
             return;
-        //moveDirection.y = 30f;
-        //keyState[(int)Key.Space] = false;
         
         if (jumpTimer <= 0.2f)
         {
@@ -113,7 +99,6 @@ public class Player : MonoBehaviour
     public void Shoot(int num, Vector3 pos, Vector3 rot)
     {
         weaponManagerSc.Shoot(num, pos, rot);
-        
     }
 
     /// <summary>
@@ -122,6 +107,7 @@ public class Player : MonoBehaviour
     /// <param name="pos"></param>
     public void TakeDamage(Vector3 pos)
     {
+
     }
 
     /// <summary>

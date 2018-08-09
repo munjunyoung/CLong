@@ -345,6 +345,7 @@ MonoBehaviour:
   myPlayer: {fileID: 0}
   currentHealth: 100
   healthSlider: {fileID: 1965001197}
+  takeAimState: 0
   cam: {fileID: 783572679}
   aimImage:
   - {fileID: 1678395980}
@@ -475,6 +476,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerObject: {fileID: 0}
   playerUpperBody: {fileID: 0}
+  camBackDistance: 5
+  camHeightDistance: 3
 --- !u!1 &868549756
 GameObject:
   m_ObjectHideFlags: 0

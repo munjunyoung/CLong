@@ -28,6 +28,7 @@ public class InputManager : MonoBehaviour
     public Slider healthSlider;
 
     //Aim
+    public bool takeAimState = false;
     public Camera cam;
     private Vector3 shellDirection = Vector3.zero;
     //Aim Rebound
@@ -52,7 +53,11 @@ public class InputManager : MonoBehaviour
         {
             SendKeyData();
             SendAngleYData();
-            ReturnAim();
+            
+            ReturnAimImage();
+            TakeAim();
+            Ray ray = cam.ScreenPointToRay(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+            Debug.DrawRay(ray.origin, ray.direction * 100, Color.yellow);
         }
     }
 
@@ -156,7 +161,7 @@ public class InputManager : MonoBehaviour
         if (Input.GetKeyDown(KeyList[(int)Key.Space]))
         {
             //if (IsGroundedFunc())
-                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
+            NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
         }
 
         //Shooting
@@ -164,9 +169,8 @@ public class InputManager : MonoBehaviour
         {
             if (shootPeriodCount > myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].ShootPeriod)
             {
-                ReboundShell();
-                NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(shellDirection)));
-                AimRebound();
+                NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(ReboundShell())));
+                ReboundAimImage();
                 shootPeriodCount = 0;
             }
             shootPeriodCount++;
@@ -183,7 +187,7 @@ public class InputManager : MonoBehaviour
         {
             if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 1)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
-        } 
+        }
     }
 
     #region Turning
@@ -222,22 +226,59 @@ public class InputManager : MonoBehaviour
     }
     #endregion
 
+    #region Aim
+    /// <summary>
+    /// 인게임에서 조준(총의 위치와 카메라 위치 변경)Zoom
+    /// </summary>
+    void TakeAim()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (!takeAimState)
+            {
+                //카메라에 직접선언?
+                cam.GetComponent<CameraManager>().camBackDistance = 0.5f;
+                cam.GetComponent<CameraManager>().camHeightDistance = 1.3f;
+                myPlayer.weaponManagerSc.equipPosObjectList[0].localPosition = new Vector3(0, -1f, 1f);
+                takeAimState = true;
+            }
+            else
+            {
+
+                cam.GetComponent<CameraManager>().camBackDistance = 5f;
+                cam.GetComponent<CameraManager>().camHeightDistance = 3f;
+                myPlayer.weaponManagerSc.equipPosObjectList[0].localPosition = new Vector3(0.5f, -1f, 1f);
+                takeAimState = false;
+            }
+        }
+        //카메라 포지션변경
+        
+        //총의 포지션 변경
+
+        
+    }
+
     /// <summary>
     /// 실제 총알이 도착할곳 리바운드
     /// </summary>
-    void ReboundShell()
+    Vector3 ReboundShell()
     {
         //정중앙 (반동추가)
-        var ShellDestination = cam.ScreenToWorldPoint(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
-        shellDirection= (myPlayer.weaponManagerSc.fireTransform.position - ShellDestination).normalized;
+        var ShellDestination = cam.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 100f));
+        
+        
+        shellDirection = (ShellDestination - myPlayer.weaponManagerSc.fireTransform.position).normalized;
+        Debug.Log(shellDirection);
+        return shellDirection;
     }
+
 
     /// <summary>
     /// Rebound Image 벌어지기
     /// </summary>
-    void AimRebound()
+    void ReboundAimImage()
     {
-        foreach(var a in aimImage)
+        foreach (var a in aimImage)
         {
             //25이상 더이상 안벌어지도록
             if (a.localPosition.x >= 30)
@@ -249,19 +290,20 @@ public class InputManager : MonoBehaviour
             a.Translate(Vector3.right * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundIntensity);
         }
     }
-    
+
     /// <summary>
     /// Return Aim Image
     /// </summary>
-    void ReturnAim()
+    void ReturnAimImage()
     {
         if (aimImage[0].localPosition.x.Equals(10))
             return;
-        
-        foreach(var a in aimImage)
+
+        foreach (var a in aimImage)
             a.localPosition = Vector3.Lerp(a.transform.localPosition, new Vector3(10f, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundRecoveryTime);
     }
-    
+    #endregion
+
     /// <summary>
     /// set player HealthUI 
     /// when takeDamge, and startGame Setting
@@ -285,13 +327,10 @@ public class InputManager : MonoBehaviour
         KeyList.Add(KeyCode.A);
         KeyList.Add(KeyCode.S);
         KeyList.Add(KeyCode.D);
-
         //Run
         KeyList.Add(KeyCode.LeftShift);
-
         //Seat
         KeyList.Add(KeyCode.LeftControl);
-
         //Sneak
         KeyList.Add(KeyCode.Z);
         //Swap
@@ -299,22 +338,5 @@ public class InputManager : MonoBehaviour
         KeyList.Add(KeyCode.Alpha2);
         //Jump
         KeyList.Add(KeyCode.Space);
-    }
-
-    /// <summary>
-    /// 현재 땅위에 있는지 확인
-    /// </summary>
-    /// <returns></returns>
-    public bool IsGroundedFunc()
-    {
-        Ray ray = new Ray(myPlayer.transform.position, Vector3.down);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 1.1f))
-        {
-            if (hit.collider.tag == "Ground")
-                return true;
-            
-        }
-        return false;
     }
 }

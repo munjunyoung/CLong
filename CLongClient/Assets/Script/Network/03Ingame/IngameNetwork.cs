@@ -14,7 +14,7 @@ public class IngameNetwork : MonoBehaviour {
     private void Update()
     {
         //마우스 오른쪽 버튼 클릭 시 queue entry.. 일단 만들어둠
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetKeyDown(KeyCode.F1)) 
         {
             if (!GameObject.Find("AllSceneManager").GetComponent<NetworkProcess>().Ingame) 
                 NetworkManagerTCP.SendTCP(new QueueEntry());

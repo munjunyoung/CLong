@@ -11,7 +11,7 @@ public class PlayerWeaponManager : MonoBehaviour
     public int currentWeaponEquipNum; // 현재 장착하고 있는 무기 번호
     //서버에서 받은 weaponEquip String을 통해 ins
     public string[] equipWeaponArray = new string[2];
-    private List<Transform> equipPos = new List<Transform>();
+    public List<Transform> equipPosObjectList = new List<Transform>();
     //Shoot Transform to send to Server
     public Transform fireTransform;
 
@@ -49,9 +49,9 @@ public class PlayerWeaponManager : MonoBehaviour
         prefabWeaponSc.equipWeaponNum = weaponDic.Count();
         weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
         if (prefabWeaponSc.equipWeaponNum == 0)
-            weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPos[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
+            weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
         else if (prefabWeaponSc.equipWeaponNum == 1)
-            weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPos[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
+            weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
         
         weaponDic[prefabWeaponSc.equipWeaponNum].transform.localPosition = Vector3.zero;
         weaponDic[prefabWeaponSc.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
@@ -63,8 +63,8 @@ public class PlayerWeaponManager : MonoBehaviour
     /// </summary>
     private void SetEquipPos()
     {
-        equipPos.Add(transform.Find("PlayerUpperBody").transform.Find("WeaponEquip"));
-        equipPos.Add(transform.Find("WeaponBackEquip"));
+        equipPosObjectList.Add(transform.Find("PlayerUpperBody").transform.Find("WeaponEquip"));
+        equipPosObjectList.Add(transform.Find("WeaponBackEquip"));
     }
 
     /// <summary>
@@ -77,19 +77,19 @@ public class PlayerWeaponManager : MonoBehaviour
         {
             case 1:
                 currentWeaponEquipNum = 0;
-                weaponDic[0].transform.parent = equipPos[0];
+                weaponDic[0].transform.parent = equipPosObjectList[0];
                 weaponDic[0].transform.localPosition = Vector3.zero;
                 weaponDic[0].transform.localEulerAngles = Vector3.zero;
-                weaponDic[1].transform.parent = equipPos[1];
+                weaponDic[1].transform.parent = equipPosObjectList[1];
                 weaponDic[1].transform.localPosition = Vector3.zero;
                 weaponDic[1].transform.localEulerAngles = Vector3.zero;
                 break;
             case 2:
                 currentWeaponEquipNum = 1;
-                weaponDic[1].transform.parent = equipPos[0];
+                weaponDic[1].transform.parent = equipPosObjectList[0];
                 weaponDic[1].transform.localPosition = Vector3.zero;
                 weaponDic[1].transform.localEulerAngles = Vector3.zero;
-                weaponDic[0].transform.parent = equipPos[1];
+                weaponDic[0].transform.parent = equipPosObjectList[1];
                 weaponDic[0].transform.localPosition = Vector3.zero;
                 weaponDic[0].transform.localEulerAngles = Vector3.zero;
                 break;

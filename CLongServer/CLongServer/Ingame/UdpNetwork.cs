@@ -143,7 +143,7 @@ namespace CLongServer.Ingame
             var tempSize = 0;
             while (totalSize > tempSize)
             {
-                var bodySize = _tempBufferSocket[tempSize];
+                var bodySize = BitConverter.ToInt32(_tempBufferSocket, tempSize);
                 byte[] bodyBuf = new byte[1024];
 
                 Array.Copy(_tempBufferSocket, tempSize + headSize, bodyBuf, 0, bodySize);
