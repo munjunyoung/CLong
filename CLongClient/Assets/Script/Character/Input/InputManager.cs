@@ -28,11 +28,13 @@ public class InputManager : MonoBehaviour
     public Slider healthSlider;
 
     //Aim
-    public bool takeAimState = false;
+    public bool zoomState = false;
     public Camera cam;
     private Vector3 shellDirection = Vector3.zero;
+    private float aimImageStartPosValue = 10f; //조준상태가 아닐경우 에임 이미지 위치 넓히기위함
     //Aim Rebound
     public Transform[] aimImage = new Transform[4];
+    private float ReboundValue = 0f;
     //public float ReboundTotalValue = 0; //반동상태 확인
 
     private void Start()
@@ -55,9 +57,6 @@ public class InputManager : MonoBehaviour
             SendAngleYData();
             
             ReturnAimImage();
-            TakeAim();
-            Ray ray = cam.ScreenPointToRay(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
-            Debug.DrawRay(ray.origin, ray.direction * 100, Color.yellow);
         }
     }
 
@@ -163,19 +162,7 @@ public class InputManager : MonoBehaviour
             //if (IsGroundedFunc())
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
         }
-
-        //Shooting
-        if (Input.GetMouseButton(0))
-        {
-            if (shootPeriodCount > myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].ShootPeriod)
-            {
-                NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(ReboundShell())));
-                ReboundAimImage();
-                shootPeriodCount = 0;
-            }
-            shootPeriodCount++;
-        }
-
+        
         //WeaponSwap
         if (Input.GetKeyDown(KeyList[(int)Key.Alpha1]))
         {
@@ -188,13 +175,31 @@ public class InputManager : MonoBehaviour
             if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 1)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
         }
+
+        //Shooting
+        if (Input.GetMouseButton(0))
+        {
+            if (shootPeriodCount > myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].ShootPeriod)
+            {
+                NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(ReboundShell())));
+                shootPeriodCount = 0;
+            }
+            shootPeriodCount++;
+        }
+        //Zoom
+        if (Input.GetMouseButtonDown(1))
+        {
+            zoomState = zoomState ? false : true;
+            ZoomFunc(zoomState);
+            //SendData
+        }
     }
 
-    #region Turning
-    /// <summary>
-    /// Player Turning
-    /// </summary>
-    void Tunring()
+        #region Turning
+        /// <summary>
+        /// Player Turning
+        /// </summary>
+        void Tunring()
     {
         xRot += Input.GetAxis("Mouse X") * xSens;
         yRot += Input.GetAxis("Mouse Y") * ySens;
@@ -230,77 +235,76 @@ public class InputManager : MonoBehaviour
     /// <summary>
     /// 인게임에서 조준(총의 위치와 카메라 위치 변경)Zoom
     /// </summary>
-    void TakeAim()
+    public void ZoomFunc(bool zoomStateValue)
     {
-        if (Input.GetMouseButtonDown(1))
-        {
-            if (!takeAimState)
-            {
-                //카메라에 직접선언?
-                cam.GetComponent<CameraManager>().camBackDistance = 0.5f;
-                cam.GetComponent<CameraManager>().camHeightDistance = 1.3f;
-                myPlayer.weaponManagerSc.equipPosObjectList[0].localPosition = new Vector3(0, -1f, 1f);
-                takeAimState = true;
-            }
-            else
-            {
-
-                cam.GetComponent<CameraManager>().camBackDistance = 5f;
-                cam.GetComponent<CameraManager>().camHeightDistance = 3f;
-                myPlayer.weaponManagerSc.equipPosObjectList[0].localPosition = new Vector3(0.5f, -1f, 1f);
-                takeAimState = false;
-            }
-        }
-        //카메라 포지션변경
-        
-        //총의 포지션 변경
-
-        
+            //카메라 포지션변경
+            cam.GetComponent<CameraManager>().ZoomSetCamPos(zoomStateValue);
+            //총의 포지션 변경
+            myPlayer.weaponManagerSc.ZoomSetEquipPos(zoomStateValue);
+            //AimImage 변경
+            aimImageStartPosValue = zoomStateValue ? 0 : 10f;
+            foreach (var a in aimImage)
+                a.transform.localPosition = new Vector3(aimImageStartPosValue, 0f, 0f);
     }
 
     /// <summary>
     /// 실제 총알이 도착할곳 리바운드
     /// </summary>
-    Vector3 ReboundShell()
+    private Vector3 ReboundShell()
     {
         //정중앙 (반동추가)
-        var ShellDestination = cam.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 100f));
-        
-        
-        shellDirection = (ShellDestination - myPlayer.weaponManagerSc.fireTransform.position).normalized;
-        Debug.Log(shellDirection);
+        var ShellDestination = cam.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f + Random.Range(-ReboundValue,ReboundValue), Screen.height * 0.5f + Random.Range(-ReboundValue, ReboundValue), 100f));
+      
+        myPlayer.weaponManagerSc.fireTransform.LookAt(ShellDestination);
+        var shellDirection = myPlayer.weaponManagerSc.fireTransform.eulerAngles;
+
         return shellDirection;
     }
 
 
     /// <summary>
-    /// Rebound Image 벌어지기
+    /// when Shoot, Rebound Image Pos Increas
     /// </summary>
-    void ReboundAimImage()
+    public void ReboundAimImage()
     {
         foreach (var a in aimImage)
         {
             //25이상 더이상 안벌어지도록
-            if (a.localPosition.x >= 30)
+            if (a.localPosition.x >= 25)
             {
-                a.localPosition = Vector3.right * 30f;
+                a.localPosition = Vector3.right * 25f;
+                ReboundValue = aimImage[0].localPosition.x;
                 return;
             }
             //Aim 이동
             a.Translate(Vector3.right * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundIntensity);
+            ReboundValue = aimImage[0].localPosition.x;
         }
     }
-
+    
     /// <summary>
     /// Return Aim Image
     /// </summary>
-    void ReturnAimImage()
+    private void ReturnAimImage()
     {
-        if (aimImage[0].localPosition.x.Equals(10))
+        if (aimImage[0].localPosition.x.Equals(aimImageStartPosValue))
             return;
 
         foreach (var a in aimImage)
-            a.localPosition = Vector3.Lerp(a.transform.localPosition, new Vector3(10f, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundRecoveryTime);
+            a.localPosition = Vector3.Slerp(a.transform.localPosition, new Vector3(aimImageStartPosValue, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundRecoveryTime);
+
+        ReboundValue = aimImage[0].localPosition.x;
+    }
+
+    /// <summary>
+    /// Cam Rebound
+    /// </summary>
+    public void ReboundPlayerRotation()
+    {
+        var reboundValue = myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundIntensity;
+        yRot += (reboundValue*0.1f);
+        xRot += Random.Range(-reboundValue * 0.5f, reboundValue * 0.5f);
+        NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y, myPlayer.playerUpperBody.eulerAngles.x));
     }
     #endregion
 

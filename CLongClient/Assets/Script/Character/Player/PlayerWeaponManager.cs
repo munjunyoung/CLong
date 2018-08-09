@@ -22,7 +22,7 @@ public class PlayerWeaponManager : MonoBehaviour
         WeaponEquip(equipWeaponArray);
 
     }
-   
+
     /// <summary>
     /// Weapon Equip - Create Weapon
     /// </summary>
@@ -36,7 +36,7 @@ public class PlayerWeaponManager : MonoBehaviour
         //... 2,3,4,5 weapon ins
         fireTransform = weaponDic[currentWeaponEquipNum].transform.Find("FirePosition");
     }
-    
+
     /// <summary>
     /// Create Weapon
     /// </summary>
@@ -52,7 +52,7 @@ public class PlayerWeaponManager : MonoBehaviour
             weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
         else if (prefabWeaponSc.equipWeaponNum == 1)
             weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[weaponPrefab.GetComponent<WeaponBase>().equipWeaponNum];
-        
+
         weaponDic[prefabWeaponSc.equipWeaponNum].transform.localPosition = Vector3.zero;
         weaponDic[prefabWeaponSc.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
         //FireTransform 
@@ -73,7 +73,7 @@ public class PlayerWeaponManager : MonoBehaviour
     /// <param name="weapon"></param>
     public void WeaponChange(int num)
     {
-        switch(num)
+        switch (num)
         {
             case 1:
                 currentWeaponEquipNum = 0;
@@ -111,11 +111,10 @@ public class PlayerWeaponManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Rebound
+    /// 정조준시 무기위치 변경
     /// </summary>
-    public void AimRebound()
+    public void ZoomSetEquipPos(bool zoomState)
     {
-        //weaponDic[currentWeaponEquipNum].reboundIntensity;
-        
+        equipPosObjectList[0].localPosition = zoomState ? new Vector3(0, -1f, 1f) : new Vector3(0.5f, -1f, 1f);
     }
 }

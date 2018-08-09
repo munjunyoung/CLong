@@ -90,17 +90,7 @@ public class Player : MonoBehaviour
             return;
         moveDirection.y -= gravity;
     }
-
-    /// <summary>
-    /// Player Shoot Func , call weaponManager Shoot Func
-    /// </summary>
-    /// <param name="pos"></param>
-    /// <param name="rot"></param>
-    public void Shoot(int num, Vector3 pos, Vector3 rot)
-    {
-        weaponManagerSc.Shoot(num, pos, rot);
-    }
-
+    
     /// <summary>
     /// 맞은위치 pos을 받아와 데미지 이펙트 처리
     /// </summary>

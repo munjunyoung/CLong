@@ -46,10 +46,7 @@ public class WeaponBase : MonoBehaviour
         //var weaponFireTransform = transform.Find("FirePosition").transform;
         var tmpShellSc = shellPrefab.GetComponent<ShellScript>();
         tmpShellSc.transform.localPosition = pos;
-        var eulerVector = tmpShellSc.transform.eulerAngles;
-        
-        //tmpShellSc.transform.eulerAngles = rot;
-        //tmpShellSc.transform.localEulerAngles = rot;
+        tmpShellSc.transform.eulerAngles = rot;
         tmpShellSc.shellSpeed = shellSpeed;
         tmpShellSc.clientNum = num;
         tmpShellSc.damage = damage;

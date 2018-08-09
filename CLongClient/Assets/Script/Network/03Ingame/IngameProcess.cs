@@ -46,7 +46,12 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "InsShell":
                 var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
-                playerList[shellData.ClientNum].Shoot(shellData.ClientNum, ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
+                playerList[shellData.ClientNum].weaponManagerSc.Shoot(shellData.ClientNum, ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
+                //총알이 발사가 실행된 후 반동이 실행되도록 
+                if (!shellData.ClientNum.Equals(clientPlayerNum))
+                    return;
+                inputSc.ReboundPlayerRotation();
+                inputSc.ReboundAimImage();
                 break;
             case "SyncHealth":
                 var healthData = JsonConvert.DeserializeObject<SyncHealth>(p.Data);
@@ -119,10 +124,24 @@ public class IngameProcess : MonoBehaviour
                 playerList[num].moveSpeed = 1f;
                 break;
             case "Alpha1":
+                //무기 스왑시 조준 풀기
                 playerList[num].weaponManagerSc.WeaponChange(1);
+                if (!num.Equals(clientPlayerNum))
+                    return;
+                if (!inputSc.zoomState)
+                    return;
+                var z1 = inputSc.zoomState = false;
+                inputSc.ZoomFunc(z1);
                 break;
             case "Alpha2":
+                //무기 스왑시 조준 풀기
                 playerList[num].weaponManagerSc.WeaponChange(2);
+                if (!num.Equals(clientPlayerNum))
+                    return;
+                if (!inputSc.zoomState)
+                    return;
+                var z2 = inputSc.zoomState = false;
+                inputSc.ZoomFunc(z2);
                 break;
             case "Space":
                 playerList[num].keyState[(int)Key.Space] = true;

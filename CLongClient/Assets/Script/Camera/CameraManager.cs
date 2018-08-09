@@ -9,8 +9,8 @@ public class CameraManager : MonoBehaviour {
     /// <summary>
     /// Cam Distance -> 기본 : 5,3 조준 2~2,5 , 0
     /// </summary>
-    public float camBackDistance = 5f;
-    public float camHeightDistance = 3f;
+    private float camBackDistance = 5f;
+    private float camHeightDistance = 3f;
 
     private void Update()
     {
@@ -32,7 +32,11 @@ public class CameraManager : MonoBehaviour {
        
     }
     /// <summary>
-    /// Zoom 
+    /// Zoom State
     /// </summary>
-    void Zoom() { }
+    public void ZoomSetCamPos(bool zoomState)
+    {
+        camBackDistance = zoomState ? 0.5f : 5f;
+        camHeightDistance = zoomState ? 1.5f : 3f;
+    }
 }
