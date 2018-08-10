@@ -29,10 +29,18 @@ namespace CLongServer
         public delegate void myEventHandler<T>(object sender, Packet p);
         public event myEventHandler<Packet> ProcessHandler;
 
+        #region InGame
         //Ingame 
         public bool ingame = false;
         public int numberInGame = 0;
-        
+        public TeamColor Team;
+        //클라이언트에서 자신의 플레이어가 생성되었을때 보내는 패킷을 통해 ready(이후 타이머실행)
+        public bool ReadyCheck = false;
+
+        //Health
+        public int currentHealth = 100;
+        public bool isAlive = false;
+
         //Move
         public bool[] moveMentsKey = new bool[4];
         public List<Stopwatch> moveTimer = new List<Stopwatch>();
@@ -46,8 +54,6 @@ namespace CLongServer
         public Weapon[] weaponEqupArray = new Weapon[2];
         public int currentEquipWeaponNum = 0;
 
-        //Health
-        public int currentHealth = 100;
         
         //Action State 0 = None , 1 = Run , 2 = Seat , 3 = Lie , 4 = Fall
         public int actionState;
@@ -60,7 +66,8 @@ namespace CLongServer
         //Fall 
         public Stopwatch FallTimer = new Stopwatch();
         public bool isGrounded = true;
-        
+
+        #endregion
         /// <summary>
         /// Constructor .. Stream Save;
         /// </summary>

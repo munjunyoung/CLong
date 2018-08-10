@@ -1,6 +1,8 @@
 ﻿using CLongLib;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.UI;
+using tcpNet;
 
 public class IngameProcess : MonoBehaviour
 {
@@ -14,6 +16,11 @@ public class IngameProcess : MonoBehaviour
     //Player InputManager reference
     public InputManager inputSc;
 
+    //UI
+    public GameObject TimerPanel;
+    public Text TimerText;
+    public int TimerState = 0;  //0 : 시작타이머, 1 : 라운드 종료 타이머
+    public int currentRound = 0; // 현재 라운드
 
     //private List<GameObject> playerList = new List<GameObject>();
     /// <summary>
@@ -27,6 +34,19 @@ public class IngameProcess : MonoBehaviour
             case "ClientIns":
                 var clientInsData = JsonConvert.DeserializeObject<ClientIns>(p.Data);
                 InsClient(clientInsData.ClientNum, ToUnityVectorChange(clientInsData.StartPos), clientInsData.Client, clientInsData.WeaponArray);
+                if(clientInsData.Client)
+                    NetworkManagerTCP.SendTCP(new ReadyCheck(clientPlayerNum));
+                break;
+            case "RoundStart":
+                var roundStartData = JsonConvert.DeserializeObject<RoundStart>(p.Data);
+                currentRound = roundStartData.CurrentRound;
+                TimerState = 0;
+                break;
+            case "RoundEnd":
+                break;
+            case "RoundTimer":
+                var timerData = JsonConvert.DeserializeObject<RoundTimer>(p.Data);
+                TimerUISet(timerData.CurrentTime);
                 break;
             case "ClientMoveSync":
                 var posData = JsonConvert.DeserializeObject<ClientMoveSync>(p.Data);
@@ -225,6 +245,28 @@ public class IngameProcess : MonoBehaviour
         }
         playerList[num].weaponManagerSc.equipWeaponArray = w;
 
+    }
+
+    /// <summary>
+    /// TimerUI Set
+    /// </summary>
+    /// <param name="time"></param>
+    void TimerUISet(int countDown)
+    {
+        if (!TimerPanel.activeSelf)
+            TimerPanel.SetActive(true);
+        TimerText.text = countDown.ToString();
+
+        if (countDown >= 1)
+            return;
+        else if (countDown.Equals(0))
+        {
+            string viewTextString = TimerState.Equals(0) ? "START" : "END";
+            TimerText.text = viewTextString;
+        }
+        else if (countDown.Equals(-1))
+            TimerPanel.SetActive(false);
+        
     }
 
     #region ChangeVector
