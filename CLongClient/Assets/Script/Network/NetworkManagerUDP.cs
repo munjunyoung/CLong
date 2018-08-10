@@ -12,12 +12,12 @@ using System;
 public class NetworkManagerUDP
 {
     private static UdpClient clientUDP;
-    private static readonly IPEndPoint serverEP = new IPEndPoint(IPAddress.Parse(NetworkManagerTCP.ip), NetworkManagerTCP.portNumber);
+    private static IPEndPoint serverEP;
     
     //multicast
     private static readonly string multicastIP = "239.0.0.182";
     //동일 컴퓨터에서 포트번호 변경(multicast를 사용할때 클라이언트에서도 자기 자신을 bind해주어야하기때문에)
-    private static readonly int multicastPort = 22000;
+    private static int multicastPort = -1;
     private static IPEndPoint clientEP;
     //Receive Buffer
     private static byte[] _tempBufferSocket = new byte[4096];
@@ -29,14 +29,16 @@ public class NetworkManagerUDP
 
     /// <summary>
     /// Constructor : create UdpClient .. 
-    /// 한컴퓨터에서 여러개의 클라이언트를 실행할경우 bind포트가 겹치므로
-    /// 클라이언트 생성시 주어진 num에따라 port번호 +
+    /// 한컴퓨터에서 여러개의 멀티캐스트를 실행할경우 bind포트가 겹치므로 port번호는 서버에서 생성한것으 받아옴)
     /// </summary>
-    public static void CreateUDPClient()
+    /// <param name="port"></param> 
+    public static void CreateUDPClient(int port)
     {
+        serverEP = new IPEndPoint(IPAddress.Parse(NetworkManagerTCP.ip), port);
+        multicastPort = port;
         //receive client local ip 접속
-        
         clientUDP = new UdpClient();
+        //Socket option
         clientUDP.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
         clientEP = new IPEndPoint(IPAddress.Any, multicastPort);
         clientUDP.Client.Bind(clientEP);

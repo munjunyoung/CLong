@@ -15,9 +15,13 @@ namespace CLongServer
 {
     public class ClientTCP
     { 
+               
         //Socket
         TcpClient clientTcp;
         public Socket socketTcp; // socket
+
+        //Scene State
+        public Scene SceneState = Scene.Lobby;
 
         //Receive
         private Packet receivedPacket = null;
@@ -32,41 +36,21 @@ namespace CLongServer
         #region InGame
         //Ingame 
         public bool ingame = false;
-        public int numberInGame = 0;
-        public TeamColor Team;
-        //클라이언트에서 자신의 플레이어가 생성되었을때 보내는 패킷을 통해 ready(이후 타이머실행)
+        public TeamColor teamColor;
+        //Client create Check
         public bool ReadyCheck = false;
 
         //Health
         public int currentHealth = 100;
         public bool isAlive = false;
 
-        //Move
-        public bool[] moveMentsKey = new bool[4];
-        public List<Stopwatch> moveTimer = new List<Stopwatch>();
-        public Thread MoveThread;
-        public Vector3 currentPos;
-        public float directionAngle = 0f;
-        public float speed = 5f;
-        public float height = 1f;
+        //StartPosition
+        public Vector3 StartPos;
 
         //Weapon
-        public Weapon[] weaponEqupArray = new Weapon[2];
+        public string[] sendWeaponArray = { "AK", "M4" };
         public int currentEquipWeaponNum = 0;
-
-        
-        //Action State 0 = None , 1 = Run , 2 = Seat , 3 = Lie , 4 = Fall
-        public int actionState;
-
-        //Jump
-        public Stopwatch JumpTimer = new Stopwatch();
-        public Stopwatch JumpPeriodTimer = new Stopwatch();
-        public bool jumpState = false;
-
-        //Fall 
-        public Stopwatch FallTimer = new Stopwatch();
-        public bool isGrounded = true;
-
+   
         #endregion
         /// <summary>
         /// Constructor .. Stream Save;
@@ -79,8 +63,7 @@ namespace CLongServer
             socketTcp = clientTcp.Client;
             BeginReceive();
         }
-
-
+        
         #region Socket
         /// <summary>
         /// send packet through socket
@@ -234,6 +217,9 @@ namespace CLongServer
                 {
                     case "QueueEntry":
                         MatchingManager.MatchingProcess(this);
+                        break;
+                    case "TestRoom":
+                        MatchingManager.EntryTestRoom(this);
                         break;
                     default:
                         Console.WriteLine("[TCP] Socket :  Mismatching Message");

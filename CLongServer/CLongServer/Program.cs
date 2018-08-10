@@ -11,8 +11,8 @@ namespace CLongServer
     internal class Program
     {
         private TcpListener tcpServer;
-        public static Int32 portNumber = 23000;
-        public static IPEndPoint ep;
+        public Int32 portNumber = 23000;
+        public IPEndPoint ep;
         //Thread signal
         private ManualResetEvent tcpClientConnected = new ManualResetEvent(false);
         
@@ -20,7 +20,6 @@ namespace CLongServer
         {
             Program newProgram = new Program();
             newProgram.TcpStart();
-           
         }
         
         /// <summary>

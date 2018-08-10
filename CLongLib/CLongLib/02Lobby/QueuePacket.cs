@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CLongLib
-{ 
-  /// <summary>
-  /// enqueue in queue list
-  /// </summary>
+{
+    /// <summary>
+    /// enqueue in queue list
+    /// </summary>
     public class QueueEntry : Packet
     {
         public string Req { get; set; }
@@ -29,12 +29,19 @@ namespace CLongLib
         public string Req { get; set; }
     }
 
+  
     /// <summary>
-    /// To entry ingameScene from client
+    /// To entry ingameScene from client (
     /// </summary>
     public class StartGameReq : Packet
     {
-        public string Req { get; set; }
+        public int Port { get; set; } 
+
+        public StartGameReq(int p)
+        {
+            Port = p;
+        }
     }
 
+  
 }

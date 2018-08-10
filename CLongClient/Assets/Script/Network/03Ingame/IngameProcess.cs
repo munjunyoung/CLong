@@ -12,6 +12,7 @@ public class IngameProcess : MonoBehaviour
     public GameObject playerPrefab;
     //Player check
     public Player[] playerList = new Player[100];
+    
     public int clientPlayerNum = -1;
     //Player InputManager reference
     public InputManager inputSc;

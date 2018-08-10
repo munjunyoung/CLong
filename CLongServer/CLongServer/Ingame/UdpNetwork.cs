@@ -14,15 +14,13 @@ namespace CLongServer.Ingame
     {
         //UdpClient
         public UdpClient clientUDP;
-        
-        //Unicast
-        private IPEndPoint unicastEP = Program.ep;
+        //UnicastEp
+        private IPEndPoint unicastEP;
         
         //Multicast
-        public static string multicastIP = "239.0.0.182";
+        public string multicastIP = "239.0.0.182";
         //동일 컴퓨터에서 포트번호 변경(multicast를 사용할때 클라이언트에서도 자기 자신을 bind해주어야하기때문에)
-        public static int multicastPort = 22000;
-        private IPEndPoint multicastEP = new IPEndPoint(IPAddress.Parse(multicastIP), multicastPort);
+        private IPEndPoint multicastEP = null;
 
         //Receive
         private byte[] _tempBufferSocket = new byte[4096];
@@ -36,9 +34,12 @@ namespace CLongServer.Ingame
         /// <summary>
         /// Constructor . Create UDPClient
         /// </summary>
-        public UdpNetwork(IPEndPoint ep)
+        public UdpNetwork(int port)
         {
+            unicastEP = new IPEndPoint(IPAddress.Any, port);
             clientUDP = new UdpClient(unicastEP);
+            //MultiCast Port변경
+            multicastEP = new IPEndPoint(IPAddress.Parse(multicastIP), port);
             BeginReceiveUDP();
         }
 

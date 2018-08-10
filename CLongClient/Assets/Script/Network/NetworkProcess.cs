@@ -44,15 +44,16 @@ public class NetworkProcess : MonoBehaviour {
                 case "MatchingComplete":
                     //.. Show matchingComplete UI
                     Debug.Log("[Network Process] TCP : Matching Complete");
-                    
                     break;
                 case "StartGameReq":
                     //서버에서 게임룸생성후 list에 client를 추가했을시 보내는 패킷
+                    var portData = JsonConvert.DeserializeObject<StartGameReq>(p.Data);
+
                     Ingame = true;
                     ProcessHandlerTCP += GameObject.Find("IngameNetworkManager").GetComponent<IngameProcess>().IngameDataRequestTCP;
-                    NetworkManagerUDP.CreateUDPClient();
+                    NetworkManagerUDP.CreateUDPClient(portData.Port);
                     ProcessHandlerUDP += GameObject.Find("IngameNetworkManager").GetComponent<IngameProcess>().IngameDataRequestUDP;
-                    NetworkManagerTCP.SendTCP(new StartGameReq());
+                    NetworkManagerTCP.SendTCP(p);
                     StartCoroutine("ProcessDataUDP");
                     Debug.Log("[Network Process] TCP : Ingame Start");
                     //..IngameScene Load

@@ -18,15 +18,26 @@ namespace CLongLib
         public Vector3 StartPos { get; set; }
         public bool Client { get; set; }
         public string[] WeaponArray { get; set; }
-        public string Team { get; set; }
 
-        public ClientIns(int n, Vector3 p, bool b, string[] w, string t)
+        public ClientIns(int n, Vector3 p, bool b, string[] w)
         {
             ClientNum = n;
             StartPos = p;
             Client = b;
             WeaponArray = w;
-            Team = t;
+        }
+    }
+
+    /// <summary>
+    /// 테스트 진입패킷
+    /// </summary>
+    public class TestRoom : Packet
+    {
+        public int Req { get; set; }
+
+        public TestRoom()
+        {
+            Req = 0;
         }
     }
 }

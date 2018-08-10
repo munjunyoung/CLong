@@ -8,33 +8,35 @@ namespace CLongServer.Ingame
 {
     class GameRoomManager
     {
-        public static List<GameRoom> roomList = new List<GameRoom>();
-        public static Dictionary<int, GameRoom> roomDic = new Dictionary<int, GameRoom>();
+        public int roomCount = 0;
+        public Dictionary<int, GameRoom> roomDic = new Dictionary<int, GameRoom>();
+        
+        public GameRoomManager()
+        {
+            roomCount = 0;
+        }
+
         /// <summary>
         /// add Gaemroom in List
         /// </summary>
         /// <param name="room"></param>
-        public static void AddGameRoom(GameRoom room)
+        public void CreateRoom(ClientTCP c1, ClientTCP c2)
         {
-            room.gameRoomNumber = roomList.Count;
-            roomList.Add(room);
-           
-            Console.WriteLine("[GAME ROOM MANAGER] : Add GameRoom ! .. this gameroom in people count : " + roomList[0].playerDic.Count());
+            var TmpRoom = new GameRoom(roomCount, 10000 + roomCount);
+            roomDic.Add(roomCount, TmpRoom);
+            roomDic[roomCount].SetClientInGameRoom(c1, c2);
+            roomCount++;
+            Console.WriteLine("[GAME ROOM MANAGER] : Add GameRoom !");
         }
 
         /// <summary>
         /// Delete GameRoom in List
         /// </summary>
         /// <param name="room"></param>
-        public static void DellGameRoom(GameRoom room)
+        public void DellGameRoom(GameRoom room)
         {
-            roomList.Remove(room);
+            roomDic.Remove(room.gameRoomNumber);
             Console.WriteLine("[GAME ROOM MANAGER] : Remove GameRoom");
-        }
-
-        public static void FindGameRoom()
-        {
-
         }
     }
 }

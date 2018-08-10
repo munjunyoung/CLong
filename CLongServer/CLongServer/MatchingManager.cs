@@ -11,25 +11,20 @@ namespace CLongServer
     class MatchingManager
     {
         private static List<ClientTCP> queueClientList = new List<ClientTCP>();
-        
-       /// <summary>
-       /// 매칭프로세스
-       /// </summary>
-       /// <param name="c"></param>
+        private static GameRoomManager roomManager = new GameRoomManager();
+        /// <summary>
+        /// Matching 
+        /// </summary>
+        /// <param name="c"></param>
         public static void MatchingProcess(ClientTCP c)
         {
-            //팀일경우 팀컬러를 입히는게? 
-            //처음 큐를 눌렀을 경우 RoomList를 검색한후 아직 시작하지 않은게임에 참가
-            foreach(var r in GameRoomManager.roomList)
+            if (queueClientList.Count > 0)
             {
-                if (!r.gameStartState)
-                {
-                    r.AddClientInGameRoom(c);
-                    return;
-                }
+                MatchingCompleteFunc(queueClientList[0], c);
+                queueClientList.Remove(queueClientList[0]);
+                return;
             }
-            
-            //방이 존재하지 않으면 queue list 추가
+            Console.WriteLine("[MATCHING MANAGER] : No people..");
             ClientEnqueue(c);
         }
 
@@ -40,11 +35,8 @@ namespace CLongServer
         public static void ClientEnqueue(ClientTCP c)
         {
             queueClientList.Add(c);
-            Console.WriteLine("[MATCHING MANAGER] : Matching people Count : " + queueClientList.Count);
-            if (queueClientList.Count > 1)
-                MatchingCompleteOnePeopleFunc();
-            else
-                Console.WriteLine("[MATCHING MANAGER] : No people..");
+            Console.WriteLine("[MATCHING MANAGER] : QueueList people Count : " + queueClientList.Count);
+            
         }
 
         /// <summary>
@@ -53,8 +45,8 @@ namespace CLongServer
         /// <param name="c"></param>
         public static void ClientDequeue(ClientTCP c)
         {
-            queueClientList.Remove(c);
-            Console.WriteLine("[MATCHING MANAGER] : client Mathcing remove.. Count : " + queueClientList.Count);
+            queueClientList.Remove(queueClientList[0]);
+            Console.WriteLine("[MATCHING MANAGER] : QueueList people remove.. Count : " + queueClientList.Count);
         }
         
         /// <summary>
@@ -62,20 +54,24 @@ namespace CLongServer
         /// queueList에 있는 클라이언트들을 GameRoom의 list에 추가
         /// startgame packet 전송
         /// </summary>
-        public static void MatchingCompleteOnePeopleFunc()
+        public static void MatchingCompleteFunc(ClientTCP c1, ClientTCP c2)
         {
-            var tmpRoom = new GameRoom();
             //팀매칭일 경우 리스트로 큐를 넣는것으로 바꾸어야할듯 게임룸또한 구분해야함
-            foreach (var cl in queueClientList)
-            {
-                cl.Send(new MatchingComplete());
-                tmpRoom.AddClientInGameRoom(cl);
-            }
-             
-            queueClientList.Clear();
+            c1.Send(new MatchingComplete());
+            c2.Send(new MatchingComplete());
+            //Create Room through GameRoom Manager  (GameRoom Manager static으로 할필요가..?)
+            roomManager.CreateRoom(c1, c2);
+            Console.WriteLine("[MATCHING MANAGER] : Create Room! show  Count : " + queueClientList.Count);
+        }
 
-            GameRoomManager.AddGameRoom(tmpRoom);
-            Console.WriteLine("[MATCHING MANAGER] : Create Room! Queue List all Remove .. show Count : " + queueClientList.Count);
+        /// <summary>
+        /// Test Room 
+        /// </summary>
+
+        private static GameRoom tRoom = new GameRoom(-1, 30000);
+        public static void EntryTestRoom(ClientTCP c)
+        {
+            tRoom.AddClientInTestRoom(c);
         }
     }
 }
