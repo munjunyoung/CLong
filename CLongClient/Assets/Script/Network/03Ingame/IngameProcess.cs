@@ -12,7 +12,7 @@ public class IngameProcess : MonoBehaviour
     public GameObject playerPrefab;
     //Player check
     public Player[] playerList = new Player[100];
-    
+
     public int clientPlayerNum = -1;
     //Player InputManager reference
     public InputManager inputSc;
@@ -35,7 +35,7 @@ public class IngameProcess : MonoBehaviour
             case "ClientIns":
                 var clientInsData = JsonConvert.DeserializeObject<ClientIns>(p.Data);
                 InsClient(clientInsData.ClientNum, ToUnityVectorChange(clientInsData.StartPos), clientInsData.Client, clientInsData.WeaponArray);
-                if(clientInsData.Client)
+                if (clientInsData.Client)
                     NetworkManagerTCP.SendTCP(new ReadyCheck(clientPlayerNum));
                 break;
             case "RoundStart":
@@ -99,11 +99,11 @@ public class IngameProcess : MonoBehaviour
             case "ClientDir":
                 var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
                 //자신의 플레이어가 아닐경우에만
-                if (clientPlayerNum != clientDirData.ClientNum)
-                {
-                    playerList[clientDirData.ClientNum].transform.localEulerAngles = new Vector3(0, clientDirData.DirectionY, 0);
-                    playerList[clientDirData.ClientNum].playerUpperBody.localEulerAngles = new Vector3(clientDirData.DirectionX, 0, 0);
-                }
+                if (clientPlayerNum.Equals(clientDirData.ClientNum))
+                    return;
+
+                playerList[clientDirData.ClientNum].transform.localEulerAngles = new Vector3(0, clientDirData.DirectionY, 0);
+                playerList[clientDirData.ClientNum].playerUpperBody.localEulerAngles = new Vector3(clientDirData.DirectionX, 0, 0);
                 break;
             default:
                 Debug.Log("[Ingame Proces] UDP : Mismatching Message");
@@ -223,9 +223,9 @@ public class IngameProcess : MonoBehaviour
         //배정되는 클라이언트 num에 prefab생성
         var tmpPrefab = Instantiate(playerPrefab);
         tmpPrefab.GetComponent<Player>().clientNum = num;
-        
+
         tmpPrefab.transform.position = pos;
-        
+
         playerList[num] = tmpPrefab.GetComponent<Player>();
         //클라이언트 일 경우
         if (clientCheck)
@@ -267,7 +267,7 @@ public class IngameProcess : MonoBehaviour
         }
         else if (countDown.Equals(-1))
             TimerPanel.SetActive(false);
-        
+
     }
 
     #region ChangeVector

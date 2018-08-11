@@ -68,7 +68,7 @@ namespace CLongServer
         /// Test Room 
         /// </summary>
 
-        private static GameRoom tRoom = new GameRoom(-1, 30000);
+        private static GameRoom tRoom = new GameRoom(-1, 29999);
         public static void EntryTestRoom(ClientTCP c)
         {
             tRoom.AddClientInTestRoom(c);

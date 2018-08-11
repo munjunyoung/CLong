@@ -142,7 +142,7 @@ namespace CLongServer
                     RequestDataTCP(receivedPacket);
                 }
 
-                    _bodyBufferListSocket.Clear();
+                 _bodyBufferListSocket.Clear();
 
                 BeginReceive();
             }

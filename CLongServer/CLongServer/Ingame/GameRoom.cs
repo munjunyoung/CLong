@@ -130,7 +130,6 @@ namespace CLongServer.Ingame
                 case "ReadyCheck":
                     var readyData = JsonConvert.DeserializeObject<ReadyCheck>(p.Data);
                     c.ReadyCheck = true;
-                   
                     //둘 모두 Object 생성완료 -> CountDown Timer 실행
                     if (TeamDic[(int)TeamColor.BLUE].Client.ReadyCheck && TeamDic[(int)TeamColor.BLUE].Client.ReadyCheck)
                         countTimer();

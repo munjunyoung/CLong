@@ -97,7 +97,8 @@ public class NetworkManagerUDP
         {
             _tempBufferSocket = tmpUDP.EndReceive(ar, ref tmpEP);
             var tempDataSize = _tempBufferSocket.Length;
-            //Debug.Log("[UDP] Socket - Receive Data Size : " + tempDataSize);
+            
+            Debug.Log("[UDP] Socket - Receive Data Size : " + tempDataSize);
             if (tempDataSize == 0)
             {
                 Debug.Log("[UDP] Socket -  Receive Data Size is zero");

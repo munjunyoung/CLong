@@ -36,8 +36,12 @@ namespace CLongServer.Ingame
         /// </summary>
         public UdpNetwork(int port)
         {
+            //한개의 컴퓨터에서 BIND를 2개를 해야하므로 서버포트 다르게 클라포트 다르게 해주어야함
             unicastEP = new IPEndPoint(IPAddress.Any, port);
-            clientUDP = new UdpClient(unicastEP);
+            clientUDP = new UdpClient();
+            clientUDP.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            clientUDP.Client.Bind(unicastEP);
+
             //MultiCast Port변경
             multicastEP = new IPEndPoint(IPAddress.Parse(multicastIP), port);
             BeginReceiveUDP();
