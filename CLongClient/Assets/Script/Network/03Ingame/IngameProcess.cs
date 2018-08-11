@@ -227,25 +227,20 @@ public class IngameProcess : MonoBehaviour
         tmpPrefab.transform.position = pos;
 
         playerList[num] = tmpPrefab.GetComponent<Player>();
-        //클라이언트 일 경우
-        if (clientCheck)
-        {
-            clientPlayerNum = num;
-            //플레이어 오브젝트 cam
-            camManagerSc.playerObject = playerList[clientPlayerNum].transform;
-            camManagerSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
-            //Player Sc;
-            inputSc.myPlayer = playerList[clientPlayerNum];
-            playerList[clientPlayerNum].clientCheck = true;
-            playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
-        }
-        //다른 클라이언트 일 경우
-        else
-        {
-            playerList[num].clientNum = num;
-        }
         playerList[num].weaponManagerSc.equipWeaponArray = w;
+        Debug.Log("확인 : " + num);
 
+        if (!clientCheck)
+            return;
+        //클라이언트 일 경우
+        clientPlayerNum = num;
+        //플레이어 오브젝트 cam
+        camManagerSc.playerObject = playerList[clientPlayerNum].transform;
+        camManagerSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
+        //Player Sc;
+        inputSc.myPlayer = playerList[clientPlayerNum];
+        playerList[clientPlayerNum].clientCheck = true;
+        playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
     }
 
     /// <summary>

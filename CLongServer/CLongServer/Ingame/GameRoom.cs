@@ -71,10 +71,13 @@ namespace CLongServer.Ingame
             c1.teamColor = TeamColor.BLUE;//0
             c2.teamColor = TeamColor.RED; //1
 
+            //Send StartGame (MultiPort 보냄) 클라이언트가 인게임씬로드 하기위한 패킷
+            c1.Send(new StartGameReq(multicastPortUDP));
+            c2.Send(new StartGameReq(multicastPortUDP));
             //TeamSet
             TeamDic.Add((int)c1.teamColor, new Team(0, c1));
             TeamDic.Add((int)c2.teamColor, new Team(0, c2));
-
+            
             foreach (var team in TeamDic)
             {
                 var c = team.Value.Client;
@@ -82,19 +85,18 @@ namespace CLongServer.Ingame
                 c.ingame = true;
                 //Health Set
                 c.currentHealth = 100;
+                c.isAlive = true;
                 //Start Pos
                 c.StartPos = StartPosList[(int)c.teamColor];
                 //TCP Handler
                 c.ProcessHandler += IngameDataRequestTCP;
-                //Send StartGame (MultiPort 보냄)
-                c.Send(new StartGameReq(multicastPortUDP));
+               
                 //ClientIns 부분은 Scene이 로드된 후에 보내야함으로 패킷설정후 실행)
                 //Send Client Create
                 c.Send(new ClientIns((int)c.teamColor, c.StartPos, true, c.sendWeaponArray));
                 //Other Client Create
-                TeamColor ocColor = c.teamColor + 1;
-                var oc = TeamDic[(int)ocColor].Client;
-                oc.Send(new ClientIns((int)oc.teamColor, oc.StartPos, false, oc.sendWeaponArray));
+                ClientTCP oc = c.teamColor.Equals(TeamColor.BLUE) ? c2 : c1;
+                oc.Send(new ClientIns((int)c.teamColor, c.StartPos, false, c.sendWeaponArray));
             }
             Console.WriteLine("[GAME ROOM] Set ClientInfo Complete");
         }
@@ -182,7 +184,7 @@ namespace CLongServer.Ingame
             //둘중하나라도 죽었을경우 process return
             if (!TeamDic[0].Client.isAlive || !TeamDic[1].Client.isAlive)
                 return;
-
+            
             c.currentHealth += -damage;
             if (c.currentHealth <= 0)
             {
@@ -209,7 +211,7 @@ namespace CLongServer.Ingame
         {
             // c = Loser; 
             int loserIndex = (int)c.teamColor;
-            int winnerIndex = (int)(c.teamColor + 1);
+            int winnerIndex = (((int)c.teamColor + 1)%2);
             Console.WriteLine("winnerTeam" + c);
             Console.WriteLine("DefeatTeam" + c);
 
@@ -278,10 +280,12 @@ namespace CLongServer.Ingame
         {
             foreach (var cl in TeamDic)
                 cl.Value.Client.Send(new RoundTimer(countDownTime));
-
-            if (countDownTime.Equals(-1))
+            Console.WriteLine("타이머 확인 : " + countDownTime);
+            if (countDownTime <= -1)
+            {
                 gameTimer.Stop();
-
+                gameTimer.Dispose();
+            }
             countDownTime -= 1;
         }
 
