@@ -11,33 +11,21 @@ namespace CLongLib
 {
     public class PacketMaker
     {
-        protected PacketMaker() { }
-        
-        public PacketMaker Instance 
+        private static readonly Dictionary<Type, byte> _typeDic = new Dictionary<Type, byte>()
         {
-            get
-            {
-                if (_instance == null)
-                    _instance = new PacketMaker();
+            {typeof(Login_Ack), 0x00},
+            {typeof(Login_Req), 0x01},
+            {typeof(Start_Game), 0x02 }
+        };
 
-                return _instance;
-            }
-        }
-        private PacketMaker _instance;
-
-        public byte CODE_MOVE { get { return 0x00; } }
-        public byte CODE_MATCH { get { return 0x01; } }
-        public byte CODE_INGAME_MOVE { get { return 0x02; } }
-        public byte CODE_INGAME_ROTATE { get { return 0x03; } }
-
-        public static byte[] SetPacket(byte code, object o)
+        public static byte[] SetPacket(object o)
         {
-            Type t = o.GetType();
             int size = Marshal.SizeOf(o);
             byte[] ary = new byte[size+1];
             IntPtr p = Marshal.AllocHGlobal(size);
 
-            ary[0] = code;
+            ary[0] = _typeDic[o.GetType()];
+
             Marshal.StructureToPtr(o, p, true);
             Marshal.Copy(p, ary, 1, size);
             Marshal.FreeHGlobal(p);
@@ -45,18 +33,17 @@ namespace CLongLib
             return ary;
         }
 
-        public static T GetPacket<T>(byte[] buffer) where T : struct
+        public static object GetPacket(byte[] b)
         {
-            int size = Marshal.SizeOf(typeof(T));
-
-            if (size > buffer.Length)
-            {
+            var type = _typeDic.FirstOrDefault(x => x.Value == b[0]).Key;
+            int size = Marshal.SizeOf(type);
+            Console.WriteLine(size);
+            if (size > b.Length-1)
                 throw new Exception();
-            }
 
             IntPtr ptr = Marshal.AllocHGlobal(size);
-            Marshal.Copy(buffer, 0, ptr, size);
-            T obj = (T)Marshal.PtrToStructure(ptr, typeof(T));
+            Marshal.Copy(b, 1, ptr, size);
+            object obj = Marshal.PtrToStructure(ptr, type);
             Marshal.FreeHGlobal(ptr);
             return obj;
         }

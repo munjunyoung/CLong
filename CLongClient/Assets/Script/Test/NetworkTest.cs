@@ -9,21 +9,33 @@ public class NetworkTest : MonoBehaviour
 {
     UdpClient _c;
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start()
     {
-        _c = new UdpClient();
+        //_c = new UdpClient();
 
-        var d = new Login_Req
-        {
-            id = "1123",
-            password = "pasd"
-        };
-        IPEndPoint ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 30000);
-      // lib빌드했더니 코드 오류나서 주석처리로 변경
-      //  var pb = PacketMaker.MakePacket(PacketMaker.CODE_MOVE, d);
-      //  Debug.Log(_c.Send(pb, pb.Length, ep));
-	}
+        //var d = new Login_Ack
+        //{
+        //    connected = true
+        //};
+
+        //var dd = new Login_Req
+        //{
+        //    id = "Asd",
+        //    password = "123"
+        //};
+
+        //var ddd = new Start_Game
+        //{
+        //    port = 1234
+        //};
+        //IPEndPoint ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 30000);
+        //List<IPacket> _asd = new List<IPacket>();
+        //_asd.Add(d);
+
+        //var pb = PacketMaker.SetPacket(dd);
+        //Debug.Log(_c.Send(pb, pb.Length, ep));
+    }
 	
 	// Update is called once per frame
 	void Update () 

@@ -7,11 +7,90 @@ using System.Runtime.InteropServices;
 
 namespace CLongLib
 {
+    public interface IPacket
+    { }
+
+    public struct Exit_Req : IPacket
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        public bool req;
+    }
+
+    /// <summary>
+    /// 클라->서버 매칭 시작 또는 취소
+    /// </summary>
+    public struct Queue_Req : IPacket
+    {
+        // true : 신청, false : 취소
+        [MarshalAs(UnmanagedType.I1)]
+        public bool req;
+    }
+
+    /// <summary>
+    /// 서버->클라 매칭 결과
+    /// </summary>
+    public struct Match_Succeed : IPacket
+    {
+        // true : 매칭성공, false : 매칭오류
+        [MarshalAs(UnmanagedType.I1)]
+        public bool req;
+    }
+
+    /// <summary>
+    /// 서버->클라 멀티캐스트 포트 전송 (매칭 성공 이후)
+    /// </summary>
+    public struct Start_Game : IPacket
+    {
+        [MarshalAs(UnmanagedType.U2)]
+        public ushort port;
+    }
+
+    public struct Player_Init : IPacket
+    {
+        public byte clientIdx;
+        public float[] startpos;
+        public bool assign;
+        public byte weapon1;
+        public byte weapon2;
+    }
+
+    public struct Player_SyncHP : IPacket
+    {
+        public byte clientIdx;
+        public int curHealth;
+    }
+
+    public struct Player_Dead : IPacket
+    {
+        public byte clientIdx;
+    }
+
+    public struct Player_Ready : IPacket
+    {
+        public byte clientIdx;
+    }
+
+    public struct Round_Timer : IPacket
+    {
+        public byte remainTime;
+    }
+
+    public struct Round_Start : IPacket
+    {
+        public byte curRound;
+    }
+
+    public struct Round_End : IPacket
+    {
+        public byte curRound;
+        public byte[] roundPoint;
+        public string roundResult;
+    }
+
     /// <summary>
     /// Login request from CLIENT to SERVER.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Login_Req
+    public struct Login_Req : IPacket
     {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
         public string id;
@@ -22,56 +101,11 @@ namespace CLongLib
     /// <summary>
     /// Login ackknowledgement from SERVER to CLIENT
     /// </summary>
-    public struct Login_Ack
+    [StructLayout(LayoutKind.Sequential, Pack =1)]
+    public struct Login_Ack : IPacket
     {
+        [MarshalAs(UnmanagedType.I1)]
         public bool connected;
     }
 
-    /// <summary>
-    /// Matching start/cancel request from CLIENT to SERVER.
-    /// </summary>
-    public struct Match_Req
-    {
-        public bool matching;
-    }
-
-    public struct Match_Ack
-    {
-        public bool matching;
-    }
-
-    public struct Match_Succeed
-    {
-
-    }
-
-    public struct Start_Game
-    {
-
-    }
-
-    public struct Load_Succeed
-    {
-
-    }
-
-    public struct Exit_Req
-    {
-
-    }
-
-    public struct Init_Player
-    {
-
-    }
-
-    public struct Shoot_Weapon
-    {
-
-    }
-
-    public struct Change_Weapon
-    {
-
-    }
 }
