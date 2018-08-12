@@ -17,11 +17,22 @@ public class IngameProcess : MonoBehaviour
     //Player InputManager reference
     public InputManager inputSc;
 
-    //UI
+    #region UI Var
+    //Current Round View 
+    public GameObject ViewRoundPanel;
+    public Text ViewRoundText;
+    public Text ViewPointText;
+
+    //Timer
     public GameObject TimerPanel;
     public Text TimerText;
     public int TimerState = 0;  //0 : 시작타이머, 1 : 라운드 종료 타이머
-    public int currentRound = 0; // 현재 라운드
+
+    //RoundResult
+    public GameObject RoundResultPanel;
+    public Text RoundResultText;
+    #endregion
+
 
     //private List<GameObject> playerList = new List<GameObject>();
     /// <summary>
@@ -40,14 +51,19 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "RoundStart":
                 var roundStartData = JsonConvert.DeserializeObject<RoundStart>(p.Data);
-                currentRound = roundStartData.CurrentRound;
+                SetViewRoundUI(roundStartData.CurrentRound);
+                SetRoundResultUI(roundStartData.RoundPoint, null);
                 TimerState = 0;
                 break;
             case "RoundEnd":
+                var roundEndData = JsonConvert.DeserializeObject<RoundEnd>(p.Data);
+                SetViewRoundUI(roundEndData.CurrentRound);
+                SetRoundResultUI(roundEndData.RoundPoint,roundEndData.RoundResult);
+                TimerState = 1;
                 break;
             case "RoundTimer":
                 var timerData = JsonConvert.DeserializeObject<RoundTimer>(p.Data);
-                TimerUISet(timerData.CurrentTime);
+                SetTimerUI(timerData.CurrentTime);
                 break;
             case "ClientMoveSync":
                 var posData = JsonConvert.DeserializeObject<ClientMoveSync>(p.Data);
@@ -228,7 +244,6 @@ public class IngameProcess : MonoBehaviour
 
         playerList[num] = tmpPrefab.GetComponent<Player>();
         playerList[num].weaponManagerSc.equipWeaponArray = w;
-        Debug.Log("확인 : " + num);
 
         if (!clientCheck)
             return;
@@ -243,16 +258,29 @@ public class IngameProcess : MonoBehaviour
         playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
     }
 
+    #region UI Func
+
+    /// <summary>
+    /// when the Game START, View currentRound
+    /// </summary>
+    /// <param name="cr"></param>
+    private void SetViewRoundUI(int round)
+    {
+        if (!ViewRoundPanel.activeSelf)
+            ViewRoundPanel.SetActive(true);
+
+        ViewRoundText.text = "ROUND " + round;
+    }
+
     /// <summary>
     /// TimerUI Set
     /// </summary>
     /// <param name="time"></param>
-    void TimerUISet(int countDown)
+    private void SetTimerUI(int countDown)
     {
         if (!TimerPanel.activeSelf)
             TimerPanel.SetActive(true);
         TimerText.text = countDown.ToString();
-        Debug.Log("타이머 : " + countDown.ToString());
         if (countDown >= 1)
             return;
         else if (countDown.Equals(0))
@@ -261,9 +289,32 @@ public class IngameProcess : MonoBehaviour
             TimerText.text = viewTextString;
         }
         else if (countDown.Equals(-1))
-            TimerPanel.SetActive(false);
-
+            SetUIEndActive();
     }
+
+    /// <summary>
+    /// Round Result UI
+    /// </summary>
+    private void SetRoundResultUI(int[] point, string result)
+    {
+        var team = clientPlayerNum.Equals(0) ? TeamColor.BLUE : TeamColor.RED;
+        if (!RoundResultPanel.activeSelf)
+            RoundResultPanel.SetActive(true);
+        
+        RoundResultText.text = team.ToString() + " " + result;
+        ViewPointText.text = point[0] + " : " + point[1];
+    }
+
+    private void SetUIEndActive()
+    {
+        if (TimerPanel.activeSelf)
+            TimerPanel.SetActive(false);
+        if (ViewRoundPanel.activeSelf)
+            ViewRoundPanel.SetActive(false);
+        if (RoundResultPanel.activeSelf)
+            RoundResultPanel.SetActive(false);
+    }
+    #endregion
 
     #region ChangeVector
     /// <summary>

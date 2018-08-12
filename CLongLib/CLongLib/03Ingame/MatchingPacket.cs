@@ -35,15 +35,17 @@ namespace CLongLib
     }
 
     /// <summary>
-    /// 라운드 시작할때 전송
+    /// when Round Started, send Packet
     /// </summary>
     public class RoundStart : Packet
     {
         public int CurrentRound { get; set; }
+        public int[] RoundPoint { get; set; }
 
-        public RoundStart(int r)
+        public RoundStart(int round, int[] point)
         {
-            CurrentRound = r;
+            CurrentRound = round;
+            RoundPoint = point;
         }
     }
 

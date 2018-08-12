@@ -34,6 +34,7 @@ namespace CLongServer.Ingame
         //Round
         private int CurrentRound = 0;
         private int EndGameMaxPoint = 2;
+        private int[] currentPoint = { 0, 0 };
 
         //Timer
         private System.Timers.Timer gameTimer = new System.Timers.Timer();
@@ -85,25 +86,42 @@ namespace CLongServer.Ingame
                 var c = team.Value.Client;
                 //Ingame Set
                 c.ingame = true;
+                //TCP Handler
+                c.ProcessHandler += IngameDataRequestTCP;
+            }
+
+            SetClientVarAndSendClinetIns();
+            Console.WriteLine("[GAME ROOM] Set ClientInfo Complete");
+        }
+
+        /// <summary>
+        /// 씬이 넘어가거나 할떄 다시보내야됨 오져따리
+        /// </summary>
+        void SetClientVarAndSendClinetIns()
+        {
+            foreach (var team in TeamDic)
+            {
+                var c = team.Value.Client;
                 //Health Set
                 c.currentHealth = 100;
                 //AliveSet
                 c.isAlive = true;
                 //Start Pos
-                c.StartPos = StartPosList[(int)c.teamColor];
-                //TCP Handler
-                c.ProcessHandler += IngameDataRequestTCP;
-               
+                if(CurrentRound.Equals(1))
+                    c.StartPos = StartPosList[(int)c.teamColor % 2];
+                else if(CurrentRound.Equals(2)) //스타트 포지션 변경
+                    c.StartPos = StartPosList[((int)c.teamColor+1) % 2];
+                else if(CurrentRound.Equals(3))
+                    c.StartPos = StartPosList[(int)c.teamColor % 2];
+
                 //ClientIns 부분은 Scene이 로드된 후에 보내야함으로 패킷설정후 실행)
                 //Send Client Create
                 c.Send(new ClientIns((int)c.teamColor, c.StartPos, true, c.sendWeaponArray));
                 //Other Client Create
-                ClientTCP oc = c.teamColor.Equals(TeamColor.BLUE) ? c2 : c1;
+                ClientTCP oc = c.teamColor.Equals(TeamColor.BLUE) ? TeamDic[(int)TeamColor.RED].Client : TeamDic[(int)TeamColor.BLUE].Client;
                 oc.Send(new ClientIns((int)c.teamColor, c.StartPos, false, c.sendWeaponArray));
             }
-            Console.WriteLine("[GAME ROOM] Set ClientInfo Complete");
         }
-
         /// <summary>
         /// exit Player Remove
         /// </summary>
@@ -131,11 +149,12 @@ namespace CLongServer.Ingame
                 case "StartGameReq":
                     //클라이언트 생성하는 패킷 전송 필요(나중에 게임룸 구현후)
                     //c.SendSocket(new ClientIns(c.numberInGame, c.currentPos));
-                    c.Send(new RoundStart(CurrentRound));
+                   
                     break;
                 case "ReadyCheck":
                     var readyData = JsonConvert.DeserializeObject<ReadyCheck>(p.Data);
                     readyCheck[(int)c.teamColor] = true;
+                    c.Send(new RoundStart(CurrentRound, currentPoint));
                     //둘 모두 Object 생성완료 -> CountDown Timer 실행
                     if (readyCheck[(int)TeamColor.BLUE] && readyCheck[(int)TeamColor.RED])
                         countTimerStart();
@@ -243,12 +262,11 @@ namespace CLongServer.Ingame
             TeamDic[winnerIndex].RoundPoint++;
 
             //Set Point Data for Send;
-            var point = new int[2];
-            point[winnerIndex] = TeamDic[winnerIndex].RoundPoint;
-            point[loserIndex] = TeamDic[loserIndex].RoundPoint;
+            currentPoint[winnerIndex] = TeamDic[winnerIndex].RoundPoint;
+            currentPoint[loserIndex] = TeamDic[loserIndex].RoundPoint;
             //Send Round Data
-            TeamDic[winnerIndex].Client.Send(new RoundEnd(CurrentRound, point, GameResult.WIN.ToString()));
-            TeamDic[loserIndex].Client.Send(new RoundEnd(CurrentRound, point, GameResult.LOSE.ToString()));
+            TeamDic[winnerIndex].Client.Send(new RoundEnd(CurrentRound, currentPoint, GameResult.WIN.ToString()));
+            TeamDic[loserIndex].Client.Send(new RoundEnd(CurrentRound, currentPoint, GameResult.LOSE.ToString()));
 
             //라운드 종료후 씬전환 전 종료 카운트 실행
             countTimerStart();
@@ -288,7 +306,6 @@ namespace CLongServer.Ingame
                 return;
 
             countDownTime = countMaxTime;
-
             gameTimer.Start();
         }
 
@@ -299,10 +316,12 @@ namespace CLongServer.Ingame
         {
             foreach (var cl in TeamDic)
                 cl.Value.Client.Send(new RoundTimer(countDownTime));
-            Console.WriteLine("타이머 확인 : " + countDownTime);
-            if (countDownTime <= -1)
-                CountTimerEnd();
+
             countDownTime -= 1;
+            if (countDownTime>-2)
+                return;
+
+            CountTimerEnd();
         }
 
         /// <summary>

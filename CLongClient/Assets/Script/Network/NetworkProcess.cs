@@ -50,9 +50,9 @@ public class NetworkProcess : MonoBehaviour {
                     var portData = JsonConvert.DeserializeObject<StartGameReq>(p.Data);
 
                     Ingame = true;
-                    ProcessHandlerTCP += GameObject.Find("IngameNetworkManager").GetComponent<IngameProcess>().IngameDataRequestTCP;
+                    ProcessHandlerTCP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestTCP;
                     NetworkManagerUDP.CreateUDPClient(portData.Port);
-                    ProcessHandlerUDP += GameObject.Find("IngameNetworkManager").GetComponent<IngameProcess>().IngameDataRequestUDP;
+                    ProcessHandlerUDP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestUDP;
                     NetworkManagerTCP.SendTCP(p);
                     StartCoroutine("ProcessDataUDP");
                     Debug.Log("[Network Process] TCP : Ingame Start");
