@@ -159,7 +159,7 @@ public class InputManager : MonoBehaviour
         //Jump
         if (Input.GetKeyDown(KeyList[(int)Key.Space]))
         {
-            //if (IsGroundedFunc())
+            if (myPlayer.IsGroundedFromServer)
             NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
         }
         

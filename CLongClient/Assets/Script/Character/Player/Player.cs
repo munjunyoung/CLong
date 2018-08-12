@@ -67,7 +67,7 @@ public class Player : MonoBehaviour
     {
         if (!keyState[(int)Key.Space])
             return;
-        
+
         if (jumpTimer <= 0.2f)
         {
             jumpTimer += Time.deltaTime;

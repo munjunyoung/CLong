@@ -25,9 +25,8 @@ namespace CLongServer.Ingame
         private List<Vector3> StartPosList = new List<Vector3>();
 
         //Client
-        //public Dictionary<int, ClientTCP> playerDic = new Dictionary<int, ClientTCP>();
         //Ready Check for Start CountDown Timer
-        public bool allReadyCheck = false;
+        private bool[] readyCheck = new bool[2];
 
         //Team
         private Dictionary<int ,Team> TeamDic = new Dictionary<int, Team>();
@@ -37,9 +36,10 @@ namespace CLongServer.Ingame
         private int EndGameMaxPoint = 2;
 
         //Timer
-        private System.Timers.Timer gameTimer;
+        private System.Timers.Timer gameTimer = new System.Timers.Timer();
         private int countMaxTime = 5;
         private int countDownTime = 0;
+        //Readycheck가 짧은시간내로 모두 이루어질경우 타이머가 2번 실행되는 경우가 생김
 
         #region GameRoom
         /// <summary>
@@ -53,13 +53,15 @@ namespace CLongServer.Ingame
             multicastPortUDP = multiPort;
             udpServer = new UdpNetwork(multicastPortUDP);
             udpServer.ProcessHandler += IngameDataRequestUDP;
-
+            
             //Set Start Pos List
             SetStartPos();
             //Set Round
             CurrentRound = 1;
+            //Set Timer;
+            countTimerSet();
         }
-        
+
         /// <summary>
         /// when GameRoom entry, Set Client Info
         /// </summary>
@@ -85,6 +87,7 @@ namespace CLongServer.Ingame
                 c.ingame = true;
                 //Health Set
                 c.currentHealth = 100;
+                //AliveSet
                 c.isAlive = true;
                 //Start Pos
                 c.StartPos = StartPosList[(int)c.teamColor];
@@ -113,6 +116,7 @@ namespace CLongServer.Ingame
 
         #endregion
 
+        #region process Data
         /// <summary>
         /// IngameData TCP Process 
         /// </summary>
@@ -131,10 +135,10 @@ namespace CLongServer.Ingame
                     break;
                 case "ReadyCheck":
                     var readyData = JsonConvert.DeserializeObject<ReadyCheck>(p.Data);
-                    c.ReadyCheck = true;
+                    readyCheck[(int)c.teamColor] = true;
                     //둘 모두 Object 생성완료 -> CountDown Timer 실행
-                    if (TeamDic[(int)TeamColor.BLUE].Client.ReadyCheck && TeamDic[(int)TeamColor.BLUE].Client.ReadyCheck)
-                        countTimer();
+                    if (readyCheck[(int)TeamColor.BLUE] && readyCheck[(int)TeamColor.RED])
+                        countTimerStart();
                     break;
                 case "KeyDown":
                     var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
@@ -172,76 +176,7 @@ namespace CLongServer.Ingame
                     break;
             }
         }
-
-        #region game Process Func
-        /// <summary>
-        /// Take Damage Process
-        /// </summary>
-        /// <param name="c"></param>
-        /// <param name="damage"></param>
-        private void TakeDamageProcessFunc(ClientTCP c, int damage)
-        {
-            //둘중하나라도 죽었을경우 process return
-            if (!TeamDic[0].Client.isAlive || !TeamDic[1].Client.isAlive)
-                return;
-            
-            c.currentHealth += -damage;
-            if (c.currentHealth <= 0)
-            {
-                c.currentHealth = 0;
-                c.isAlive = false;
-
-                foreach (var cl in TeamDic)
-                    cl.Value.Client.Send(new Death((int)c.teamColor));
-            }
-            c.Send(new SyncHealth((int)c.teamColor, c.currentHealth));
-
-            //Round 정리
-            RoundProcess(c);
-            //foreach (var cl in playerDic)
-            //TakeDamage등 맞았을때 이펙트 생성을위한 전송이 필요함
-        }
-
-        /// <summary>
-        /// Round Process, 
-        /// </summary>
-        /// <param name="c"></param>
-        /// Death Player
-        public void RoundProcess(ClientTCP c)
-        {
-            // c = Loser; 
-            int loserIndex = (int)c.teamColor;
-            int winnerIndex = (((int)c.teamColor + 1)%2);
-            Console.WriteLine("winnerTeam" + c);
-            Console.WriteLine("DefeatTeam" + c);
-
-            TeamDic[winnerIndex].RoundPoint++;
-
-            //Set Point Data for Send;
-            var point = new int[2];
-            point[winnerIndex] = TeamDic[winnerIndex].RoundPoint;
-            point[loserIndex] = TeamDic[loserIndex].RoundPoint;
-            //Send Round Data
-            TeamDic[winnerIndex].Client.Send(new RoundEnd(CurrentRound, point, GameResult.WIN.ToString()));
-            TeamDic[loserIndex].Client.Send(new RoundEnd(CurrentRound, point, GameResult.LOSE.ToString()));
-
-            //라운드 종료후 씬전환 카운트
-            countTimer();
-            //Game End (winner의 point 가 2일 경우 )
-            if (TeamDic[winnerIndex].RoundPoint.Equals(2))
-                MatchingResult();
-        }
-
-        /// <summary>
-        /// 매칭결과
-        /// </summary>
-        public void MatchingResult()
-        {
-
-        }
-
-        #endregion
-
+        
         /// <summary>
         /// IngameData UDP Process
         /// </summary>
@@ -259,34 +194,123 @@ namespace CLongServer.Ingame
                     break;
             }
         }
-        
-        #region GameTimer
+        #endregion
+
+        #region game Process Func
         /// <summary>
-        /// 스레드에 넣을 타이머
+        /// Take Damage Process
         /// </summary>
-        private void countTimer()
+        /// <param name="c"></param>
+        /// <param name="damage"></param>
+        private void TakeDamageProcessFunc(ClientTCP c, int damage)
         {
-            countDownTime = countMaxTime;
-            gameTimer = new System.Timers.Timer();
+            //둘중하나라도 죽었을경우 process return
+            if (!TeamDic[0].Client.isAlive || !TeamDic[1].Client.isAlive)
+                return;
+
+            c.currentHealth += -damage;
+           
+            if (c.currentHealth <= 0)
+            {
+                c.isAlive = false;
+                c.currentHealth = 0;
+                foreach (var cl in TeamDic)
+                    cl.Value.Client.Send(new Death((int)c.teamColor));
+                
+                //Round 정리
+                RoundProcess(c);
+            }
+           
+            c.Send(new SyncHealth((int)c.teamColor, c.currentHealth));
+            
+            //foreach (var cl in playerDic)
+            //TakeDamage등 맞았을때 이펙트 생성을위한 전송이 필요함
+        }
+
+        /// <summary>
+        /// Round Process, 
+        /// </summary>
+        /// <param name="c"></param>
+        /// Death Player
+        public void RoundProcess(ClientTCP c)
+        {
+            // c = Loser; 
+            int loserIndex = (int)c.teamColor;
+            int winnerIndex = (((int)c.teamColor + 1) % 2);
+            Console.WriteLine("winnerTeam" + c);
+            Console.WriteLine("DefeatTeam" + c);
+
+            TeamDic[winnerIndex].RoundPoint++;
+
+            //Set Point Data for Send;
+            var point = new int[2];
+            point[winnerIndex] = TeamDic[winnerIndex].RoundPoint;
+            point[loserIndex] = TeamDic[loserIndex].RoundPoint;
+            //Send Round Data
+            TeamDic[winnerIndex].Client.Send(new RoundEnd(CurrentRound, point, GameResult.WIN.ToString()));
+            TeamDic[loserIndex].Client.Send(new RoundEnd(CurrentRound, point, GameResult.LOSE.ToString()));
+
+            //라운드 종료후 씬전환 전 종료 카운트 실행
+            countTimerStart();
+            //Game End (winner의 point 가 2일 경우 )
+            if (TeamDic[winnerIndex].RoundPoint.Equals(2))
+                MatchingResult();
+        }
+
+        /// <summary>
+        /// 매칭결과
+        /// </summary>
+        public void MatchingResult()
+        {
+
+        }
+
+        #endregion
+
+        #region Game CountDownTimer
+        /// <summary>
+        /// when Game Start, Timer Set
+        /// </summary>
+        private void countTimerSet()
+        {
             gameTimer.Interval = 1000f;//5초
-            gameTimer.Elapsed += new System.Timers.ElapsedEventHandler(GameTimerCallBack);
+            gameTimer.Elapsed += new System.Timers.ElapsedEventHandler(CountTimerCallBack);
+            gameTimer.AutoReset = true; // 한번만 발생시킬건지 여부
+        }
+
+        /// <summary>
+        /// Timer Start
+        /// </summary>
+        private void countTimerStart()
+        {
+            //타이머가 두번실행되는것을 방지
+            if (gameTimer.Enabled)
+                return;
+
+            countDownTime = countMaxTime;
+
             gameTimer.Start();
         }
 
         /// <summary>
         /// 스레드타이머의 콜백
         /// </summary>
-        private void GameTimerCallBack(object state, System.Timers.ElapsedEventArgs e)
+        private void CountTimerCallBack(object state, System.Timers.ElapsedEventArgs e)
         {
             foreach (var cl in TeamDic)
                 cl.Value.Client.Send(new RoundTimer(countDownTime));
             Console.WriteLine("타이머 확인 : " + countDownTime);
             if (countDownTime <= -1)
-            {
-                gameTimer.Stop();
-                gameTimer.Dispose();
-            }
+                CountTimerEnd();
             countDownTime -= 1;
+        }
+
+        /// <summary>
+        /// Timer End
+        /// </summary>
+        private void CountTimerEnd()
+        {
+            gameTimer.Stop();
         }
 
         #endregion
@@ -360,6 +384,7 @@ namespace CLongServer.Ingame
                     break;
                 case "ReadyCheck":
                     var readyData = JsonConvert.DeserializeObject<ReadyCheck>(p.Data);
+                    countTimerStart();
                     break;
                 case "KeyDown":
                     var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);

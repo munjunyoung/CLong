@@ -252,7 +252,7 @@ public class IngameProcess : MonoBehaviour
         if (!TimerPanel.activeSelf)
             TimerPanel.SetActive(true);
         TimerText.text = countDown.ToString();
-
+        Debug.Log("타이머 : " + countDown.ToString());
         if (countDown >= 1)
             return;
         else if (countDown.Equals(0))

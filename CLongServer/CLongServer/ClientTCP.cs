@@ -37,8 +37,6 @@ namespace CLongServer
         //Ingame 
         public bool ingame = false;
         public TeamColor teamColor;
-        //Client create Check
-        public bool ReadyCheck = false;
 
         //Health
         public int currentHealth = 100;
