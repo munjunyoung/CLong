@@ -83,7 +83,7 @@ namespace CLongServer.Ingame
             }
             catch (Exception e)
             {
-                Console.WriteLine("[UDP] Socket - Receive : " + e.ToString());
+                //Console.WriteLine("[UDP] Socket - Receive : " + e.ToString());
             }
         }
         
@@ -100,7 +100,7 @@ namespace CLongServer.Ingame
             {
                 _tempBufferSocket = tmpUDP.EndReceive(ar, ref tmpEP);
                 var tempDataSize = _tempBufferSocket.Length;
-                //Console.WriteLine("[UDP] Socket - Receive Data Size : " + tempDataSize);
+                Console.WriteLine("[UDP] Socket - Receive Data Size : " + tempDataSize);
                 if (tempDataSize == 0)
                 {
                     Console.WriteLine("[UDP] Socket -  Receive Data Size is zero");

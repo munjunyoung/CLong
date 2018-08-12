@@ -7,25 +7,24 @@ using UnityEngine.UI;
 
 public class InputManager : MonoBehaviour
 {
-
     //Client
     public Player myPlayer;
 
     //KeyList
     List<KeyCode> KeyList = new List<KeyCode>();
+
     //Rotation
     private float xSens = 1.0f;
     private float ySens = 1.0f;
     private float xRot = 0f;
     private float yRot = 0f;
+
     //Turning Send Packet
     float mousePacketSendFrame = 0f;
     float mouseDelay = 1f;
+
     //Shooting
     int shootPeriodCount = 0;
-    //for Set Health UI
-    public int currentHealth = 100;
-    public Slider healthSlider;
 
     //Aim
     public bool zoomState = false;
@@ -35,12 +34,13 @@ public class InputManager : MonoBehaviour
     //Aim Rebound
     public Transform[] aimImage = new Transform[4];
     private float ReboundValue = 0f;
-    //public float ReboundTotalValue = 0; //반동상태 확인
 
+    /// <summary>
+    /// 키셋팅 및 현재 체력 설정
+    /// </summary>
     private void Start()
     {
         KeySet();
-        healthSlider.value = currentHealth;
     }
 
     private void FixedUpdate()
@@ -291,9 +291,13 @@ public class InputManager : MonoBehaviour
         if (aimImage[0].localPosition.x.Equals(aimImageStartPosValue))
             return;
 
+        if (myPlayer == null)
+            return;
         foreach (var a in aimImage)
-            a.localPosition = Vector3.Slerp(a.transform.localPosition, new Vector3(aimImageStartPosValue, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundRecoveryTime);
-
+        {
+            a.localPosition = Vector3.Slerp(a.transform.localPosition,
+                new Vector3(aimImageStartPosValue, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundRecoveryTime);
+        }
         ReboundValue = aimImage[0].localPosition.x;
     }
 
@@ -308,20 +312,7 @@ public class InputManager : MonoBehaviour
         NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y, myPlayer.playerUpperBody.eulerAngles.x));
     }
     #endregion
-
-    /// <summary>
-    /// set player HealthUI 
-    /// when takeDamge, and startGame Setting
-    /// </summary>
-    public void SetHealthUI(int h)
-    {
-        currentHealth = h;
-        if (currentHealth <= 0)
-            healthSlider.value = 0;
-        else
-            healthSlider.value = currentHealth;
-    }
-
+    
     /// <summary>
     /// setting Key List;
     /// </summary>
@@ -332,15 +323,20 @@ public class InputManager : MonoBehaviour
         KeyList.Add(KeyCode.A);
         KeyList.Add(KeyCode.S);
         KeyList.Add(KeyCode.D);
+        
         //Run
         KeyList.Add(KeyCode.LeftShift);
+
         //Seat
         KeyList.Add(KeyCode.LeftControl);
+
         //Sneak
         KeyList.Add(KeyCode.Z);
+
         //Swap
         KeyList.Add(KeyCode.Alpha1);
         KeyList.Add(KeyCode.Alpha2);
+
         //Jump
         KeyList.Add(KeyCode.Space);
     }

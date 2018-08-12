@@ -28,8 +28,7 @@ namespace CLongLib
     {
         public string Req { get; set; }
     }
-
-  
+    
     /// <summary>
     /// To entry ingameScene from client (
     /// </summary>
@@ -42,6 +41,4 @@ namespace CLongLib
             Port = p;
         }
     }
-
-  
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 using CLongLib;
 using Newtonsoft.Json;
 using tcpNet;
-
+using UnityEngine.SceneManagement;
 public class NetworkProcess : MonoBehaviour {
 
 
@@ -48,15 +48,10 @@ public class NetworkProcess : MonoBehaviour {
                 case "StartGameReq":
                     //서버에서 게임룸생성후 list에 client를 추가했을시 보내는 패킷
                     var portData = JsonConvert.DeserializeObject<StartGameReq>(p.Data);
-
-                    Ingame = true;
-                    ProcessHandlerTCP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestTCP;
                     NetworkManagerUDP.CreateUDPClient(portData.Port);
-                    ProcessHandlerUDP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestUDP;
-                    NetworkManagerTCP.SendTCP(p);
-                    StartCoroutine("ProcessDataUDP");
+                    //코루틴으로 로드실행
+                    StartCoroutine(IngameSceneLoad());
                     Debug.Log("[Network Process] TCP : Ingame Start");
-                    //..IngameScene Load
                     break;
                 default:
                     Debug.Log("[Network Process] TCP : Mismatching Message");
@@ -69,7 +64,7 @@ public class NetworkProcess : MonoBehaviour {
         }
 
     }
-    
+
     /// <summary>
     /// Udp Correspond Data 
     /// </summary>
@@ -77,6 +72,28 @@ public class NetworkProcess : MonoBehaviour {
     private void RequestDataUDP(Packet p)
     {
         ProcessHandlerUDP(p);
+    }
+
+    /// <summary>
+    ///  새로운 씬 Load 후 이전 씬 Unload 
+    /// Dondestroy를 사용하지 않고 직접 씬에서 씬으로 오브젝트 이동후 processHandler 추가
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator IngameSceneLoad()
+    {
+        Scene currentScene = SceneManager.GetActiveScene();
+
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("03IngameManager", LoadSceneMode.Additive);
+        while (!asyncLoad.isDone)
+            yield return null;
+
+        SceneManager.MoveGameObjectToScene(this.gameObject, SceneManager.GetSceneByName("03IngameManager"));
+        ProcessHandlerTCP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestTCP;
+        ProcessHandlerUDP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestUDP;
+        Ingame = true;
+        StartCoroutine("ProcessDataUDP");
+        NetworkManagerTCP.SendTCP(new StartGameReq(0));
+        SceneManager.UnloadSceneAsync(currentScene);
     }
 
     /// <summary>

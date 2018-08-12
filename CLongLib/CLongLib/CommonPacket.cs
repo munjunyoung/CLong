@@ -5,8 +5,6 @@ using Newtonsoft.Json;
 using System.Numerics;
 namespace CLongLib
 {
-    //SceneState
-    public enum Scene { Login, Lobby, Ingame};
     //Key
     public enum Key { W = 0, S, A, D, LeftShift, LeftControl, Z, Alpha1, Alpha2, Space};
     //Action State server and client 

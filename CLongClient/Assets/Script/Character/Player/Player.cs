@@ -126,8 +126,6 @@ public class Player : MonoBehaviour
                     //TakeDamage(other.GetComponent<ShellScript>().damage);
                     NetworkManagerTCP.SendTCP(new TakeDamage(clientNum, other.GetComponent<ShellScript>().damage));
                 }
-                Debug.Log("Trigger에서 아팡 데미지 : " + other.GetComponent<ShellScript>().damage);
-               
                 Destroy(other.gameObject);
             }
         }

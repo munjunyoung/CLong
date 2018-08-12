@@ -78,6 +78,18 @@ namespace CLongLib
             VictoryTeam = t;
         }
     }
-
+    
+    /// <summary>
+    /// 중복이 너무많다 
+    /// </summary>
+    public class SceneLoad : Packet
+    {
+        public int LoadRound { get; set; }
+        
+        public SceneLoad(int l)
+        {
+            LoadRound = l;
+        }
+    }
 }
 

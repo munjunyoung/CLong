@@ -19,10 +19,7 @@ namespace CLongServer
         //Socket
         TcpClient clientTcp;
         public Socket socketTcp; // socket
-
-        //Scene State
-        public Scene SceneState = Scene.Lobby;
-
+        
         //Receive
         private Packet receivedPacket = null;
         private byte[] _tempBufferSocket = new byte[4096];

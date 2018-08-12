@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using tcpNet;
 using CLongLib;
-public class IngameNetwork : MonoBehaviour {
-    
+
+public class AllSceneInputManager : MonoBehaviour
+{
 	// Use this for initialization
 	void Start () {
         NetworkManagerTCP.TcpConnectToServer();
@@ -12,7 +13,7 @@ public class IngameNetwork : MonoBehaviour {
 
     private void Update()
     {
-        //마우스 오른쪽 버튼 클릭 시 queue entry.. 일단 만들어둠
+        //Server 연결
         if (Input.GetKeyDown(KeyCode.F1))
         {
             if (!NetworkManagerTCP.clientTcp.Connected)
@@ -21,11 +22,13 @@ public class IngameNetwork : MonoBehaviour {
                     NetworkManagerTCP.TcpConnectToServer();
             }
         }
+        //Queue Entry
         if (Input.GetKeyDown(KeyCode.F2)) 
         {
             if (!GameObject.Find("AllSceneManager").GetComponent<NetworkProcess>().Ingame) 
                 NetworkManagerTCP.SendTCP(new QueueEntry());
         }
+        //TestRoom
         if(Input.GetKeyDown(KeyCode.F3))
         {
             if(!GameObject.Find("AllSceneManager").GetComponent<NetworkProcess>().Ingame)
@@ -33,7 +36,7 @@ public class IngameNetwork : MonoBehaviour {
         }
       
     }
-
+    
     /// <summary>
     /// 강제종료등 게임을 종료할 경우
     /// </summary>

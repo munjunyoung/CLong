@@ -63,7 +63,7 @@ public class NetworkManagerUDP
         sendPacket.AddRange(headBuf);
         sendPacket.AddRange(bodyBuf);
         clientUDP.Send(sendPacket.ToArray(), sendPacket.Count, serverEP);
-        //Debug.Log("[UDP] Socket - Send : [" + p.MsgName + "] to [" + serverEP + "]" + "DataSize : " + sendPacket.Count);
+        Debug.Log("[UDP] Socket - Send : [" + p.MsgName + "] to [" + serverEP + "]" + "DataSize : " + sendPacket.Count);
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ public class NetworkManagerUDP
             _tempBufferSocket = tmpUDP.EndReceive(ar, ref tmpEP);
             var tempDataSize = _tempBufferSocket.Length;
             
-            //Debug.Log("[UDP] Socket - Receive Data Size : " + tempDataSize);
+            Debug.Log("[UDP] Socket - Receive Data Size : " + tempDataSize);
             if (tempDataSize == 0)
             {
                 Debug.Log("[UDP] Socket -  Receive Data Size is zero");

@@ -3,6 +3,8 @@ using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.UI;
 using tcpNet;
+using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 public class IngameProcess : MonoBehaviour
 {
@@ -11,12 +13,12 @@ public class IngameProcess : MonoBehaviour
     //playerIns Prefab
     public GameObject playerPrefab;
     //Player check
-    public Player[] playerList = new Player[100];
+    public Player[] playerList = new Player[2];
 
     public int clientPlayerNum = -1;
     //Player InputManager reference
     public InputManager inputSc;
-
+    
     #region UI Var
     //Current Round View 
     public GameObject ViewRoundPanel;
@@ -31,9 +33,12 @@ public class IngameProcess : MonoBehaviour
     //RoundResult
     public GameObject RoundResultPanel;
     public Text RoundResultText;
+    
+    //Health UI
+    public int currentHealth = 100;
+    public Slider healthSlider;
     #endregion
-
-
+    
     //private List<GameObject> playerList = new List<GameObject>();
     /// <summary>
     /// IngameProcessHandler;
@@ -43,28 +48,34 @@ public class IngameProcess : MonoBehaviour
     {
         switch (p.MsgName)
         {
+            case "SceneLoad":
+                var sceneData = JsonConvert.DeserializeObject<SceneLoad>(p.Data);
+                SceneUnloadFunc(sceneData.LoadRound-1);
+                SceneLoadFunc(sceneData.LoadRound);
+                break;
             case "ClientIns":
                 var clientInsData = JsonConvert.DeserializeObject<ClientIns>(p.Data);
-                InsClient(clientInsData.ClientNum, ToUnityVectorChange(clientInsData.StartPos), clientInsData.Client, clientInsData.WeaponArray);
+                InsClient(clientInsData.ClientNum, clientInsData.HP, ToUnityVectorChange(clientInsData.StartPos), clientInsData.Client, clientInsData.WeaponArray);
                 if (clientInsData.Client)
                     NetworkManagerTCP.SendTCP(new ReadyCheck(clientPlayerNum));
                 break;
             case "RoundStart":
+                TimerState = 0;
                 var roundStartData = JsonConvert.DeserializeObject<RoundStart>(p.Data);
                 SetViewRoundUI(roundStartData.CurrentRound);
                 SetRoundResultUI(roundStartData.RoundPoint, null);
-                TimerState = 0;
                 break;
             case "RoundEnd":
+                TimerState = 1;
                 var roundEndData = JsonConvert.DeserializeObject<RoundEnd>(p.Data);
                 SetViewRoundUI(roundEndData.CurrentRound);
-                SetRoundResultUI(roundEndData.RoundPoint,roundEndData.RoundResult);
-                TimerState = 1;
+                SetRoundResultUI(roundEndData.RoundPoint, roundEndData.RoundResult);
                 break;
             case "RoundTimer":
                 var timerData = JsonConvert.DeserializeObject<RoundTimer>(p.Data);
                 SetTimerUI(timerData.CurrentTime);
                 break;
+
             case "ClientMoveSync":
                 var posData = JsonConvert.DeserializeObject<ClientMoveSync>(p.Data);
                 playerList[posData.ClientNum].transform.position = new Vector3(posData.CurrentPos.X, posData.CurrentPos.Y, posData.CurrentPos.Z);
@@ -92,7 +103,7 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "SyncHealth":
                 var healthData = JsonConvert.DeserializeObject<SyncHealth>(p.Data);
-                inputSc.SetHealthUI(healthData.CurrentHealth);
+                SetHealthUI(healthData.CurrentHealth);
                 break;
             case "Death":
                 var deathData = JsonConvert.DeserializeObject<Death>(p.Data);
@@ -115,9 +126,11 @@ public class IngameProcess : MonoBehaviour
             case "ClientDir":
                 var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
                 //자신의 플레이어가 아닐경우에만
+                Debug.Log("ClientNum : " + clientDirData.ClientNum);
+                Debug.Log("ClientPlayerNum : " + clientPlayerNum);
                 if (clientPlayerNum.Equals(clientDirData.ClientNum))
                     return;
-
+                //삭제하니 오류발생오져따리
                 playerList[clientDirData.ClientNum].transform.localEulerAngles = new Vector3(0, clientDirData.DirectionY, 0);
                 playerList[clientDirData.ClientNum].playerUpperBody.localEulerAngles = new Vector3(clientDirData.DirectionX, 0, 0);
                 break;
@@ -234,7 +247,7 @@ public class IngameProcess : MonoBehaviour
     /// <summary>
     /// Client 생성
     /// </summary>
-    public void InsClient(int num, Vector3 pos, bool clientCheck, string[] w)
+    public void InsClient(int num, int health, Vector3 pos, bool clientCheck, string[] w)
     {
         //배정되는 클라이언트 num에 prefab생성
         var tmpPrefab = Instantiate(playerPrefab);
@@ -250,6 +263,7 @@ public class IngameProcess : MonoBehaviour
         //클라이언트 일 경우
         clientPlayerNum = num;
         //플레이어 오브젝트 cam
+        SetHealthUI(health);
         camManagerSc.playerObject = playerList[clientPlayerNum].transform;
         camManagerSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
         //Player Sc;
@@ -305,6 +319,9 @@ public class IngameProcess : MonoBehaviour
         ViewPointText.text = point[0] + " : " + point[1];
     }
 
+    /// <summary>
+    /// UI 종료
+    /// </summary>
     private void SetUIEndActive()
     {
         if (TimerPanel.activeSelf)
@@ -313,6 +330,56 @@ public class IngameProcess : MonoBehaviour
             ViewRoundPanel.SetActive(false);
         if (RoundResultPanel.activeSelf)
             RoundResultPanel.SetActive(false);
+    }
+    #endregion
+    /// <summary>
+    /// set player HealthUI 
+    /// when takeDamge, and startGame Setting
+    /// </summary>
+    public void SetHealthUI(int h)
+    {
+        currentHealth = h;
+        if (currentHealth <= 0)
+            healthSlider.value = 0;
+        else
+            healthSlider.value = currentHealth;
+    }
+
+    #region Scene
+ 
+    /// <summary>
+    /// 씬생성 (매니저 씬에 씬병합)
+    /// </summary>
+    /// <param name="round"></param>
+    private void SceneLoadFunc(int round)
+    {
+        string sceneName = "Round" + round;
+        SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+        //씬이 생성된 후에 전송
+        NetworkManagerTCP.SendTCP(new SceneLoad(round));
+    }
+
+    /// <summary>
+    /// 종료될 씬의 숫자를 파라미터로 받아서 씬종료 및 오브젝트처리
+    /// </summary>
+    /// <param name="round"></param>
+
+    private void SceneUnloadFunc(int round)
+    {
+        //처음 시작하는 라운드일경우
+        if (round.Equals(0))
+            return;
+        //씬이 변경되기전 처리할 부분 
+        Debug.Log("MYPLAYER Destroy 확인 : " + inputSc.myPlayer);
+
+        if(playerList[0]!=null)
+            Destroy(playerList[0].gameObject);
+        if(playerList[1]!=null)
+            Destroy(playerList[1].gameObject);
+        //받아온 라운드는 실행될 라운드이므로..
+        string sceneName = "Round" + round;
+        if (SceneManager.GetSceneByName(sceneName).isLoaded)
+            SceneManager.UnloadSceneAsync(sceneName);
     }
     #endregion
 
