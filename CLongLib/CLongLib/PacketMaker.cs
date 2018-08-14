@@ -15,7 +15,8 @@ namespace CLongLib
         {
             {typeof(Login_Ack), 0x00},
             {typeof(Login_Req), 0x01},
-            {typeof(Start_Game), 0x02 }
+            {typeof(Start_Game), 0x02 },
+            {typeof(Queue_Req), 0x03 }
         };
 
         public static byte[] SetPacket(object o)
@@ -33,19 +34,26 @@ namespace CLongLib
             return ary;
         }
 
-        public static object GetPacket(byte[] b)
+        public static void GetPacket(byte[] b, ref Queue<IPacket> list)
         {
-            var type = _typeDic.FirstOrDefault(x => x.Value == b[0]).Key;
-            int size = Marshal.SizeOf(type);
-            Console.WriteLine(size);
-            if (size > b.Length-1)
-                throw new Exception();
+            int headerIdx = 0;
 
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-            Marshal.Copy(b, 1, ptr, size);
-            object obj = Marshal.PtrToStructure(ptr, type);
-            Marshal.FreeHGlobal(ptr);
-            return obj;
+            while(headerIdx < b.Length)
+            {
+                var type = _typeDic.FirstOrDefault(x => x.Value == b[headerIdx]).Key;
+                int size = Marshal.SizeOf(type);
+
+                if (headerIdx + size +1 > b.Length)
+                    throw new Exception();
+
+                IntPtr ptr = Marshal.AllocHGlobal(size);
+                Marshal.Copy(b, 1, ptr, size);
+                IPacket packet = Marshal.PtrToStructure(ptr, type) as IPacket;
+                Marshal.FreeHGlobal(ptr);
+                headerIdx = headerIdx + size + 1;
+
+                list.Enqueue(packet);
+            }
         }
     }
 

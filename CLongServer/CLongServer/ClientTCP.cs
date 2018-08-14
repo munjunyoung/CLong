@@ -15,7 +15,6 @@ namespace CLongServer
 {
     public class ClientTCP
     { 
-               
         //Socket
         TcpClient clientTcp;
         public Socket socketTcp; // socket
@@ -25,6 +24,7 @@ namespace CLongServer
         private byte[] _tempBufferSocket = new byte[4096];
         private readonly List<byte[]> _bodyBufferListSocket = new List<byte[]>();
         private readonly int headSize = 4;
+        private Queue<IPacket> _packetQueue= new Queue<IPacket>();
 
         //Handler
         public delegate void myEventHandler<T>(object sender, Packet p);
@@ -57,8 +57,79 @@ namespace CLongServer
             streamTcp = clientTcp.GetStream();
             socketTcp = clientTcp.Client;
             BeginReceive();
+
+            // 변경예정
+            //clientTcp.Client.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, ReceiveCb, clientTcp.Client);
+        }
+
+        /// <summary>
+        /// TCP 패킷을 보낸다.
+        /// </summary>
+        /// <param name="p">인터페이스 상속 패킷 클라스</param>
+        public void Send(IPacket p)
+        {
+            try
+            {
+                var data = PacketMaker.SetPacket(p);
+                clientTcp.Client.BeginSend(data, 0, data.Length, SocketFlags.None, null, clientTcp.Client);
+                Console.WriteLine("[TCP] Send to [{0}] : {1}, Length : {2}", clientTcp.Client.RemoteEndPoint, p.GetType(), data.Length);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("[TCP] Send exception : " + e.ToString());
+            }
         }
         
+        /// <summary>
+        /// TCP 소켓의 BeginReceive에 등록된 콜백 메소드
+        /// </summary>
+        /// <param name="ar">BeginReceive에 설정한 인스턴스가 담긴 파라미터</param>
+        private void ReceiveCb(IAsyncResult ar)
+        {
+            try
+            {
+                var sock = (Socket)ar.AsyncState;
+                var dataSize = sock.EndReceive(ar);
+
+                if(dataSize > 0)
+                {
+                    Console.WriteLine("[TCP] Received data size : " + dataSize);
+                    var dataAry = new byte[dataSize];
+                    Array.Copy(_tempBufferSocket, 0, dataAry, 0, dataSize);
+                    PacketMaker.GetPacket(dataAry, ref _packetQueue);
+                    Array.Clear(_tempBufferSocket, 0, _tempBufferSocket.Length);
+                    while(_packetQueue.Count > 0)
+                    {
+                        var packet = _packetQueue.Dequeue();
+                        Console.Write(packet.GetType() + ", ");
+                        ProcessPacket(packet);
+                    }
+                    Console.WriteLine("[TCP] Process was done.");
+                    sock.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, ReceiveCb, sock);
+                }
+                else
+                {
+                    Console.WriteLine("[TCP] Receive no data.");
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
+        private void ProcessPacket(IPacket p)
+        {
+            if(p is Queue_Req)
+            {
+                Console.WriteLine("Asd");
+            }
+            else
+            {
+                // Do something.
+            }
+        }
+
         #region Socket
         /// <summary>
         /// send packet through socket

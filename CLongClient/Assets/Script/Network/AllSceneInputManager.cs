@@ -28,6 +28,11 @@ public class AllSceneInputManager : MonoBehaviour
             if (!GameObject.Find("AllSceneManager").GetComponent<NetworkProcess>().Ingame) 
                 NetworkManagerTCP.SendTCP(new QueueEntry());
         }
+        if(Input.GetKeyDown(KeyCode.F4))
+        {
+            if (!GameObject.Find("AllSceneManager").GetComponent<NetworkProcess>().Ingame)
+                NetworkManagerTCP.SendPacket(new Queue_Req { req = true } );
+        }
         //TestRoom
         if(Input.GetKeyDown(KeyCode.F3))
         {

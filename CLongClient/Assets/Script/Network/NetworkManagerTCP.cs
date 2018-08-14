@@ -53,6 +53,20 @@ namespace tcpNet
             BeginReceiveTCP();
         }
 
+        public static void SendPacket(IPacket p)
+        {
+            try
+            {
+                var b = PacketMaker.SetPacket(p);
+                socketTcp.BeginSend(b, 0, b.Length, SocketFlags.None, null, socketTcp);
+                Debug.Log("Send");
+            }
+            catch(Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+
         #region Socket
         /// <summary>
         /// send packet through socket
