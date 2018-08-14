@@ -107,7 +107,6 @@ public class Player : MonoBehaviour
     {
         //모두 정지
         Debug.Log("저 주거욧");
-        Destroy(this.gameObject);
     }
 
     /// <summary>

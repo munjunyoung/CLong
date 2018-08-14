@@ -96,7 +96,7 @@ namespace CLongServer.Ingame
         }
 
         /// <summary>
-        /// 매라운드마다 초기화 해줘야할 변수
+        /// 시작, 매라운드마다 초기화 해줘야 변수들 초기화
         /// </summary>
         void SetClientVar()
         {

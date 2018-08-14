@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using tcpNet;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using System.Collections;
 
 public class IngameProcess : MonoBehaviour
 {
@@ -408,4 +409,22 @@ public class IngameProcess : MonoBehaviour
 
     #endregion
 
+    /// <summary>
+    ///  새로운 씬 Load 후 이전 씬 Unload 
+    /// Dondestroy를 사용하지 않고 직접 씬에서 씬으로 오브젝트 이동후 processHandler 추가
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator RoundLoad()
+    {
+        Scene currentScene = SceneManager.GetActiveScene();
+
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("03IngameManager", LoadSceneMode.Additive);
+        while (!asyncLoad.isDone)
+            yield return null;
+
+        SceneManager.MoveGameObjectToScene(this.gameObject, SceneManager.GetSceneByName("03IngameManager"));
+       
+        NetworkManagerTCP.SendTCP(new StartGameReq(0));
+        SceneManager.UnloadSceneAsync(currentScene);
+    }
 }
