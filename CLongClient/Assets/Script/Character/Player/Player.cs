@@ -106,7 +106,9 @@ public class Player : MonoBehaviour
     public void Death()
     {
         //모두 정지
+        this.gameObject.SetActive(false);
         Debug.Log("저 주거욧");
+        
     }
 
     /// <summary>
@@ -129,13 +131,4 @@ public class Player : MonoBehaviour
             }
         }
     }
-
-    /// <summary>
-    /// Total Add Script Func
-    /// </summary>
-    private void AddScript()
-    {
-        weaponManagerSc = this.gameObject.AddComponent<PlayerWeaponManager>();
-    }
-
 }

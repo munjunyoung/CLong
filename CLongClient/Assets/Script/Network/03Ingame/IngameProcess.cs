@@ -49,16 +49,15 @@ public class IngameProcess : MonoBehaviour
     {
         switch (p.MsgName)
         {
-            case "SceneLoad":
-                var sceneData = JsonConvert.DeserializeObject<SceneLoad>(p.Data);
-                SceneUnloadFunc(sceneData.LoadRound-1);
-                SceneLoadFunc(sceneData.LoadRound);
-                break;
             case "ClientIns":
                 var clientInsData = JsonConvert.DeserializeObject<ClientIns>(p.Data);
                 InsClient(clientInsData.ClientNum, clientInsData.HP, ToUnityVectorChange(clientInsData.StartPos), clientInsData.Client, clientInsData.WeaponArray);
                 if (clientInsData.Client)
                     NetworkManagerTCP.SendTCP(new ReadyCheck(clientPlayerNum));
+                break;
+            case "SetClient":
+                var setClientData = JsonConvert.DeserializeObject<SetClient>(p.Data);
+                ResetPlayerVar(setClientData);
                 break;
             case "RoundStart":
                 TimerState = 0;
@@ -273,6 +272,38 @@ public class IngameProcess : MonoBehaviour
         playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
     }
 
+    /// <summary>
+    /// 라운드가 넘어갈경우나 처음 시작할떄 초기화 해주어야할 변수
+    /// </summary>
+    public void ResetPlayerVar(SetClient set)
+    {
+        //클라이언트 플레이어 오브젝트 체력 설정
+        SetHealthUI(set.HP);
+
+        playerList[(int)TeamColor.BLUE].transform.position = ToUnityVectorChange(set.StartPos[(int)TeamColor.BLUE]);
+        playerList[(int)TeamColor.RED].transform.position = ToUnityVectorChange(set.StartPos[(int)TeamColor.RED]);
+
+        foreach (var p in playerList)
+        {
+            if(!p.gameObject.activeSelf)
+            p.gameObject.SetActive(true);
+        }
+        NetworkManagerTCP.SendTCP(new ReadyCheck(set.ClientNum));
+    }
+
+    /// <summary>
+    /// set player HealthUI 
+    /// when takeDamge, and startGame Setting
+    /// </summary>
+    public void SetHealthUI(int h)
+    {
+        currentHealth = h;
+        if (currentHealth <= 0)
+            healthSlider.value = 0;
+        else
+            healthSlider.value = currentHealth;
+    }
+    
     #region UI Func
 
     /// <summary>
@@ -333,21 +364,34 @@ public class IngameProcess : MonoBehaviour
             RoundResultPanel.SetActive(false);
     }
     #endregion
+   
+    #region ChangeVector
     /// <summary>
-    /// set player HealthUI 
-    /// when takeDamge, and startGame Setting
+    /// return Numerics Vector3
     /// </summary>
-    public void SetHealthUI(int h)
+    /// <param name="pos"></param>
+    /// <returns></returns>
+    public static System.Numerics.Vector3 ToNumericVectorChange(Vector3 pos)
     {
-        currentHealth = h;
-        if (currentHealth <= 0)
-            healthSlider.value = 0;
-        else
-            healthSlider.value = currentHealth;
+        var tempPos = new System.Numerics.Vector3(pos.x, pos.y, pos.z);
+        return tempPos;
     }
 
+    /// <summary>
+    /// return Unity Vector3
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
+    public static Vector3 ToUnityVectorChange(System.Numerics.Vector3 pos)
+    {
+        var tempPos = new Vector3(pos.X, pos.Y, pos.Z);
+        return tempPos;
+    }
+
+    #endregion
+/*
     #region Scene
- 
+
     /// <summary>
     /// 씬생성 (매니저 씬에 씬병합)
     /// </summary>
@@ -373,9 +417,9 @@ public class IngameProcess : MonoBehaviour
         //씬이 변경되기전 처리할 부분 
         Debug.Log("MYPLAYER Destroy 확인 : " + inputSc.myPlayer);
 
-        if(playerList[0]!=null)
+        if (playerList[0] != null)
             Destroy(playerList[0].gameObject);
-        if(playerList[1]!=null)
+        if (playerList[1] != null)
             Destroy(playerList[1].gameObject);
         //받아온 라운드는 실행될 라운드이므로..
         string sceneName = "Round" + round;
@@ -383,32 +427,6 @@ public class IngameProcess : MonoBehaviour
             SceneManager.UnloadSceneAsync(sceneName);
     }
     #endregion
-
-    #region ChangeVector
-    /// <summary>
-    /// return Numerics Vector3
-    /// </summary>
-    /// <param name="pos"></param>
-    /// <returns></returns>
-    public static System.Numerics.Vector3 ToNumericVectorChange(Vector3 pos)
-    {
-        var tempPos = new System.Numerics.Vector3(pos.x, pos.y, pos.z);
-        return tempPos;
-    }
-
-    /// <summary>
-    /// return Unity Vector3
-    /// </summary>
-    /// <param name="pos"></param>
-    /// <returns></returns>
-    public static Vector3 ToUnityVectorChange(System.Numerics.Vector3 pos)
-    {
-        var tempPos = new Vector3(pos.X, pos.Y, pos.Z);
-        return tempPos;
-    }
-
-    #endregion
-
     /// <summary>
     ///  새로운 씬 Load 후 이전 씬 Unload 
     /// Dondestroy를 사용하지 않고 직접 씬에서 씬으로 오브젝트 이동후 processHandler 추가
@@ -427,4 +445,5 @@ public class IngameProcess : MonoBehaviour
         NetworkManagerTCP.SendTCP(new StartGameReq(0));
         SceneManager.UnloadSceneAsync(currentScene);
     }
+    */
 }

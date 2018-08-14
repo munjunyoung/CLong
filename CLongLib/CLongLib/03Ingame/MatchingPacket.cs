@@ -3,11 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace CLongLib
 {
     public enum TeamColor { BLUE = 0, RED };
     public enum GameResult { WIN=0, LOSE };
+
+    /// <summary>
+    /// 다음라운드 설정시 플레이어 인게임 설정
+    /// </summary>
+    public class SetClient : Packet
+    {
+        public int ClientNum { get; set; }
+        public int HP { get; set; } 
+        public Vector3[] StartPos { get; set; }
+        
+        public SetClient(int n,int h, Vector3[] p )
+        {
+            ClientNum = n;
+            HP = h;
+            StartPos = p;
+        }
+    }
     /// <summary>
     /// 클라이언트가 모두 생성된후에 카운트가 시작되도록 생성후 클라에서 보내는 패킷
     /// </summary>
@@ -76,19 +94,6 @@ namespace CLongLib
         public MatchinEnd(int t)
         {
             VictoryTeam = t;
-        }
-    }
-    
-    /// <summary>
-    /// 중복이 너무많다 
-    /// </summary>
-    public class SceneLoad : Packet
-    {
-        public int LoadRound { get; set; }
-        
-        public SceneLoad(int l)
-        {
-            LoadRound = l;
         }
     }
 }
