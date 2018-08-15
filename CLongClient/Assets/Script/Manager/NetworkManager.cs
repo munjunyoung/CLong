@@ -37,14 +37,15 @@ public class NetworkManager : MonoBehaviour
         _tcpNet.Init(_IP, _PORT);
         StartCoroutine(ProcessPacket());
     }
+
     float elapsedTime = 0;
+
     private IEnumerator ProcessPacket()
     {
         int c = 0;
         
         while(true)
         {
-            c++;
             if(_tcpNet.packetQueue.Count > 0)
             {
                 ProcessPacket(_tcpNet.packetQueue.Dequeue());
@@ -55,6 +56,7 @@ public class NetworkManager : MonoBehaviour
                 c = 0;
                 elapsedTime = 0;
             }
+            c++;
 
             yield return new WaitForFixedUpdate();
         }
