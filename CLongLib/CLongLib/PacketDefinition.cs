@@ -43,6 +43,7 @@ namespace CLongLib
     {
         [MarshalAs(UnmanagedType.U2)]
         public ushort port;
+        public uint ip;
     }
 
     public struct Player_Init : IPacket
