@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace CLongLib
 {
+    /// <summary>
+    /// 아직 처리 제대로 안함
+    /// </summary>
     public class Login : Packet
     {
         public string ID { get; set; }

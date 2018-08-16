@@ -26,6 +26,9 @@ public class Player : MonoBehaviour
     public CharacterController playerController;
     private Vector3 moveDirection = Vector3.zero;
 
+    //Zoom
+    public bool zoomState = false;
+
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
     public bool IsGroundedFromServer = false;
     private float gravity = 10f;

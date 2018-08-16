@@ -42,6 +42,7 @@ namespace CLongServer.Ingame
 
         //TestRoom
         private int peopleCount = 0;
+
         #region GameRoom
         /// <summary>
         /// Constructor
@@ -188,6 +189,10 @@ namespace CLongServer.Ingame
                     break;
                 case "InsShell":
                     var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
+                    foreach (var cl in TeamDic)
+                        cl.Value.Client.Send(p);
+                    break;
+                case "Zoom":
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
                     break;

@@ -196,9 +196,7 @@ public class InputManager : MonoBehaviour
         //Zoom
         if (Input.GetMouseButtonDown(1))
         {
-            zoomState = zoomState ? false : true;
-            ZoomFunc(zoomState);
-            //SendData
+            NetworkManagerTCP.SendTCP(new Zoom(myPlayer.clientNum, myPlayer.zoomState.Equals(true)? false : true));
         }
     }
 
@@ -246,8 +244,6 @@ public class InputManager : MonoBehaviour
     {
         //카메라 포지션변경
         cam.GetComponent<CameraManager>().ZoomSetCamPos(zoomStateValue);
-        //총의 포지션 변경
-        myPlayer.weaponManagerSc.ZoomSetEquipPos(zoomStateValue);
         //AimImage 변경
         aimImageStartPosValue = zoomStateValue ? 0 : 10f;
         foreach (var a in aimImage)
@@ -267,8 +263,7 @@ public class InputManager : MonoBehaviour
 
         return shellDirection;
     }
-
-
+    
     /// <summary>
     /// when Shoot, Rebound Image Pos Increas
     /// </summary>

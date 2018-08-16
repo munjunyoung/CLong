@@ -45,6 +45,8 @@ public class IngameProcess : MonoBehaviour
     {
         npSC = GameObject.Find("AllSceneManager").GetComponent<NetworkProcess>();
     }
+
+    #region packet Process
     //private List<GameObject> playerList = new List<GameObject>();
     /// <summary>
     /// IngameProcessHandler;
@@ -115,6 +117,10 @@ public class IngameProcess : MonoBehaviour
                 inputSc.ReboundPlayerRotation();
                 inputSc.ReboundAimImage();
                 break;
+            case "Zoom":
+                var zoomData = JsonConvert.DeserializeObject<Zoom>(p.Data);
+                ZoomChange(zoomData.ClientNum, zoomData.ZoomState);
+                break;
             case "SyncHealth":
                 var healthData = JsonConvert.DeserializeObject<SyncHealth>(p.Data);
                 SetHealthUI(healthData.CurrentHealth);
@@ -153,6 +159,9 @@ public class IngameProcess : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Key
     /// <summary>
     /// OtherPlayer key down for moving
     /// </summary>
@@ -189,22 +198,16 @@ public class IngameProcess : MonoBehaviour
             case "Alpha1":
                 //무기 스왑시 조준 풀기
                 playerList[num].weaponManagerSc.WeaponChange(1);
-                if (!num.Equals(clientPlayerNum))
+                if (!playerList[num].zoomState)
                     return;
-                if (!inputSc.zoomState)
-                    return;
-                var z1 = inputSc.zoomState = false;
-                inputSc.ZoomFunc(z1);
+                ZoomChange(num, false);
                 break;
             case "Alpha2":
                 //무기 스왑시 조준 풀기
                 playerList[num].weaponManagerSc.WeaponChange(2);
-                if (!num.Equals(clientPlayerNum))
+                if (!playerList[num].zoomState)
                     return;
-                if (!inputSc.zoomState)
-                    return;
-                var z2 = inputSc.zoomState = false;
-                inputSc.ZoomFunc(z2);
+                ZoomChange(num, false);
                 break;
             case "Space":
                 playerList[num].keyState[(int)Key.Space] = true;
@@ -256,6 +259,7 @@ public class IngameProcess : MonoBehaviour
                 break;
         }
     }
+    #endregion
 
     /// <summary>
     /// Client 생성
@@ -293,11 +297,11 @@ public class IngameProcess : MonoBehaviour
     {
         //클라이언트 플레이어 오브젝트 체력 설정
         SetHealthUI(set.HP);
-        //줌 상태 일경우 품
-        if (inputSc.zoomState)
-            inputSc.zoomState = false;
-        inputSc.ZoomFunc(inputSc.zoomState);
 
+        //줌 상태 일경우 품
+        if (playerList[set.ClientNum].zoomState.Equals(true)) 
+            ZoomChange(set.ClientNum, false);
+        
         playerList[(int)TeamColor.BLUE].transform.position = ToUnityVectorChange(set.StartPos[(int)TeamColor.BLUE]);
         playerList[(int)TeamColor.RED].transform.position = ToUnityVectorChange(set.StartPos[(int)TeamColor.RED]);
 
@@ -311,7 +315,21 @@ public class IngameProcess : MonoBehaviour
         //Send
         NetworkManagerTCP.SendTCP(new ReadyCheck(set.ClientNum));
     }
+    
+    /// <summary>
+    /// 줌변경
+    /// </summary>
+    /// <param name="clientnum"></param>
+    /// <param name="zoomstate"></param>
+    private void ZoomChange(int clientnum, bool zoomstate)
+    {
+        playerList[clientnum].zoomState = zoomstate;
+        playerList[clientnum].weaponManagerSc.ZoomSetEquipPos(zoomstate);
+        if (clientPlayerNum.Equals(clientnum))
+            inputSc.ZoomFunc(zoomstate);
+    }
 
+    #region UI Func
     /// <summary>
     /// set player HealthUI 
     /// when takeDamge, and startGame Setting
@@ -324,8 +342,6 @@ public class IngameProcess : MonoBehaviour
         else
             healthSlider.value = currentHealth;
     }
-    
-    #region UI Func
 
     /// <summary>
     /// when the Game START, View currentRound
