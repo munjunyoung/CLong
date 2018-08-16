@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using UnityEngine;
 using CLongLib;
 
+[RequireComponent(typeof(GlobalManager))]
 public class NetworkManager : MonoBehaviour
 {
     public enum Protocol { TCP, UDP }
@@ -13,11 +14,12 @@ public class NetworkManager : MonoBehaviour
     private const string _IP = "127.0.0.1";
     private const int _PORT = 23000;
 
-    private const float _TCP_PROC_FREQ = 0.01f;
-    private const float _UDP_PROC_FREQ = 0.01f;
-
     private TCPNetwork _tcpNet = new TCPNetwork();
     private UDPNetwork _udpNet = new UDPNetwork();
+    private Coroutine _procRoutineTCP;
+    private Coroutine _procRoutineUDP;
+
+    private GlobalManager _gm;
     
     public void SendPacket(IPacket p, Protocol pt)
     {
@@ -34,47 +36,52 @@ public class NetworkManager : MonoBehaviour
 
     private void Awake()
     {
+        _gm = GetComponent<GlobalManager>();
         _tcpNet.Init(_IP, _PORT);
-        StartCoroutine(ProcessPacket());
-    }
-
-    float elapsedTime = 0;
-
-    private IEnumerator ProcessPacket()
-    {
-        int c = 0;
-        
-        while(true)
-        {
-            if(_tcpNet.packetQueue.Count > 0)
-            {
-                ProcessPacket(_tcpNet.packetQueue.Dequeue());
-            }
-            if (c % 100 == 0)
-            {
-                Debug.Log("100 processing time : " + DateTime.Now + " " + DateTime.Now.Millisecond + ", elapsedTime : " + elapsedTime);
-                c = 0;
-                elapsedTime = 0;
-            }
-            c++;
-
-            yield return new WaitForFixedUpdate();
-        }
+        _procRoutineTCP = StartCoroutine(ProcPacketQueue(_tcpNet.packetQueue));
     }
 
     private void FixedUpdate()
     {
-        elapsedTime += Time.deltaTime;
         if (Input.GetKeyDown(KeyCode.F4))
         {
             this.SendPacket(new Queue_Req { req = true }, Protocol.TCP);
         }
+        if (Input.GetKeyDown(KeyCode.F5))
+        {
+            Debug.Log("Stop");
+            StopCoroutine(_procRoutineTCP);
+            StopCoroutine(_procRoutineUDP);
+        }
 
-        if (_tcpNet.packetQueue.Count > 0)
-            ProcessPacket(_tcpNet.packetQueue.Dequeue());
+        //Testcode
+        //if (Input.GetKeyDown(KeyCode.F6))
+        //{
+        //    for(int i=0; i<10000000; ++i) 0.5. 100000 0.005
+        //        _tcpNet.packetQueue.Enqueue(new Queue_Req(true));
+        //    Debug.Log("start : " + DateTime.Now + " " + DateTime.Now.Millisecond);
+        //    _procRoutine = StartCoroutine(ProcPacketQueue(_tcpNet.packetQueue));
+        //    bb = true;
+        //}
+    }
 
-        if (_udpNet.packetQueue.Count > 0)
-            ProcessPacket(_udpNet.packetQueue.Dequeue());
+    private IEnumerator ProcPacketQueue(Queue<IPacket> packets)
+    {
+        while (true)
+        {
+            int c = 0;
+            while (packets.Count > 0)
+            {
+                c++;
+                _gm.ProcessPacket(packets.Dequeue());
+                if (c > 100000)
+                {
+                    c = 0;
+                    yield return new WaitForFixedUpdate();
+                }
+            }
+            yield return new WaitForFixedUpdate();
+        }
     }
 
     private void ProcessPacket(IPacket p)
@@ -83,9 +90,17 @@ public class NetworkManager : MonoBehaviour
         {
             var s = (Start_Game)p;
             _udpNet.Init(s.ip, s.port);
+            _procRoutineUDP = StartCoroutine(ProcPacketQueue(_udpNet.packetQueue));
+        }
+        else if (p is Login_Ack)
+        {
+            var s = (Login_Ack)p;
         }
     }
 
+    /// <summary>
+    /// TCP class
+    /// </summary>
     private class TCPNetwork
     {
         internal Queue<IPacket> packetQueue = new Queue<IPacket>();
@@ -149,6 +164,9 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// UDP class
+    /// </summary>
     public class UDPNetwork
     {
         internal Queue<IPacket> packetQueue = new Queue<IPacket>();

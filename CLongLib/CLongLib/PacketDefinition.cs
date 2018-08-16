@@ -10,10 +10,37 @@ namespace CLongLib
     public interface IPacket
     { }
 
-    public struct Exit_Req : IPacket
+    /// <summary>
+    /// Login request from CLIENT to SERVER.
+    /// </summary>
+    public struct Login_Req : IPacket
     {
-        [MarshalAs(UnmanagedType.I1)]
-        public bool req;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
+        public string id;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
+        public string password;
+
+        public Login_Req(string i, string p)
+        {
+            id = i;
+            password = p;
+        }
+    }
+
+    /// <summary>
+    /// 서버->클라 멀티캐스트 포트 전송 (매칭 성공 이후)
+    /// </summary>
+    public struct Start_Game : IPacket
+    {
+        [MarshalAs(UnmanagedType.U2)]
+        public ushort port;
+        public uint ip;
+
+        public Start_Game(ushort p, uint i)
+        {
+            port = p;
+            ip = i;
+        }
     }
 
     /// <summary>
@@ -22,6 +49,17 @@ namespace CLongLib
     public struct Queue_Req : IPacket
     {
         // true : 신청, false : 취소
+        [MarshalAs(UnmanagedType.I1)]
+        public bool req;
+
+        public Queue_Req(bool b)
+        {
+            req = b;
+        }
+    }
+
+    public struct Exit_Req : IPacket
+    {
         [MarshalAs(UnmanagedType.I1)]
         public bool req;
     }
@@ -34,16 +72,6 @@ namespace CLongLib
         // true : 매칭성공, false : 매칭오류
         [MarshalAs(UnmanagedType.I1)]
         public bool req;
-    }
-
-    /// <summary>
-    /// 서버->클라 멀티캐스트 포트 전송 (매칭 성공 이후)
-    /// </summary>
-    public struct Start_Game : IPacket
-    {
-        [MarshalAs(UnmanagedType.U2)]
-        public ushort port;
-        public uint ip;
     }
 
     public struct Player_Init : IPacket
@@ -88,16 +116,7 @@ namespace CLongLib
         public string roundResult;
     }
 
-    /// <summary>
-    /// Login request from CLIENT to SERVER.
-    /// </summary>
-    public struct Login_Req : IPacket
-    {
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
-        public string id;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
-        public string password;
-    }
+    
 
     /// <summary>
     /// Login ackknowledgement from SERVER to CLIENT
