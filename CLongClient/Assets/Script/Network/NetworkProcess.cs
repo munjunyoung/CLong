@@ -7,6 +7,7 @@ using tcpNet;
 using UnityEngine.SceneManagement;
 public class NetworkProcess : MonoBehaviour {
 
+    public AllSceneInputManager allSceneManagerSc;
 
     public bool Ingame = false;
     public delegate void myEventHandler<T>(Packet p);
@@ -26,10 +27,7 @@ public class NetworkProcess : MonoBehaviour {
     private void ProcessPacket()
     {
         if (NetworkManagerTCP.receivedPacketTCP.Count > 0)
-        {
             RequestDataTCP(NetworkManagerTCP.receivedPacketTCP.Dequeue());
-        }
-       
     }
     /// <summary>
     /// data process
@@ -41,6 +39,9 @@ public class NetworkProcess : MonoBehaviour {
         {
             switch (p.MsgName)
             {
+                case "Login":
+                    LobbyCouroutineFunc();
+                    break;
                 case "MatchingComplete":
                     //.. Show matchingComplete UI
                     Debug.Log("[Network Process] TCP : Matching Complete");
@@ -75,6 +76,30 @@ public class NetworkProcess : MonoBehaviour {
     }
 
     /// <summary>
+    /// IngameProcess에서도 사용하기 위함 (게임이 종료될때)
+    /// </summary>
+    public void LobbyCouroutineFunc()
+    {
+        StartCoroutine(LobbySceneLoad());
+    }
+
+    /// <summary>
+    /// 로비씬 로드
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator LobbySceneLoad()
+    {
+        Scene currentScene = SceneManager.GetActiveScene();
+
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("02Lobby", LoadSceneMode.Additive);
+        while (!asyncLoad.isDone)
+            yield return null;
+
+        SceneManager.MoveGameObjectToScene(this.gameObject, allSceneManagerSc.currentScene =  SceneManager.GetSceneByName("02Lobby"));
+        SceneManager.UnloadSceneAsync(currentScene);
+    }
+
+    /// <summary>
     ///  새로운 씬 Load 후 이전 씬 Unload 
     /// Dondestroy를 사용하지 않고 직접 씬에서 씬으로 오브젝트 이동후 processHandler 추가
     /// </summary>
@@ -87,7 +112,7 @@ public class NetworkProcess : MonoBehaviour {
         while (!asyncLoad.isDone)
             yield return null;
 
-        SceneManager.MoveGameObjectToScene(this.gameObject, SceneManager.GetSceneByName("03IngameManager"));
+        SceneManager.MoveGameObjectToScene(this.gameObject, allSceneManagerSc.currentScene = SceneManager.GetSceneByName("03IngameManager"));
         ProcessHandlerTCP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestTCP;
         ProcessHandlerUDP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestUDP;
         Ingame = true;
@@ -105,9 +130,7 @@ public class NetworkProcess : MonoBehaviour {
         while (Ingame)
         {
             if (NetworkManagerUDP.receivedPacketUDP.Count > 0)
-            {
                 RequestDataUDP(NetworkManagerUDP.receivedPacketUDP.Dequeue());
-            }
             yield return null;   
         }
     }

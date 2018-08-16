@@ -30,7 +30,7 @@ namespace CLongServer.Ingame
         //Handler
         public delegate void myEventHandler<T>(Packet p);
         public event myEventHandler<Packet> ProcessHandler;
-
+        
         /// <summary>
         /// Constructor . Create UDPClient
         /// </summary>
@@ -47,6 +47,7 @@ namespace CLongServer.Ingame
             BeginReceiveUDP();
         }
 
+        
         /// <summary>
         /// Send packet through UDP
         /// </summary>
@@ -164,6 +165,11 @@ namespace CLongServer.Ingame
         private void RequestDataUDP(Packet p)
         {
             ProcessHandler(p);
+        }
+
+        private void UDPClose()
+        {
+            clientUDP.Close();
         }
     }
 }

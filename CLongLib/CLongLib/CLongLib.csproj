@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="01Login\LoginPacket.cs" />
     <Compile Include="03Ingame\GameStartPacket.cs" />
     <Compile Include="03Ingame\HealthPacket.cs" />
     <Compile Include="03Ingame\MatchingPacket.cs" />

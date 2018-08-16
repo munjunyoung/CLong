@@ -20,6 +20,7 @@ public class Player : MonoBehaviour
 
     //Action State
     public int currentActionState;
+    public bool isAlive = false;
 
     //Character Controller
     public CharacterController playerController;
@@ -31,9 +32,12 @@ public class Player : MonoBehaviour
     private float jumpSpeed = 30f;
     private float jumpTimer = 0f;
     public GameObject GroundCheckObject;
-    
+
     private void FixedUpdate()
     {
+        if (!isAlive)
+            return;
+
         Move();
     }
 
@@ -90,7 +94,7 @@ public class Player : MonoBehaviour
             return;
         moveDirection.y -= gravity;
     }
-    
+
     /// <summary>
     /// 맞은위치 pos을 받아와 데미지 이펙트 처리
     /// </summary>
@@ -106,9 +110,10 @@ public class Player : MonoBehaviour
     public void Death()
     {
         //모두 정지
+        isAlive = false;
         this.gameObject.SetActive(false);
         Debug.Log("저 주거욧");
-        
+
     }
 
     /// <summary>

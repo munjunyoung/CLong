@@ -6,12 +6,25 @@ using System.Threading.Tasks;
 
 namespace CLongServer.Ingame
 {
-    class GameRoomManager
+    class GameRoomManager 
     {
-        public int roomCount = 0;
-        public Dictionary<int, GameRoom> roomDic = new Dictionary<int, GameRoom>();
-        
-        public GameRoomManager()
+        private static GameRoomManager _instance = null;
+        public static GameRoomManager Instance
+        {
+            get
+            {
+                if(_instance == null)
+                    _instance = new GameRoomManager();
+                
+                return _instance;
+            }
+        }
+
+
+        private int roomCount = 0;
+        private Dictionary<int, GameRoom> roomDic = new Dictionary<int, GameRoom>();
+
+        private GameRoomManager()
         {
             roomCount = 0;
         }

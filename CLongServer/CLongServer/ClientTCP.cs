@@ -33,14 +33,9 @@ namespace CLongServer
         #region InGame
         //Ingame 
         public bool ingame = false;
-        public TeamColor teamColor;
-
-        //Health
-        public int currentHealth = 100;
-        public bool isAlive = false;
-
+        
         //StartPosition
-        public Vector3 StartPos;
+        //public Vector3 StartPos;
 
         //Weapon
         public string[] sendWeaponArray = { "AK", "M4" };
@@ -54,7 +49,6 @@ namespace CLongServer
         public ClientTCP(TcpClient tc)
         {
             clientTcp = tc;
-            streamTcp = clientTcp.GetStream();
             socketTcp = clientTcp.Client;
             BeginReceive();
 
@@ -282,11 +276,17 @@ namespace CLongServer
             {
                 switch (p.MsgName)
                 {
+                    case "Login":
+                        this.Send(p);
+                        break;
                     case "QueueEntry":
-                        MatchingManager.MatchingProcess(this);
+                        MatchingManager.Instance.MatchingProcess(this);
                         break;
                     case "TestRoom":
-                        MatchingManager.EntryTestRoom(this);
+                        MatchingManager.Instance.EntryTestRoom(this);
+                        break;
+                    case "ExitReq":
+                        this.Close();
                         break;
                     default:
                         Console.WriteLine("[TCP] Socket :  Mismatching Message");
@@ -298,114 +298,5 @@ namespace CLongServer
                 ProcessHandler(this, p);
             }
         }
-
-        #region Stream
-        //StreamTest용
-        public NetworkStream streamTcp; // 전송 주소
-        protected byte[] _tempBufferStream = new byte[4096];
-        protected List<byte[]> _bodyBufferListStream = new List<byte[]>();
-
-        /// <summary>
-        /// Send through Stream
-        /// </summary>
-        public void SendStream(Packet p)
-        {
-            var packetStr = JsonConvert.SerializeObject(p, Formatting.Indented, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Objects
-            });
-            var bodyBuf = Encoding.UTF8.GetBytes(packetStr);
-            var headBuf = BitConverter.GetBytes(bodyBuf.Length);
-            List<byte> sendPacket = new List<byte>();
-            sendPacket.AddRange(headBuf);
-            sendPacket.AddRange(bodyBuf);
-
-            streamTcp.BeginWrite(sendPacket.ToArray(), 0, sendPacket.Count, OnSendCallBackStream, streamTcp);
-            Console.WriteLine("[Client] Stream - Send : [" + p.MsgName + "] to [" + clientTcp.Client.RemoteEndPoint + "]");
-        }
-
-        /// <summary>
-        /// Send Callback func through stream
-        /// </summary>
-        /// <param name="ar"></param>
-        public void OnSendCallBackStream(IAsyncResult ar)
-        {
-
-        }
-
-        /// <summary>
-        /// Receive through Stream
-        /// </summary>
-        public void BeginReceiveStream()
-        {
-            if (!clientTcp.Connected)
-            {
-                Console.WriteLine("[Client] Stream - Not Connected");
-                return;
-            }
-
-            Array.Clear(_tempBufferStream, 0, _tempBufferStream.Length);
-
-            try
-            {
-                streamTcp.BeginRead(_tempBufferStream, 0, _tempBufferStream.Length, OnReceiveCallBackStream, streamTcp);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("[Client] Stream - Receive : " + e.ToString());
-            }
-        }
-
-        /// <summary>
-        /// Recevie Call Back
-        /// </summary>
-        /// <param name="ar"></param>
-        private void OnReceiveCallBackStream(IAsyncResult ar)
-        {
-            var tempStream = (NetworkStream)ar.AsyncState;
-
-            try
-            {
-                var tempDataSize = tempStream.EndRead(ar);
-                Console.WriteLine("[Client] Stream - Receive Data Size : " + tempDataSize);
-                if (tempDataSize == 0)
-                {
-                    Console.WriteLine("[Client] Stream - Receive Data Size is zero");
-                    return;
-                }
-                CheckPacketStream(tempDataSize);
-
-                foreach (var p in _bodyBufferListStream)
-                    DeserializePacket(p);
-
-                _bodyBufferListStream.Clear();
-                BeginReceiveStream();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("[Client] Stream - RecevieCallBack : " + e.ToString());
-            }
-        }
-
-        /// <summary>
-        /// overLap Packet divide through stream
-        /// </summary>
-        /// <param name="totalSize"></param>
-        private void CheckPacketStream(int totalSize)
-        {
-            var tempSize = 0;
-
-            while (totalSize > tempSize)
-            {
-                var bodySize = _tempBufferStream[tempSize];
-                byte[] bodyBuf = new byte[1024];
-
-                Array.Copy(_tempBufferStream, tempSize + headSize, bodyBuf, 0, bodySize);
-                _bodyBufferListStream.Add(bodyBuf);
-                tempSize += (bodySize + headSize);
-            }
-        }
-
-        #endregion
     }
 }

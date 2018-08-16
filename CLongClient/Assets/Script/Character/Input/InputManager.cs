@@ -45,19 +45,26 @@ public class InputManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (myPlayer != null)
-            Tunring();
+        if (myPlayer == null)
+            return;
+        if (!myPlayer.isAlive)
+            return;
+        Tunring();
+
     }
 
     private void Update()
     {
-        if (myPlayer != null)
-        {
-            SendKeyData();
-            SendAngleYData();
-            
-            ReturnAimImage();
-        }
+        if (myPlayer == null)
+            return;
+        if (!myPlayer.isAlive)
+            return;
+
+        SendKeyData();
+        SendAngleYData();
+
+        ReturnAimImage();
+
     }
 
     /// <summary>
@@ -159,11 +166,10 @@ public class InputManager : MonoBehaviour
         //Jump
         if (Input.GetKeyDown(KeyList[(int)Key.Space]))
         {
-            Debug.Log("gg : " + myPlayer.IsGroundedFromServer);
             if (myPlayer.IsGroundedFromServer)
-            NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
+                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Space].ToString()));
         }
-        
+
         //WeaponSwap
         if (Input.GetKeyDown(KeyList[(int)Key.Alpha1]))
         {
@@ -196,11 +202,11 @@ public class InputManager : MonoBehaviour
         }
     }
 
-        #region Turning
-        /// <summary>
-        /// Player Turning
-        /// </summary>
-        void Tunring()
+    #region Turning
+    /// <summary>
+    /// Player Turning
+    /// </summary>
+    void Tunring()
     {
         xRot += Input.GetAxis("Mouse X") * xSens;
         yRot += Input.GetAxis("Mouse Y") * ySens;
@@ -238,14 +244,14 @@ public class InputManager : MonoBehaviour
     /// </summary>
     public void ZoomFunc(bool zoomStateValue)
     {
-            //카메라 포지션변경
-            cam.GetComponent<CameraManager>().ZoomSetCamPos(zoomStateValue);
-            //총의 포지션 변경
-            myPlayer.weaponManagerSc.ZoomSetEquipPos(zoomStateValue);
-            //AimImage 변경
-            aimImageStartPosValue = zoomStateValue ? 0 : 10f;
-            foreach (var a in aimImage)
-                a.transform.localPosition = new Vector3(aimImageStartPosValue, 0f, 0f);
+        //카메라 포지션변경
+        cam.GetComponent<CameraManager>().ZoomSetCamPos(zoomStateValue);
+        //총의 포지션 변경
+        myPlayer.weaponManagerSc.ZoomSetEquipPos(zoomStateValue);
+        //AimImage 변경
+        aimImageStartPosValue = zoomStateValue ? 0 : 10f;
+        foreach (var a in aimImage)
+            a.transform.localPosition = new Vector3(aimImageStartPosValue, 0f, 0f);
     }
 
     /// <summary>
@@ -254,8 +260,8 @@ public class InputManager : MonoBehaviour
     private Vector3 ReboundShell()
     {
         //정중앙 (반동추가)
-        var ShellDestination = cam.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f + Random.Range(-ReboundValue,ReboundValue), Screen.height * 0.5f + Random.Range(-ReboundValue, ReboundValue), 100f));
-      
+        var ShellDestination = cam.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f + Random.Range(-ReboundValue, ReboundValue), Screen.height * 0.5f + Random.Range(-ReboundValue, ReboundValue), 100f));
+
         myPlayer.weaponManagerSc.fireTransform.LookAt(ShellDestination);
         var shellDirection = myPlayer.weaponManagerSc.fireTransform.eulerAngles;
 
@@ -282,7 +288,7 @@ public class InputManager : MonoBehaviour
             ReboundValue = aimImage[0].localPosition.x;
         }
     }
-    
+
     /// <summary>
     /// Return Aim Image
     /// </summary>
@@ -307,12 +313,12 @@ public class InputManager : MonoBehaviour
     public void ReboundPlayerRotation()
     {
         var reboundValue = myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundIntensity;
-        yRot += (reboundValue*0.1f);
+        yRot += (reboundValue * 0.1f);
         xRot += Random.Range(-reboundValue * 0.5f, reboundValue * 0.5f);
         NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y, myPlayer.playerUpperBody.eulerAngles.x));
     }
     #endregion
-    
+
     /// <summary>
     /// setting Key List;
     /// </summary>
@@ -323,7 +329,7 @@ public class InputManager : MonoBehaviour
         KeyList.Add(KeyCode.A);
         KeyList.Add(KeyCode.S);
         KeyList.Add(KeyCode.D);
-        
+
         //Run
         KeyList.Add(KeyCode.LeftShift);
 

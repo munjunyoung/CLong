@@ -19,6 +19,7 @@ public class IngameProcess : MonoBehaviour
     public int clientPlayerNum = -1;
     //Player InputManager reference
     public InputManager inputSc;
+    public NetworkProcess npSC;
     
     #region UI Var
     //Current Round View 
@@ -39,7 +40,11 @@ public class IngameProcess : MonoBehaviour
     public int currentHealth = 100;
     public Slider healthSlider;
     #endregion
-    
+
+    private void Start()
+    {
+        npSC = GameObject.Find("AllSceneManager").GetComponent<NetworkProcess>();
+    }
     //private List<GameObject> playerList = new List<GameObject>();
     /// <summary>
     /// IngameProcessHandler;
@@ -71,6 +76,10 @@ public class IngameProcess : MonoBehaviour
                 SetViewRoundUI(roundEndData.CurrentRound);
                 SetRoundResultUI(roundEndData.RoundPoint, roundEndData.RoundResult);
                 break;
+            case "MatchingEnd":
+                npSC.Ingame = false;
+                npSC.LobbyCouroutineFunc();
+                break;
             case "RoundTimer":
                 var timerData = JsonConvert.DeserializeObject<RoundTimer>(p.Data);
                 SetTimerUI(timerData.CurrentTime);
@@ -78,23 +87,28 @@ public class IngameProcess : MonoBehaviour
 
             case "ClientMoveSync":
                 var posData = JsonConvert.DeserializeObject<ClientMoveSync>(p.Data);
-                playerList[posData.ClientNum].transform.position = new Vector3(posData.CurrentPos.X, posData.CurrentPos.Y, posData.CurrentPos.Z);
+                if (playerList[posData.ClientNum] != null)
+                    playerList[posData.ClientNum].transform.position = new Vector3(posData.CurrentPos.X, posData.CurrentPos.Y, posData.CurrentPos.Z);
                 break;
             case "KeyDown":
                 var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
-                KeyDownClient(keyDownData.ClientNum, keyDownData.DownKey);
+                if (playerList[keyDownData.ClientNum] != null)
+                    KeyDownClient(keyDownData.ClientNum, keyDownData.DownKey);
                 break;
             case "KeyUP":
                 var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
-                KeyUpClient(keyUpData.ClientNum, keyUpData.UpKey);
+                if (playerList[keyUpData.ClientNum] != null)
+                    KeyUpClient(keyUpData.ClientNum, keyUpData.UpKey);
                 break;
             case "IsGrounded":
                 var groundData = JsonConvert.DeserializeObject<IsGrounded>(p.Data);
-                playerList[groundData.ClientNum].IsGroundedFromServer = groundData.State;
+                if (playerList[groundData.ClientNum] != null) 
+                    playerList[groundData.ClientNum].IsGroundedFromServer = groundData.State;
                 break;
             case "InsShell":
                 var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
-                playerList[shellData.ClientNum].weaponManagerSc.Shoot(shellData.ClientNum, ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
+                if (playerList[shellData.ClientNum] != null)
+                    playerList[shellData.ClientNum].weaponManagerSc.Shoot(shellData.ClientNum, ToUnityVectorChange(shellData.Pos), ToUnityVectorChange(shellData.Rot));
                 //총알이 발사가 실행된 후 반동이 실행되도록 
                 if (!shellData.ClientNum.Equals(clientPlayerNum))
                     return;
@@ -126,8 +140,7 @@ public class IngameProcess : MonoBehaviour
             case "ClientDir":
                 var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
                 //자신의 플레이어가 아닐경우에만
-                Debug.Log("ClientNum : " + clientDirData.ClientNum);
-                Debug.Log("ClientPlayerNum : " + clientPlayerNum);
+
                 if (clientPlayerNum.Equals(clientDirData.ClientNum))
                     return;
                 //삭제하니 오류발생오져따리
@@ -257,6 +270,7 @@ public class IngameProcess : MonoBehaviour
 
         playerList[num] = tmpPrefab.GetComponent<Player>();
         playerList[num].weaponManagerSc.equipWeaponArray = w;
+        playerList[num].isAlive = true;
 
         if (!clientCheck)
             return;
@@ -279,6 +293,10 @@ public class IngameProcess : MonoBehaviour
     {
         //클라이언트 플레이어 오브젝트 체력 설정
         SetHealthUI(set.HP);
+        //줌 상태 일경우 품
+        if (inputSc.zoomState)
+            inputSc.zoomState = false;
+        inputSc.ZoomFunc(inputSc.zoomState);
 
         playerList[(int)TeamColor.BLUE].transform.position = ToUnityVectorChange(set.StartPos[(int)TeamColor.BLUE]);
         playerList[(int)TeamColor.RED].transform.position = ToUnityVectorChange(set.StartPos[(int)TeamColor.RED]);
@@ -287,7 +305,10 @@ public class IngameProcess : MonoBehaviour
         {
             if(!p.gameObject.activeSelf)
             p.gameObject.SetActive(true);
+
+            p.isAlive = true;
         }
+        //Send
         NetworkManagerTCP.SendTCP(new ReadyCheck(set.ClientNum));
     }
 

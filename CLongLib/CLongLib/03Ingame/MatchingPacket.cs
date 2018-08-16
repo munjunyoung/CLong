@@ -74,7 +74,7 @@ namespace CLongLib
     {
         public int CurrentRound { get; set; }
         public int[] RoundPoint { get; set; }
-        public String RoundResult { get; set; }
+        public string RoundResult { get; set; }
         
         public RoundEnd(int round, int[] point, string result)
         {
@@ -85,15 +85,15 @@ namespace CLongLib
     }
     
     /// <summary>
-    /// 결과포함 승부가 끝났을경우 전송
+    /// 매칭이 끝나고 로비로 씬전환 
     /// </summary>
-    public class MatchinEnd : Packet
+    public class MatchingEnd : Packet
     {
-        public int VictoryTeam { get; set; }
+        public int Req { get; set; }
 
-        public MatchinEnd(int t)
+        public MatchingEnd(int r)
         {
-            VictoryTeam = t;
+            Req = r;
         }
     }
 }
