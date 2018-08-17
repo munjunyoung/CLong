@@ -138,6 +138,8 @@ namespace CLongServer.Ingame
         {
             var cNumber = TeamDic.FirstOrDefault(x => x.Value.Client == c).Key;
             TeamDic.Remove(cNumber);
+            //Test Room
+            peopleCount--;
             c.Close();
         }
 
@@ -169,17 +171,14 @@ namespace CLongServer.Ingame
                         countTimerStart();
                     break;
                 case "KeyDown":
-                    var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
                     break;
                 case "KeyUP":
-                    var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
                     break;
                 case "IsGrounded":
-                    var groundData = JsonConvert.DeserializeObject<IsGrounded>(p.Data);
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
                     break;
@@ -188,10 +187,13 @@ namespace CLongServer.Ingame
                         cl.Value.Client.Send(p);
                     break;
                 case "InsShell":
-                    var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
                     break;
+                case "ThrowBomb":
+                    foreach (var cl in TeamDic)
+                        cl.Value.Client.Send(p);
+                    break;  
                 case "Zoom":
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
@@ -456,17 +458,14 @@ namespace CLongServer.Ingame
                     countTimerStart();
                     break;
                 case "KeyDown":
-                    var keyDownData = JsonConvert.DeserializeObject<KeyDown>(p.Data);
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
                     break;
                 case "KeyUP":
-                    var keyUpData = JsonConvert.DeserializeObject<KeyUP>(p.Data);
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
                     break;
                 case "IsGrounded":
-                    var groundData = JsonConvert.DeserializeObject<IsGrounded>(p.Data);
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
                     break;
@@ -475,7 +474,14 @@ namespace CLongServer.Ingame
                         cl.Value.Client.Send(p);
                     break;
                 case "InsShell":
-                    var shellData = JsonConvert.DeserializeObject<InsShell>(p.Data);
+                    foreach (var cl in TeamDic)
+                        cl.Value.Client.Send(p);
+                    break;
+                case "ThrowBomb":
+                    foreach (var cl in TeamDic)
+                        cl.Value.Client.Send(p);
+                    break;
+                case "Zoom":
                     foreach (var cl in TeamDic)
                         cl.Value.Client.Send(p);
                     break;

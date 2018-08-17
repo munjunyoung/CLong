@@ -38,7 +38,7 @@ namespace CLongServer
         //public Vector3 StartPos;
 
         //Weapon
-        public string[] sendWeaponArray = { "AK", "M4" };
+        public string[] sendWeaponArray = { "AR/AK", "AR/M4" , "Throwable/HandGenerade"};
         public int currentEquipWeaponNum = 0;
    
         #endregion

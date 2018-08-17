@@ -4,23 +4,18 @@ using UnityEngine;
 
 public class WeaponBase : MonoBehaviour
 {
-    //Weapon
+    //Weapon (Input에서 반동 처리를 하기위함..) 
+    public float reboundIntensity; // 반동세기
+    public float reboundRecoveryTime;//반동회복?
     //private WeaponScript go;
     protected string weaponType;
     protected string weaponName; //
     //Gun Option
     protected int damage; // 총기 데미지
     protected int shellSpeed; // 총알이 날아가는 속도
-    public int ShootPeriod; // 연사속도
-    public float reboundIntensity; // 반동세기
-    public float reboundRecoveryTime;//반동회복?
-    //Material material;
-    //Shell
-    protected string shellType; //사용하는 총알의 종류
-    protected GameObject shellPrefab; // 총알 오브젝트 PREFAB
     //Equip
     public int equipWeaponNum; //무기별 장착 번호
-    
+
     /// <summary>
     /// 상속
     /// </summary>
@@ -28,27 +23,22 @@ public class WeaponBase : MonoBehaviour
     {
     }
     /// <summary>
-    /// Shoot
+    /// 서버에서 패킷을 받은후 총알을 생성하기위함
     /// </summary>
     public virtual void Shoot(int clientNum, Vector3 pos, Vector3 rot)
     {
         //연사속도관련
-        ShellIns(shellType, clientNum, pos, rot);
+     
     }
 
     /// <summary>
-    /// Create Shell
+    /// 웨폰에서 반동등 적용해서 전송하기 위함 위함
     /// </summary>
-    /// <param name="st"></param>
-    protected virtual void ShellIns(string st, int num, Vector3 pos, Vector3 rot)
+    /// <param name="clientNum"></param>
+    /// <param name="pos"></param>
+    /// <param name="dir"></param>
+    public virtual void ShootSendServer(int clientNum, Vector3 pos, Vector3 dir)
     {
-        shellPrefab = Instantiate(Resources.Load("Prefab/Weapon/Shell/" + st)) as GameObject;
-        //var weaponFireTransform = transform.Find("FirePosition").transform;
-        var tmpShellSc = shellPrefab.GetComponent<ShellScript>();
-        tmpShellSc.transform.localPosition = pos;
-        tmpShellSc.transform.eulerAngles = rot;
-        tmpShellSc.shellSpeed = shellSpeed;
-        tmpShellSc.clientNum = num;
-        tmpShellSc.damage = damage;
+        
     }
 }

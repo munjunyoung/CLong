@@ -174,24 +174,23 @@ public class InputManager : MonoBehaviour
         if (Input.GetKeyDown(KeyList[(int)Key.Alpha1]))
         {
             //이미 장착한 번호와 같은경우 전송 안되도록
-            if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 0)
+            if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 0)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha1].ToString()));
         }
         else if (Input.GetKeyDown(KeyList[(int)Key.Alpha2]))
         {
-            if (myPlayer.weaponManagerSc.currentWeaponEquipNum != 1)
+            if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 1)
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha2].ToString()));
         }
-
+        else if (Input.GetKeyDown(KeyList[(int)Key.Alpha3]))
+        {
+            if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 2)
+                NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha3].ToString()));
+        }
         //Shooting
         if (Input.GetMouseButton(0))
         {
-            if (shootPeriodCount > myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].ShootPeriod)
-            {
-                NetworkManagerTCP.SendTCP(new InsShell(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.weaponManagerSc.fireTransform.position), IngameProcess.ToNumericVectorChange(ReboundShell())));
-                shootPeriodCount = 0;
-            }
-            shootPeriodCount++;
+            myPlayer.weaponManagerSc.SendShootToServer(myPlayer.clientNum, ReboundShell());
         }
         //Zoom
         if (Input.GetMouseButtonDown(1))
@@ -263,7 +262,7 @@ public class InputManager : MonoBehaviour
 
         return shellDirection;
     }
-    
+
     /// <summary>
     /// when Shoot, Rebound Image Pos Increas
     /// </summary>
@@ -279,7 +278,7 @@ public class InputManager : MonoBehaviour
                 return;
             }
             //Aim 이동
-            a.Translate(Vector3.right * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundIntensity);
+            a.Translate(Vector3.right * myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity);
             ReboundValue = aimImage[0].localPosition.x;
         }
     }
@@ -297,7 +296,7 @@ public class InputManager : MonoBehaviour
         foreach (var a in aimImage)
         {
             a.localPosition = Vector3.Slerp(a.transform.localPosition,
-                new Vector3(aimImageStartPosValue, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundRecoveryTime);
+                new Vector3(aimImageStartPosValue, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.currentUsingWeapon.reboundRecoveryTime);
         }
         ReboundValue = aimImage[0].localPosition.x;
     }
@@ -307,7 +306,7 @@ public class InputManager : MonoBehaviour
     /// </summary>
     public void ReboundPlayerRotation()
     {
-        var reboundValue = myPlayer.weaponManagerSc.weaponDic[myPlayer.weaponManagerSc.currentWeaponEquipNum].reboundIntensity;
+        var reboundValue = myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity;
         yRot += (reboundValue * 0.1f);
         xRot += Random.Range(-reboundValue * 0.5f, reboundValue * 0.5f);
         NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y, myPlayer.playerUpperBody.eulerAngles.x));
@@ -337,6 +336,9 @@ public class InputManager : MonoBehaviour
         //Swap
         KeyList.Add(KeyCode.Alpha1);
         KeyList.Add(KeyCode.Alpha2);
+        KeyList.Add(KeyCode.Alpha3);
+        KeyList.Add(KeyCode.Alpha4);
+        KeyList.Add(KeyCode.Alpha5);
 
         //Jump
         KeyList.Add(KeyCode.Space);

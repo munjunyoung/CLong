@@ -20,5 +20,4 @@ public class ShellScript : MonoBehaviour {
     private void OnTriggerEnter(Collider other)
     {
     }
-
 }

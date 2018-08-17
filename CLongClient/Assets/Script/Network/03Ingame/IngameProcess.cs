@@ -117,6 +117,10 @@ public class IngameProcess : MonoBehaviour
                 inputSc.ReboundPlayerRotation();
                 inputSc.ReboundAimImage();
                 break;
+            case "ThrowBomb":
+                var bombData = JsonConvert.DeserializeObject<ThrowBomb>(p.Data);
+                playerList[bombData.ClientNum].weaponManagerSc.Shoot(bombData.ClientNum, ToUnityVectorChange(bombData.Pos), ToUnityVectorChange(bombData.Rot));
+                break;
             case "Zoom":
                 var zoomData = JsonConvert.DeserializeObject<Zoom>(p.Data);
                 ZoomChange(zoomData.ClientNum, zoomData.ZoomState);
@@ -197,13 +201,19 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "Alpha1":
                 //무기 스왑시 조준 풀기
-                playerList[num].weaponManagerSc.WeaponChange(1);
+                playerList[num].weaponManagerSc.WeaponChange(0);
                 if (!playerList[num].zoomState)
                     return;
                 ZoomChange(num, false);
                 break;
             case "Alpha2":
                 //무기 스왑시 조준 풀기
+                playerList[num].weaponManagerSc.WeaponChange(1);
+                if (!playerList[num].zoomState)
+                    return;
+                ZoomChange(num, false);
+                break;
+            case "Alpha3":
                 playerList[num].weaponManagerSc.WeaponChange(2);
                 if (!playerList[num].zoomState)
                     return;

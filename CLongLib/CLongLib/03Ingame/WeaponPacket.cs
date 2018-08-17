@@ -36,4 +36,18 @@ namespace CLongLib
             Rot = rot;
         }
     }
+
+    public class ThrowBomb : Packet
+    {
+        public int ClientNum { get; set; }
+        public Vector3 Pos { get; set; }
+        public Vector3 Rot { get; set; }
+
+        public ThrowBomb(int n, Vector3 p, Vector3 r)
+        {
+            ClientNum = n;
+            Pos = p;
+            Rot = r;
+        }
+    }
 }
