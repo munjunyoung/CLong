@@ -6,11 +6,12 @@ using CLongLib;
 
 public class ThrowableBase : WeaponBase
 {
-    private float throwSpeed = 1000f;
+    private float throwSpeed = 10f;
     public Rigidbody bombRigidbody;
     private bool throwState = false;
     private float explosionRadius = 10f;
-    private float explosionForce = 100f;
+    private float explosionDamage = 50f;
+    private float explosionForce = 1000f;
 
     /// <summary>
     /// 던져라
@@ -43,15 +44,30 @@ public class ThrowableBase : WeaponBase
 
     private void Explosion()
     {
-        Debug.Log("확인");
-        //반경만큼 collider생성
         Collider[] explosionColliders = Physics.OverlapSphere(transform.position, explosionRadius);
-
+        
         foreach (var c in explosionColliders)
         {
-            Collider targetCollider = c;
-
+            if (c.tag.Equals("Player"))
+                TakeDamage(c.transform.GetComponent<Player>());
         }
+        //넉백 부분 놉(addExplosionForce의 경우 rigidbody가 타겟에게도 필요하므로 보류
+        Destroy(this.gameObject);
+    }
+
+    private void TakeDamage(Player c)
+    {
+        Vector3 explosionToTarget = c.transform.position - transform.position;
+        //타겟과 폭발의 거리
+        float explosionDistance = explosionToTarget.magnitude; 
+        //상대적 거리비율
+        float relativeDistance = (explosionRadius - explosionDistance) / explosionRadius;
+
+        float tmpDamage = relativeDistance * explosionDamage;
+        int realDamage = Mathf.FloorToInt(tmpDamage);
+        
+        //데미지가 두번처리됨 한번만 처리되는부분 설정할 것
+        NetworkManagerTCP.SendTCP(new TakeDamage(c.clientNum, realDamage));
     }
 
     IEnumerator BombCoroutine()

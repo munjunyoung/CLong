@@ -111,6 +111,10 @@ public class PlayerWeaponManager : MonoBehaviour
     public void SendShootToServer(int clientNum, Vector3 dir)
     {
         currentUsingWeapon.ShootSendServer(clientNum, fireTransform.position, dir);
+        if(currentUsingWeapon.equipWeaponNum==2)
+        {
+            weaponDic.Remove(2);
+        }
     }
 
 
