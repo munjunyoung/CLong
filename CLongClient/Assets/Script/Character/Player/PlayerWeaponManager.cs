@@ -81,7 +81,17 @@ public class PlayerWeaponManager : MonoBehaviour
     public void WeaponChange(int pushNumber)
     {
         //리스트 스왑
-        var tmpObject = currentUsingWeapon;
+        //폭탄을 던졌을경우 터지면 -> null 던졌으면 throwState로 처리하여 변경되지 않도록
+        if (!currentUsingWeapon.Equals(null))
+        {
+            if (currentUsingWeapon.throwState.Equals(false))
+            {
+                var tmpObject = currentUsingWeapon;
+                weaponDic[tmpObject.equipWeaponNum].transform.parent = equipPosObjectList[tmpObject.equipWeaponNum];
+                weaponDic[tmpObject.equipWeaponNum].transform.localPosition = Vector3.zero;
+                weaponDic[tmpObject.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+            }
+        }
         currentUsingWeapon = weaponDic[pushNumber];
         //weaponDic.Remove(pushNumber);
         //weaponDic.Add(tmpObject.equipWeaponNum, tmpObject);
@@ -90,9 +100,7 @@ public class PlayerWeaponManager : MonoBehaviour
         currentUsingWeapon.transform.parent = currentUsingWeaponTransform;
         currentUsingWeapon.transform.localPosition = Vector3.zero;
         currentUsingWeapon.transform.localEulerAngles = Vector3.zero;
-        weaponDic[tmpObject.equipWeaponNum].transform.parent = equipPosObjectList[tmpObject.equipWeaponNum];
-        weaponDic[tmpObject.equipWeaponNum].transform.localPosition = Vector3.zero;
-        weaponDic[tmpObject.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+
     }
 
     /// <summary>
@@ -111,7 +119,7 @@ public class PlayerWeaponManager : MonoBehaviour
     public void SendShootToServer(int clientNum, Vector3 dir)
     {
         currentUsingWeapon.ShootSendServer(clientNum, fireTransform.position, dir);
-        if(currentUsingWeapon.equipWeaponNum==2)
+        if (currentUsingWeapon.equipWeaponNum == 2)
         {
             weaponDic.Remove(2);
         }

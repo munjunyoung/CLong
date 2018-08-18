@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class GeneradeScript : ThrowableBase {
     // Update is called once per frame
-    
+    protected override void Start()
+    {
+        weaponType = "Throwable";
+        damage = 50;
+    }
     /// <summary>
     /// 수류탄이 터질때 실행
     /// </summary>

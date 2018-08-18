@@ -8,14 +8,14 @@ public class WeaponBase : MonoBehaviour
     public float reboundIntensity; // 반동세기
     public float reboundRecoveryTime;//반동회복?
     //private WeaponScript go;
-    protected string weaponType;
+    public string weaponType; // 해당 타입에 따라 InputManager에서 줌을 사용을 처리하기 위해Public
     protected string weaponName; //
     //Gun Option
     protected int damage; // 총기 데미지
     protected int shellSpeed; // 총알이 날아가는 속도
     //Equip
     public int equipWeaponNum; //무기별 장착 번호
-
+    public bool throwState = false;
     /// <summary>
     /// 상속
     /// </summary>

@@ -26,7 +26,7 @@ GameObject:
   - component: {fileID: 114724463538059822}
   m_Layer: 0
   m_Name: HandGenerade
-  m_TagString: Untagged
+  m_TagString: Generade
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -114,8 +114,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   reboundIntensity: 0
   reboundRecoveryTime: 0
+  weaponType: 
   equipWeaponNum: 0
+  throwState: 0
   bombRigidbody: {fileID: 54012147962471684}
+  coll: {fileID: 135418959653706304}
 --- !u!135 &135418959653706304
 SphereCollider:
   m_ObjectHideFlags: 1

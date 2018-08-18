@@ -186,7 +186,7 @@ public class InputManager : MonoBehaviour
         {
             if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 2)
             {
-                //해당 dictionary가 존재하지 않으면 하지 않음
+                //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
                 if(myPlayer.weaponManagerSc.weaponDic.ContainsKey(2))
                     NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha3].ToString()));
             }
@@ -199,6 +199,7 @@ public class InputManager : MonoBehaviour
         //Zoom
         if (Input.GetMouseButtonDown(1))
         {
+            if (myPlayer.weaponManagerSc.currentUsingWeapon.weaponType.Equals("AR")) 
             NetworkManagerTCP.SendTCP(new Zoom(myPlayer.clientNum, myPlayer.zoomState.Equals(true)? false : true));
         }
     }

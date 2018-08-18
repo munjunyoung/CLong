@@ -138,5 +138,17 @@ public class Player : MonoBehaviour
                 Destroy(other.gameObject);
             }
         }
+
+        if(other.tag == "Generade")
+        {
+            //내가 쏜 총알이 아닐 경우에
+            if (this.GetComponent<Player>().clientNum != other.GetComponent<ShellScript>().clientNum)
+            {
+                if (clientCheck)
+                {
+                    other.GetComponent<GeneradeScript>().TakeDamage(this);
+                }
+            }
+        }
     }
 }

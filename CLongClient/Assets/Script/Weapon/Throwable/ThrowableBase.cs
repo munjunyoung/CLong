@@ -6,12 +6,12 @@ using CLongLib;
 
 public class ThrowableBase : WeaponBase
 {
-    private float throwSpeed = 10f;
+    private float throwSpeed = 50f;
     public Rigidbody bombRigidbody;
-    private bool throwState = false;
+    public SphereCollider coll;
     private float explosionRadius = 10f;
-    private float explosionDamage = 50f;
     private float explosionForce = 1000f;
+    private float BombTime = 2f;
 
     /// <summary>
     /// 던져라
@@ -42,20 +42,31 @@ public class ThrowableBase : WeaponBase
         throwState = true;
     }
 
+    /// <summary>
+    /// 폭발 Trigger 처리 함수
+    /// </summary>
     private void Explosion()
     {
+
+        coll.isTrigger = true;
+        coll.radius = explosionRadius;  
+        /*
         Collider[] explosionColliders = Physics.OverlapSphere(transform.position, explosionRadius);
         
         foreach (var c in explosionColliders)
         {
             if (c.tag.Equals("Player"))
                 TakeDamage(c.transform.GetComponent<Player>());
-        }
+        }*/
         //넉백 부분 놉(addExplosionForce의 경우 rigidbody가 타겟에게도 필요하므로 보류
-        Destroy(this.gameObject);
+        Destroy(this.gameObject,0.5f);
     }
 
-    private void TakeDamage(Player c)
+    /// <summary>
+    /// 실제 데미지 처리 함수(폭발물의 거리와 피격당한 플레이어의 거리를 비례해서 데미지 전송
+    /// </summary>
+    /// <param name="c"></param>
+    public void TakeDamage(Player c)
     {
         Vector3 explosionToTarget = c.transform.position - transform.position;
         //타겟과 폭발의 거리
@@ -63,16 +74,19 @@ public class ThrowableBase : WeaponBase
         //상대적 거리비율
         float relativeDistance = (explosionRadius - explosionDistance) / explosionRadius;
 
-        float tmpDamage = relativeDistance * explosionDamage;
+        float tmpDamage = relativeDistance * damage;
         int realDamage = Mathf.FloorToInt(tmpDamage);
-        
-        //데미지가 두번처리됨 한번만 처리되는부분 설정할 것
+       
         NetworkManagerTCP.SendTCP(new TakeDamage(c.clientNum, realDamage));
     }
 
+    /// <summary>
+    /// bombtime에 따른 시간 후의 폭발 실행
+    /// </summary>
+    /// <returns></returns>
     IEnumerator BombCoroutine()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(BombTime);
         Explosion();
     }
 }

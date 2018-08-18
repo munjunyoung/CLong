@@ -8,6 +8,7 @@ TagManager:
   - Weapon
   - Shell
   - Ground
+  - Generade
   layers:
   - Default
   - TransparentFX
