@@ -104,7 +104,7 @@ public class IngameProcess : MonoBehaviour
                 break;
             case "IsGrounded":
                 var groundData = JsonConvert.DeserializeObject<IsGrounded>(p.Data);
-                if (playerList[groundData.ClientNum] != null) 
+                if (playerList[groundData.ClientNum] != null)
                     playerList[groundData.ClientNum].IsGroundedFromServer = groundData.State;
                 break;
             case "InsShell":
@@ -132,6 +132,13 @@ public class IngameProcess : MonoBehaviour
             case "Death":
                 var deathData = JsonConvert.DeserializeObject<Death>(p.Data);
                 playerList[deathData.ClientNum].Death();
+                break;
+            case "RecoverHealth":
+                var recoverData = JsonConvert.DeserializeObject<RecoverHealth>(p.Data);
+                //SyncHealth로 처리해도되지만 이것으로 처리함으로써 오브젝트 파괴및 이벤트 처리가능
+                //회복량이 아닌 그냥 서버에서 체력을 보냄으로써 바로 설정
+                SetHealthUI(recoverData.FillHP);
+                playerList[recoverData.ClientNum].weaponManagerSc.Shoot(recoverData.ClientNum, Vector3.zero, Vector3.zero);
                 break;
             default:
                 Debug.Log("[Ingame Proces] TCP : Mismatching Message");

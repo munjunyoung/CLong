@@ -12,19 +12,23 @@ public class ThrowableBase : WeaponBase
     private float explosionRadius = 10f;
     private float explosionForce = 1000f;
     private float BombTime = 2f;
-
+    
     /// <summary>
     /// 던져라
     /// </summary>
     public override void Shoot(int clientNum, Vector3 pos, Vector3 rot)
     {
         base.Shoot(clientNum, pos, rot);
+        //Rb
         bombRigidbody.transform.parent = null;
         bombRigidbody.transform.position = pos;
         bombRigidbody.transform.eulerAngles = rot;
         bombRigidbody.isKinematic = false;
         bombRigidbody.useGravity = true;
         bombRigidbody.AddForce(transform.forward * throwSpeed);
+        //캐릭터 이동 오류로인해 false
+        coll.isTrigger = false;
+        weaponState = true;
         StartCoroutine(BombCoroutine());
     }
     /// <summary>
@@ -36,10 +40,9 @@ public class ThrowableBase : WeaponBase
     public override void ShootSendServer(int clientNum, Vector3 pos, Vector3 dir)
     {
         base.ShootSendServer(clientNum, pos, dir);
-        if (throwState)
+        if (weaponState)
             return;
         NetworkManagerTCP.SendTCP(new ThrowBomb(clientNum, IngameProcess.ToNumericVectorChange(pos), IngameProcess.ToNumericVectorChange(dir)));
-        throwState = true;
     }
 
     /// <summary>

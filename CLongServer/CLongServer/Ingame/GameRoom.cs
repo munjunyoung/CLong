@@ -202,6 +202,10 @@ namespace CLongServer.Ingame
                     var damageData = JsonConvert.DeserializeObject<TakeDamage>(p.Data);
                     TakeDamageProcessFunc(damageData, c);
                     break;
+                case "RecoverHealth":
+                    var healData = JsonConvert.DeserializeObject<RecoverHealth>(p.Data);
+                    HealProcess(healData);
+                    break;
                 case "ExitReq":
                     ClientRemove(c);
                     break;
@@ -230,6 +234,19 @@ namespace CLongServer.Ingame
         }
         #endregion
 
+        /// <summary>
+        /// 체력회복후 다시 전송 (받을때는 체력회복양, 보낼때는 회복한후 현재체력을 전송(클라에서는 체력 덧씌우기끝)
+        /// </summary>
+        /// <param name="data"></param>
+        private void HealProcess(RecoverHealth data)
+        {
+            if (!TeamDic[data.ClientNum].IsAlive)
+                return;
+
+            TeamDic[data.ClientNum].Hp += data.FillHP;
+            TeamDic[data.ClientNum].Client.Send(new RecoverHealth(data.ClientNum, TeamDic[data.ClientNum].Hp));
+        }
+
         #region game Process Func
         /// <summary>
         /// Take Damage Process
@@ -246,10 +263,9 @@ namespace CLongServer.Ingame
             
             TeamDic[cn].Hp -= d.Damage;
 
-            if (TeamDic[cn].Hp <= 0)
+            if (TeamDic[cn].Hp == 0)
             {
                 TeamDic[cn].IsAlive = false;
-                TeamDic[cn].Hp = 0;
                 foreach (var cl in TeamDic)
                     cl.Value.Client.Send(new Death(cn));
 
@@ -509,7 +525,21 @@ public class Team
 {
     public bool Ready { get; set; }
     public int RoundPoint { get; set; }
-    public int Hp { get; set; }
+    public int Hp {
+        get
+        {
+            return Hp;
+        }
+        set
+        {
+            if (Hp >= 100)
+                Hp = 100;
+            else if (Hp <= 0)
+                Hp = 0;
+            else
+                Hp = Hp;
+        }
+    }
     public bool IsAlive { get; set; }
     public Vector3 StartPos { get; set; }
     public ClientTCP Client { get; set; }

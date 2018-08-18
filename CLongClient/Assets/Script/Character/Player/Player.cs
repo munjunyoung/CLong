@@ -25,7 +25,7 @@ public class Player : MonoBehaviour
     //Character Controller
     public CharacterController playerController;
     private Vector3 moveDirection = Vector3.zero;
-
+    
     //Zoom
     public bool zoomState = false;
 
@@ -54,8 +54,10 @@ public class Player : MonoBehaviour
         var a = keyState[(int)Key.A] ? -1 : 0;
         var d = keyState[(int)Key.D] ? 1 : 0;
 
+
         moveDirection = new Vector3(a + d, 0, w + s);
-        moveDirection.Normalize();
+        moveDirection = moveDirection.normalized;
+        
         moveDirection = transform.TransformDirection(moveDirection);
         moveDirection *= moveSpeed;
 
@@ -86,8 +88,7 @@ public class Player : MonoBehaviour
             keyState[(int)Key.Space] = false;
         }
     }
-
-
+    
     /// <summary>
     /// Gravity
     /// </summary>
@@ -138,14 +139,17 @@ public class Player : MonoBehaviour
                 Destroy(other.gameObject);
             }
         }
-
-        if(other.tag == "Generade")
+        Debug.Log("1");
+        if (other.tag == "Generade")
         {
+            Debug.Log("2");
             //내가 쏜 총알이 아닐 경우에
-            if (this.GetComponent<Player>().clientNum != other.GetComponent<ShellScript>().clientNum)
+            if (other.GetComponent<GeneradeScript>().weaponState)
             {
+                Debug.Log("3");
                 if (clientCheck)
                 {
+                    Debug.Log("4");
                     other.GetComponent<GeneradeScript>().TakeDamage(this);
                 }
             }

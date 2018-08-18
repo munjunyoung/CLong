@@ -10,12 +10,16 @@ public class WeaponBase : MonoBehaviour
     //private WeaponScript go;
     public string weaponType; // 해당 타입에 따라 InputManager에서 줌을 사용을 처리하기 위해Public
     protected string weaponName; //
-    //Gun Option
+    //weapon Option
     protected int damage; // 총기 데미지
     protected int shellSpeed; // 총알이 날아가는 속도
     //Equip
     public int equipWeaponNum; //무기별 장착 번호
-    public bool throwState = false;
+    //false ->(폭탄일경우 안던짐, 음식일 경우 안먹음) true (던졌음, 먹었음) 서버에 연속으로 보내지 않기위한 체크처리
+    public bool weaponState = false;
+    //Bomb
+    //Eating
+
     /// <summary>
     /// 상속
     /// </summary>

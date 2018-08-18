@@ -12,16 +12,27 @@ namespace CLongLib
     public class TakeDamage : Packet
     {
         public int ClientNum { get; set; }
-        public string Type { get; set; }
-        public int WeaponNumber { get; set; }
         public int Damage { get; set; }
 
-        public TakeDamage(int num, string t, int wn , int d)
+        public TakeDamage(int num, int d)
         {
             ClientNum = num;
-            Type = t;
-            WeaponNumber = wn;
             Damage = d;
+        }
+    }
+
+    /// <summary>
+    /// 음식을 먹을떄 체력회복
+    /// </summary>
+    public class RecoverHealth : Packet
+    {
+        public int ClientNum { get; set; }
+        public int FillHP { get; set; }
+
+        public RecoverHealth(int n, int h)
+        {
+            ClientNum = n;
+            FillHP = h; 
         }
     }
 

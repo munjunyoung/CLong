@@ -48,12 +48,16 @@ public class PlayerWeaponManager : MonoBehaviour
     /// <param name="name"></param>
     private void InsWeapon(string name)
     {
+
         var weaponPrefab = Instantiate(Resources.Load("Prefab/Weapon/" + name)) as GameObject;
+
+        string[] tmpdata = name.Split('/');
         var prefabWeaponSc = weaponPrefab.GetComponent<WeaponBase>();
         //WeaponBase
         prefabWeaponSc.equipWeaponNum = weaponDic.Count();
         weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
-
+        //weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
+     
         //Object 장착(Parent설정)
         weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[prefabWeaponSc.equipWeaponNum];
 
@@ -84,7 +88,7 @@ public class PlayerWeaponManager : MonoBehaviour
         //폭탄을 던졌을경우 터지면 -> null 던졌으면 throwState로 처리하여 변경되지 않도록
         if (!currentUsingWeapon.Equals(null))
         {
-            if (currentUsingWeapon.throwState.Equals(false))
+            if (currentUsingWeapon.weaponState.Equals(false))
             {
                 var tmpObject = currentUsingWeapon;
                 weaponDic[tmpObject.equipWeaponNum].transform.parent = equipPosObjectList[tmpObject.equipWeaponNum];
@@ -93,9 +97,6 @@ public class PlayerWeaponManager : MonoBehaviour
             }
         }
         currentUsingWeapon = weaponDic[pushNumber];
-        //weaponDic.Remove(pushNumber);
-        //weaponDic.Add(tmpObject.equipWeaponNum, tmpObject);
-
         //Transform 스왑
         currentUsingWeapon.transform.parent = currentUsingWeaponTransform;
         currentUsingWeapon.transform.localPosition = Vector3.zero;
@@ -131,6 +132,6 @@ public class PlayerWeaponManager : MonoBehaviour
     /// </summary>
     public void ZoomSetEquipPos(bool zoomState)
     {
-        equipPosObjectList[0].localPosition = zoomState ? new Vector3(0, -1f, 1f) : new Vector3(0.5f, -1f, 1f);
+        currentUsingWeaponTransform.localPosition = zoomState ? new Vector3(0, -1f, 1f) : new Vector3(0.5f, -1f, 1f);
     }
 }
