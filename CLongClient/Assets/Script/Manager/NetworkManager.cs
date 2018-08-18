@@ -9,7 +9,12 @@ using CLongLib;
 [RequireComponent(typeof(GlobalManager))]
 public class NetworkManager : MonoBehaviour
 {
+    public static NetworkManager Instance { get { return _instance; } }
+    private static NetworkManager _instance;
+
     public enum Protocol { TCP, UDP }
+    public delegate void PacketEvent(IPacket p);
+    public PacketEvent pHandler;
     
     private const string _IP = "127.0.0.1";
     private const int _PORT = 23000;
@@ -20,7 +25,21 @@ public class NetworkManager : MonoBehaviour
     private Coroutine _procRoutineUDP;
 
     private GlobalManager _gm;
-    
+
+    public void Release()
+    {
+        StopCoroutine(_procRoutineUDP);
+        _udpNet.ResetUDP();
+        _udpNet.packetQueue.Clear();
+        _tcpNet.packetQueue.Clear();
+    }
+
+    public void InitMulticast(uint ip, ushort port)
+    {
+        _udpNet.Init(ip, port);
+        _procRoutineUDP = StartCoroutine(ProcPacketQueue(_udpNet.packetQueue));
+    }
+
     public void SendPacket(IPacket p, Protocol pt)
     {
         switch (pt)
@@ -36,6 +55,7 @@ public class NetworkManager : MonoBehaviour
 
     private void Awake()
     {
+        _instance = this;
         _gm = GetComponent<GlobalManager>();
         _tcpNet.Init(_IP, _PORT);
         _procRoutineTCP = StartCoroutine(ProcPacketQueue(_tcpNet.packetQueue));
@@ -70,31 +90,13 @@ public class NetworkManager : MonoBehaviour
         while (true)
         {
             int c = 0;
-            while (packets.Count > 0)
+            while (packets.Count > 0 && c < 100000)
             {
                 c++;
-                _gm.ProcessPacket(packets.Dequeue());
-                if (c > 100000)
-                {
-                    c = 0;
-                    yield return new WaitForFixedUpdate();
-                }
+                pHandler?.Invoke(packets.Dequeue());
+                //_gm.ProcessPacket(packets.Dequeue());
             }
             yield return new WaitForFixedUpdate();
-        }
-    }
-
-    private void ProcessPacket(IPacket p)
-    {
-        if(p is Start_Game)
-        {
-            var s = (Start_Game)p;
-            _udpNet.Init(s.ip, s.port);
-            _procRoutineUDP = StartCoroutine(ProcPacketQueue(_udpNet.packetQueue));
-        }
-        else if (p is Login_Ack)
-        {
-            var s = (Login_Ack)p;
         }
     }
 
@@ -108,13 +110,13 @@ public class NetworkManager : MonoBehaviour
 
         private byte[] _recvBuffer = new byte[4096];
 
-        public void Init(string ip, int port)
+        internal void Init(string ip, int port)
         {
             tcp = new TcpClient();
             tcp.BeginConnect(ip, port, ConnectCb, tcp);
         }
 
-        public void Send(IPacket p)
+        internal void Send(IPacket p)
         {
             try
             {
@@ -167,12 +169,12 @@ public class NetworkManager : MonoBehaviour
     /// <summary>
     /// UDP class
     /// </summary>
-    public class UDPNetwork
+    private class UDPNetwork
     {
         internal Queue<IPacket> packetQueue = new Queue<IPacket>();
         private UdpClient udp;
 
-        public void Init(uint ip, int port)
+        internal void Init(uint ip, int port)
         {
             udp = new UdpClient();
             udp.Client.Bind(new IPEndPoint(IPAddress.Any, 23010));
@@ -182,7 +184,13 @@ public class NetworkManager : MonoBehaviour
             udp.BeginReceive(ReceiveCb, udp);
         }
 
-        public void Send(IPacket p)
+        internal void ResetUDP()
+        {
+            udp.Close();
+            udp = null;
+        }
+
+        internal void Send(IPacket p)
         {
             try
             {

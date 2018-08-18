@@ -1,12 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
 namespace CLongLib
 {
+    /*
+     * Req : 클라->서버 요청
+     * Ack : 서버->클라 요청에 대한 응답
+     * Cmd : 서버->클라 명령
+     * Nfy : 서버<->클라 통보
+     */
+
     public interface IPacket
     { }
 
@@ -20,11 +28,21 @@ namespace CLongLib
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
         public string password;
 
-        public Login_Req(string i, string p)
+        public Req_Login(string i, string p)
         {
             id = i;
             password = p;
         }
+    }
+
+    /// <summary>
+    /// Login ackknowledgement from SERVER to CLIENT
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct Login_Ack : IPacket
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        public bool connected;
     }
 
     /// <summary>
@@ -58,12 +76,6 @@ namespace CLongLib
         }
     }
 
-    public struct Exit_Req : IPacket
-    {
-        [MarshalAs(UnmanagedType.I1)]
-        public bool req;
-    }
-
     /// <summary>
     /// 서버->클라 매칭 결과
     /// </summary>
@@ -74,13 +86,61 @@ namespace CLongLib
         public bool req;
     }
 
+    public struct Match_End : IPacket
+    {
+        // true : 매칭종료, false : 매칭종료중 오류
+        [MarshalAs(UnmanagedType.I1)]
+        public bool req;
+    }
+
+    public struct Exit_Req : IPacket
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        public bool req;
+    }
+
     public struct Player_Init : IPacket
     {
         public byte clientIdx;
-        public float[] startpos;
+        public int hp;
+        public Vector3 startpos;
         public bool assign;
         public byte weapon1;
         public byte weapon2;
+
+        public Player_Init(byte n, int h, Vector3 p, bool b, byte w1, byte w2)
+        {
+            clientIdx = n;
+            hp = h;
+            startpos = p;
+            assign = b;
+            weapon1 = w1;
+            weapon2 = w2;
+        }
+    }
+
+    public struct Player_Reset : IPacket
+    {
+        public byte clientIdx;
+        public int hp;
+        public Vector3[] startPos;
+
+        public Player_Reset(byte n, int h, Vector3[] p)
+        {
+            clientIdx = n;
+            hp = h;
+            startPos = p;
+        }
+    }
+
+    public struct Player_Ready : IPacket
+    {
+        public byte clientIdx;
+
+        public Player_Ready(byte n)
+        {
+            clientIdx = n;
+        }
     }
 
     public struct Player_SyncHP : IPacket
@@ -90,11 +150,6 @@ namespace CLongLib
     }
 
     public struct Player_Dead : IPacket
-    {
-        public byte clientIdx;
-    }
-
-    public struct Player_Ready : IPacket
     {
         public byte clientIdx;
     }
@@ -115,17 +170,4 @@ namespace CLongLib
         public byte[] roundPoint;
         public string roundResult;
     }
-
-    
-
-    /// <summary>
-    /// Login ackknowledgement from SERVER to CLIENT
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack =1)]
-    public struct Login_Ack : IPacket
-    {
-        [MarshalAs(UnmanagedType.I1)]
-        public bool connected;
-    }
-
 }
