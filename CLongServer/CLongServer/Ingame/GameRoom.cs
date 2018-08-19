@@ -154,7 +154,7 @@ namespace CLongServer.Ingame
         private void IngameDataRequestTCP(object sender, Packet p)
         {
             var c = sender as ClientTCP;
-
+            
             switch (p.MsgName)
             {
                 case "StartGameReq":
@@ -210,7 +210,7 @@ namespace CLongServer.Ingame
                     ClientRemove(c);
                     break;
                 default:
-                    Console.WriteLine("[INGAME PROCESS] TCP : Mismatching Message");
+                    Console.WriteLine("[INGAME PROCESS] TCP : Mismatching Message" + p.MsgName+"!");
                     break;
             }
         }
@@ -505,6 +505,10 @@ namespace CLongServer.Ingame
                     var damageData = JsonConvert.DeserializeObject<TakeDamage>(p.Data);
                     TakeDamageProcessFunc(damageData, c);
                     break;
+                case "RecoverHealth":
+                    var healData = JsonConvert.DeserializeObject<RecoverHealth>(p.Data);
+                    HealProcess(healData);
+                    break;
                 case "ExitReq":
                     ClientRemove(c);
                     break;
@@ -528,21 +532,24 @@ public class Team
     public int Hp {
         get
         {
-            return Hp;
+            return _hp;
         }
         set
         {
-            if (Hp >= 100)
-                Hp = 100;
-            else if (Hp <= 0)
-                Hp = 0;
+            _hp = value;
+            if (_hp >= 100)
+                _hp = 100;
+            else if (_hp <= 0)
+                _hp = 0;
             else
-                Hp = Hp;
+                _hp = value;
         }
     }
     public bool IsAlive { get; set; }
     public Vector3 StartPos { get; set; }
     public ClientTCP Client { get; set; }
+
+    private int _hp;
     //Point 
     public Team(int p, ClientTCP c)
     {

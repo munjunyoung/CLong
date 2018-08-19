@@ -15,7 +15,7 @@ public class WeaponBase : MonoBehaviour
     protected int shellSpeed; // 총알이 날아가는 속도
     //Equip
     public int equipWeaponNum; //무기별 장착 번호
-    //false ->(폭탄일경우 안던짐, 음식일 경우 안먹음) true (던졌음, 먹었음) 서버에 연속으로 보내지 않기위한 체크처리
+    // false -> 사용했음 true -> 가지고있음
     public bool weaponState = false;
     //Bomb
     //Eating

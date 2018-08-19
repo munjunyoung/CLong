@@ -52,7 +52,7 @@ public class ARBase : WeaponBase
     /// <param name="st"></param>
     protected virtual void ShellIns(string st, int num, Vector3 pos, Vector3 rot)
     {
-        shellPrefab = Instantiate(Resources.Load("Prefab/Weapon/Shell/" + st)) as GameObject;
+        shellPrefab = Instantiate(Resources.Load("Prefab/Item/Weapon/Shell/" + st)) as GameObject;
         //var weaponFireTransform = transform.Find("FirePosition").transform;
         var tmpShellSc = shellPrefab.GetComponent<ShellScript>();
         tmpShellSc.transform.localPosition = pos;

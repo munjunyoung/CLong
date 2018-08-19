@@ -139,17 +139,16 @@ public class Player : MonoBehaviour
                 Destroy(other.gameObject);
             }
         }
-        Debug.Log("1");
+
         if (other.tag == "Generade")
         {
-            Debug.Log("2");
-            //내가 쏜 총알이 아닐 경우에
-            if (other.GetComponent<GeneradeScript>().weaponState)
+            Debug.Log("1");
+            if (!other.GetComponent<GeneradeScript>().weaponState)
             {
-                Debug.Log("3");
+                Debug.Log("2");
                 if (clientCheck)
                 {
-                    Debug.Log("4");
+                    Debug.Log("3");
                     other.GetComponent<GeneradeScript>().TakeDamage(this);
                 }
             }

@@ -227,7 +227,7 @@ public class IngameProcess : MonoBehaviour
                 ZoomChange(num, false);
                 break;
             case "Alpha4":
-                playerList[num].weaponManagerSc.WeaponChange(2);
+                playerList[num].weaponManagerSc.WeaponChange(3);
                 if (!playerList[num].zoomState)
                     return;
                 ZoomChange(num, false);

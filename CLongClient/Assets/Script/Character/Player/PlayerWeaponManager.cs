@@ -35,6 +35,7 @@ public class PlayerWeaponManager : MonoBehaviour
             InsWeapon(s);
 
         //처음 무기 설정
+        weaponDic[0].enabled = true;
         currentUsingWeapon = weaponDic[0];
         currentUsingWeapon.transform.parent = currentUsingWeaponTransform;
         currentUsingWeapon.transform.localPosition = Vector3.zero;
@@ -44,45 +45,37 @@ public class PlayerWeaponManager : MonoBehaviour
 
     /// <summary>
     /// Create Weapon
+    /// "AR/AK", "AR/M4" , "Throwable/HandGenerade"
     /// </summary>
     /// <param name="name"></param>
     private void InsWeapon(string name)
     {
 
-        var weaponPrefab = Instantiate(Resources.Load("Prefab/Weapon/" + name)) as GameObject;
+        var weaponPrefab = Instantiate(Resources.Load("Prefab/Item/Weapon/" + name)) as GameObject;
 
         string[] tmpdata = name.Split('/');
 
-        //weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
-        if (tmpdata.Equals("AR"))
-        {
-            var prefabWeaponSc = weaponPrefab.GetComponent<WeaponBase>();
-            //WeaponBase
-            prefabWeaponSc.equipWeaponNum = weaponDic.Count();
-            weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
-            //Object 장착(Parent설정)
-            weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[prefabWeaponSc.equipWeaponNum];
+        var prefabWeaponSc = weaponPrefab.GetComponent(tmpdata[0] + "Base") as WeaponBase;
+        //WeaponBase
+        prefabWeaponSc.equipWeaponNum = weaponDic.Count();
+        weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
+        //Object 장착(Parent설정)
+        weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[prefabWeaponSc.equipWeaponNum];
 
-            weaponDic[prefabWeaponSc.equipWeaponNum].transform.localPosition = Vector3.zero;
-            weaponDic[prefabWeaponSc.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
-        }
-        //AR제외 모두 통합 각각컴포넌트로 저장하기위해
-        else
+        weaponDic[prefabWeaponSc.equipWeaponNum].transform.localPosition = Vector3.zero;
+        weaponDic[prefabWeaponSc.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+        weaponDic[prefabWeaponSc.equipWeaponNum].weaponState = true;
+        weaponDic[prefabWeaponSc.equipWeaponNum].enabled = false;
+
+        //수류탄일경우 먹을것도 같이 저장
+        if (tmpdata[0].Equals("Throwable"))
         {
-            var throwData = weaponPrefab.GetComponent<ThrowableBase>();
             var foodData = weaponPrefab.GetComponent<FoodBase>();
-            throwData.equipWeaponNum = weaponDic.Count();
             foodData.equipWeaponNum = weaponDic.Count();
-            weaponDic.Add(throwData.equipWeaponNum, throwData);
-            weaponDic.Add(throwData.equipWeaponNum, foodData);
-
-            weaponDic[throwData.equipWeaponNum].transform.parent = equipPosObjectList[throwData.equipWeaponNum];
-            weaponDic[throwData.equipWeaponNum].transform.localPosition = Vector3.zero;
-            weaponDic[throwData.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+            weaponDic.Add(foodData.equipWeaponNum, foodData);
+            weaponDic[foodData.equipWeaponNum].weaponState = true;
+            weaponDic[foodData.equipWeaponNum].enabled = false;
         }
-     
-        
-        //FireTransform 
     }
 
     /// <summary>
@@ -104,24 +97,26 @@ public class PlayerWeaponManager : MonoBehaviour
     public void WeaponChange(int pushNumber)
     {
         //리스트 스왑
-        //폭탄을 던졌을경우 터지면 -> null 던졌으면 throwState로 처리하여 변경되지 않도록
-        if (!currentUsingWeapon.Equals(null))
+        //weaponState로 던졌을경우 false로  처리하여 변경되지 않도록
+        //끼고있던무기 돌려놓기
+        if (currentUsingWeapon.weaponState.Equals(true))
         {
-            if (currentUsingWeapon.weaponState.Equals(false))
-            {
-                var tmpObject = currentUsingWeapon;
-                weaponDic[tmpObject.equipWeaponNum].transform.parent = equipPosObjectList[tmpObject.equipWeaponNum];
-                weaponDic[tmpObject.equipWeaponNum].transform.localPosition = Vector3.zero;
-                weaponDic[tmpObject.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
-            }
+            var tmpObject = currentUsingWeapon;
+            //3~5번은 통합이므로 모두 3번으로 들어가있어야함
+            var tmpNumber = (tmpObject.equipWeaponNum >= 2) ? 2 : tmpObject.equipWeaponNum;
+
+            weaponDic[tmpObject.equipWeaponNum].transform.parent = equipPosObjectList[tmpNumber];
+            weaponDic[tmpObject.equipWeaponNum].transform.localPosition = Vector3.zero;
+            weaponDic[tmpObject.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+            weaponDic[tmpObject.equipWeaponNum].enabled = false;
         }
-        
+        //새로운 무기로 스왑
+        weaponDic[pushNumber].enabled = true;
         currentUsingWeapon = weaponDic[pushNumber];
         //Transform 스왑
         currentUsingWeapon.transform.parent = currentUsingWeaponTransform;
         currentUsingWeapon.transform.localPosition = Vector3.zero;
         currentUsingWeapon.transform.localEulerAngles = Vector3.zero;
-
     }
 
     /// <summary>
@@ -139,11 +134,8 @@ public class PlayerWeaponManager : MonoBehaviour
     /// </summary>
     public void SendShootToServer(int clientNum, Vector3 dir)
     {
-        currentUsingWeapon.ShootSendServer(clientNum, fireTransform.position, dir);
-        if (currentUsingWeapon.equipWeaponNum == 2)
-        {
-            weaponDic.Remove(2);
-        }
+        if (currentUsingWeapon.weaponState.Equals(true))
+            currentUsingWeapon.ShootSendServer(clientNum, fireTransform.position, dir);
     }
 
 

@@ -187,7 +187,7 @@ public class InputManager : MonoBehaviour
             if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 2)
             {
                 //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
-                if(myPlayer.weaponManagerSc.weaponDic.ContainsKey(2))
+                if(myPlayer.weaponManagerSc.weaponDic[2].weaponState.Equals(true))
                     NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha3].ToString()));
             }
         }
@@ -196,8 +196,8 @@ public class InputManager : MonoBehaviour
             if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 3)
             {
                 //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
-                if (myPlayer.weaponManagerSc.weaponDic.ContainsKey(3))
-                    NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha3].ToString()));
+                if (myPlayer.weaponManagerSc.weaponDic[3].weaponState.Equals(true))
+                    NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha4].ToString()));
             }
         }
         //Shooting
