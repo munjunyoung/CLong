@@ -19,10 +19,12 @@ namespace CLongLib
 
         private static readonly Dictionary<Type, byte> _typeDic = new Dictionary<Type, byte>()
         {
-            {typeof(Login_Ack), 0x00},
-            {typeof(Login_Req), 0x01},
-            {typeof(Start_Game), 0x02},
-            {typeof(Queue_Req), 0x03 }
+            {typeof(Login_Ack), 0x00 },
+            {typeof(Login_Req), 0x01 },
+            {typeof(Start_Game), 0x02 },
+            {typeof(Queue_Req), 0x03 },
+            {typeof(Match_Succeed), 0x04 },
+            {typeof(Match_End), 0x05 },
         };
 
         public static byte[] SetPacket(object o)

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,6 +8,12 @@ using CLongLib;
 [RequireComponent(typeof(NetworkManager))]
 public class GlobalManager : MonoBehaviour
 {
+    public static GlobalManager Instance { get { return _instance; } }
+    private static GlobalManager _instance;
+
+    public delegate void IngameEvent(IPacket p);
+    public event IngameEvent recvHandler;
+
     private readonly string[] _sceneNames = { "01Login", "02Lobby", "03IngameManager" };
 
     private NetworkManager _nm;
@@ -15,38 +22,62 @@ public class GlobalManager : MonoBehaviour
 
     private bool _inGame;
 
-    public void ProcessPacket(IPacket p)
+    private void Awake()
     {
-        if(_inGame)
-        {
+        if (_instance == null)
+            _instance = this;
+        _nm = GetComponent<NetworkManager>();
+        _nm.pHandler = ProcessPacket;
+        _curScene = SceneManager.GetActiveScene();
+        var objs = FindObjectsOfType<GlobalManager>();
+        if (objs.Length > 1)
+            Debug.LogError("Scene has two or more GlobalManager.");
+    }
 
+    private void ProcessPacket(IPacket p)
+    {
+        if (_inGame)
+        {
+            if (p is Match_End)
+            {
+                _inGame = false;
+                _nm.Release();
+                LoadScene(_sceneNames[1]);
+            }
+            else
+                recvHandler(p);
         }
         else
         {
-
+            if (p is Start_Game)
+            {
+                var s = (Start_Game)p;
+                _nm.InitMulticast(s.ip, s.port);
+                LoadScene(_sceneNames[2]);
+            }
+            else if (p is Login_Ack)
+            {
+                var s = (Login_Ack)p;
+            }
+            else if (p is Match_Succeed)
+            {
+                var s = (Match_Succeed)p;
+            }
         }
-    }
-
-    private void Awake()
-    {
-        _nm = GetComponent<NetworkManager>();
-        _curScene = SceneManager.GetActiveScene();
     }
 
     private IEnumerator LoadScene(string sName)
     {
         Scene cs = SceneManager.GetActiveScene();
         var asyncOp = SceneManager.LoadSceneAsync(name, LoadSceneMode.Additive);
-        while(!asyncOp.isDone)
+        while (!asyncOp.isDone)
             yield return null;
 
         _curScene = SceneManager.GetSceneByName(sName);
         SceneManager.MoveGameObjectToScene(gameObject, _curScene);
 
         if (sName.Equals(_sceneNames[2]))
-        {
             _inGame = true;
-        }
 
         SceneManager.UnloadSceneAsync(cs);
     }
