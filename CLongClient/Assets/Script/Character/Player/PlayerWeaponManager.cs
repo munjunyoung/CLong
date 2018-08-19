@@ -52,17 +52,36 @@ public class PlayerWeaponManager : MonoBehaviour
         var weaponPrefab = Instantiate(Resources.Load("Prefab/Weapon/" + name)) as GameObject;
 
         string[] tmpdata = name.Split('/');
-        var prefabWeaponSc = weaponPrefab.GetComponent<WeaponBase>();
-        //WeaponBase
-        prefabWeaponSc.equipWeaponNum = weaponDic.Count();
-        weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
-        //weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
-     
-        //Object 장착(Parent설정)
-        weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[prefabWeaponSc.equipWeaponNum];
 
-        weaponDic[prefabWeaponSc.equipWeaponNum].transform.localPosition = Vector3.zero;
-        weaponDic[prefabWeaponSc.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+        //weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
+        if (tmpdata.Equals("AR"))
+        {
+            var prefabWeaponSc = weaponPrefab.GetComponent<WeaponBase>();
+            //WeaponBase
+            prefabWeaponSc.equipWeaponNum = weaponDic.Count();
+            weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
+            //Object 장착(Parent설정)
+            weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[prefabWeaponSc.equipWeaponNum];
+
+            weaponDic[prefabWeaponSc.equipWeaponNum].transform.localPosition = Vector3.zero;
+            weaponDic[prefabWeaponSc.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+        }
+        //AR제외 모두 통합 각각컴포넌트로 저장하기위해
+        else
+        {
+            var throwData = weaponPrefab.GetComponent<ThrowableBase>();
+            var foodData = weaponPrefab.GetComponent<FoodBase>();
+            throwData.equipWeaponNum = weaponDic.Count();
+            foodData.equipWeaponNum = weaponDic.Count();
+            weaponDic.Add(throwData.equipWeaponNum, throwData);
+            weaponDic.Add(throwData.equipWeaponNum, foodData);
+
+            weaponDic[throwData.equipWeaponNum].transform.parent = equipPosObjectList[throwData.equipWeaponNum];
+            weaponDic[throwData.equipWeaponNum].transform.localPosition = Vector3.zero;
+            weaponDic[throwData.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+        }
+     
+        
         //FireTransform 
     }
 
@@ -96,6 +115,7 @@ public class PlayerWeaponManager : MonoBehaviour
                 weaponDic[tmpObject.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
             }
         }
+        
         currentUsingWeapon = weaponDic[pushNumber];
         //Transform 스왑
         currentUsingWeapon.transform.parent = currentUsingWeaponTransform;

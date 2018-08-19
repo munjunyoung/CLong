@@ -226,6 +226,12 @@ public class IngameProcess : MonoBehaviour
                     return;
                 ZoomChange(num, false);
                 break;
+            case "Alpha4":
+                playerList[num].weaponManagerSc.WeaponChange(2);
+                if (!playerList[num].zoomState)
+                    return;
+                ZoomChange(num, false);
+                break;
             case "Space":
                 playerList[num].keyState[(int)Key.Space] = true;
                 break;

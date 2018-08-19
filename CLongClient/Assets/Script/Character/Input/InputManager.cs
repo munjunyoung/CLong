@@ -191,6 +191,15 @@ public class InputManager : MonoBehaviour
                     NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha3].ToString()));
             }
         }
+        else if (Input.GetKeyDown(KeyList[(int)Key.Alpha4]))
+        {
+            if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 3)
+            {
+                //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
+                if (myPlayer.weaponManagerSc.weaponDic.ContainsKey(3))
+                    NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Alpha3].ToString()));
+            }
+        }
         //Shooting
         if (Input.GetMouseButton(0))
         {
