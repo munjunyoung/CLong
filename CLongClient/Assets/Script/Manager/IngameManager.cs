@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using CLongLib;
 
-public class IngameManager : MonoBehaviour
+public class IngameManager : Singleton<IngameManager>
 {
-    // Use this for initialization
-
-    private void Awake()
+    protected override void Init()
     {
-        NetworkManager.Instance.RecvHandler += RecvUdpPacket;
-        NetworkManager.Instance.RecvHandler += RecvTcpPacket;
+        NetworkManager.Instance.RecvHandler += ProcessPacket;
     }
 	
 	// Update is called once per frame
@@ -19,22 +16,39 @@ public class IngameManager : MonoBehaviour
 		
 	}
 
-    private void RecvUdpPacket(IPacket p)
+    private void ProcessPacket(IPacket p, NetworkManager.Protocol pt)
     {
-        if(p is Match_End)
+        if (pt == NetworkManager.Protocol.TCP)
         {
-            var s = (Match_End)p;
-            NetworkManager.Instance.RecvHandler -= RecvUdpPacket;
-            NetworkManager.Instance.RecvHandler -= RecvTcpPacket;
+            if (p is Player_Init)
+            {
+                var s = (Player_Init)p;
+            }
+            if (p is Player_Reset)
+            {
+                var s = (Player_Reset)p;
+            }
+            if (p is Round_Start)
+            {
+                var s = (Round_Start)p;
+            }
+            if (p is Round_End)
+            {
+                var s = (Round_End)p;
+            }
+            if (p is Match_End)
+            {
+                var s = (Match_End)p;
+                NetworkManager.Instance.RecvHandler -= ProcessPacket;
+            }
+            if (p is Round_Timer)
+            {
+                var s = (Round_Timer)p;
+            }
         }
-    }
-
-    private void RecvTcpPacket(IPacket p)
-    {
-        if(p is Player_Init)
+        else
         {
-            var s = (Player_Init)p;
-        }
 
+        }
     }
 }
