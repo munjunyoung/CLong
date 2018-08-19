@@ -11,8 +11,11 @@ public class GlobalManager : MonoBehaviour
     public static GlobalManager Instance { get { return _instance; } }
     private static GlobalManager _instance;
 
-    public delegate void IngameEvent(IPacket p);
-    public event IngameEvent recvHandler;
+    //public delegate void IngamePacketEvent(IPacket p);
+    //public event IngamePacketEvent RecvHandler;
+
+    public delegate void IngameInitEvent(bool b, params object[] p);
+    public event IngameInitEvent InitHandler;
 
     private readonly string[] _sceneNames = { "01Login", "02Lobby", "03IngameManager" };
 
@@ -27,7 +30,7 @@ public class GlobalManager : MonoBehaviour
         if (_instance == null)
             _instance = this;
         _nm = GetComponent<NetworkManager>();
-        _nm.pHandler = ProcessPacket;
+        _nm.RecvHandler += ProcessPacket;
         _curScene = SceneManager.GetActiveScene();
         var objs = FindObjectsOfType<GlobalManager>();
         if (objs.Length > 1)
@@ -41,18 +44,18 @@ public class GlobalManager : MonoBehaviour
             if (p is Match_End)
             {
                 _inGame = false;
-                _nm.Release();
+                InitHandler(false);
                 LoadScene(_sceneNames[1]);
             }
-            else
-                recvHandler(p);
+            //else
+                //RecvHandler(p);
         }
         else
         {
             if (p is Start_Game)
             {
                 var s = (Start_Game)p;
-                _nm.InitMulticast(s.ip, s.port);
+                InitHandler(true, s.ip, s.port);
                 LoadScene(_sceneNames[2]);
             }
             else if (p is Login_Ack)

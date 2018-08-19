@@ -9,8 +9,8 @@ public class IngameManager : MonoBehaviour
 
     private void Awake()
     {
-        GlobalManager.Instance.recvHandler += RecvUdpPacket;
-        GlobalManager.Instance.recvHandler += RecvTcpPacket;
+        NetworkManager.Instance.RecvHandler += RecvUdpPacket;
+        NetworkManager.Instance.RecvHandler += RecvTcpPacket;
     }
 	
 	// Update is called once per frame
@@ -24,8 +24,8 @@ public class IngameManager : MonoBehaviour
         if(p is Match_End)
         {
             var s = (Match_End)p;
-            GlobalManager.Instance.recvHandler -= RecvUdpPacket;
-            GlobalManager.Instance.recvHandler -= RecvTcpPacket;
+            NetworkManager.Instance.RecvHandler -= RecvUdpPacket;
+            NetworkManager.Instance.RecvHandler -= RecvTcpPacket;
         }
     }
 

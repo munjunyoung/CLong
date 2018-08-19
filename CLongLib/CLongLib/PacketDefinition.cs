@@ -28,7 +28,7 @@ namespace CLongLib
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 10)]
         public string password;
 
-        public Req_Login(string i, string p)
+        public Login_Req(string i, string p)
         {
             id = i;
             password = p;

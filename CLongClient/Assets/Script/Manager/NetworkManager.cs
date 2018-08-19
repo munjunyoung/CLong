@@ -13,8 +13,8 @@ public class NetworkManager : MonoBehaviour
     private static NetworkManager _instance;
 
     public enum Protocol { TCP, UDP }
-    public delegate void PacketEvent(IPacket p);
-    public PacketEvent pHandler;
+    public delegate void RecvPacketEvent(IPacket p);
+    public event RecvPacketEvent RecvHandler;
     
     private const string _IP = "127.0.0.1";
     private const int _PORT = 23000;
@@ -25,21 +25,7 @@ public class NetworkManager : MonoBehaviour
     private Coroutine _procRoutineUDP;
 
     private GlobalManager _gm;
-
-    public void Release()
-    {
-        StopCoroutine(_procRoutineUDP);
-        _udpNet.ResetUDP();
-        _udpNet.packetQueue.Clear();
-        _tcpNet.packetQueue.Clear();
-    }
-
-    public void InitMulticast(uint ip, ushort port)
-    {
-        _udpNet.Init(ip, port);
-        _procRoutineUDP = StartCoroutine(ProcPacketQueue(_udpNet.packetQueue));
-    }
-
+    
     public void SendPacket(IPacket p, Protocol pt)
     {
         switch (pt)
@@ -53,10 +39,30 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    private void InitMulticast(bool b, params object[] pAry)
+    {
+        if (b)
+        {
+            var ip = (uint)pAry[0];
+            var port = (ushort)pAry[1];
+            _udpNet.Init(ip, port);
+            _procRoutineUDP = StartCoroutine(ProcPacketQueue(_udpNet.packetQueue));
+        }
+        else
+        {
+            StopCoroutine(_procRoutineUDP);
+            _udpNet.ResetUDP();
+            _udpNet.packetQueue.Clear();
+            _tcpNet.packetQueue.Clear();
+        }
+    }
+
     private void Awake()
     {
-        _instance = this;
+        if(_instance == null)
+            _instance = this;
         _gm = GetComponent<GlobalManager>();
+        _gm.InitHandler += InitMulticast;
         _tcpNet.Init(_IP, _PORT);
         _procRoutineTCP = StartCoroutine(ProcPacketQueue(_tcpNet.packetQueue));
     }
@@ -93,7 +99,7 @@ public class NetworkManager : MonoBehaviour
             while (packets.Count > 0 && c < 100000)
             {
                 c++;
-                pHandler?.Invoke(packets.Dequeue());
+                RecvHandler?.Invoke(packets.Dequeue());
                 //_gm.ProcessPacket(packets.Dequeue());
             }
             yield return new WaitForFixedUpdate();
