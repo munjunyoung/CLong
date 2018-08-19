@@ -6,14 +6,8 @@ using UnityEngine.SceneManagement;
 using CLongLib;
 
 [RequireComponent(typeof(NetworkManager))]
-public class GlobalManager : MonoBehaviour
+public class GlobalManager : Singleton<GlobalManager>
 {
-    public static GlobalManager Instance { get { return _instance; } }
-    private static GlobalManager _instance;
-
-    //public delegate void IngamePacketEvent(IPacket p);
-    //public event IngamePacketEvent RecvHandler;
-
     public delegate void IngameInitEvent(bool b, params object[] p);
     public event IngameInitEvent InitHandler;
 
@@ -25,56 +19,54 @@ public class GlobalManager : MonoBehaviour
 
     private bool _inGame;
 
-    private void Awake()
+    protected override void Init()
     {
-        if (_instance == null)
-            _instance = this;
         _nm = GetComponent<NetworkManager>();
         _nm.RecvHandler += ProcessPacket;
         _curScene = SceneManager.GetActiveScene();
-        var objs = FindObjectsOfType<GlobalManager>();
-        if (objs.Length > 1)
-            Debug.LogError("Scene has two or more GlobalManager.");
     }
 
-    private void ProcessPacket(IPacket p)
+    private void FixedUpdate()
     {
-        if (_inGame)
+        if (Input.GetKeyDown(KeyCode.F11))
+            StartCoroutine(LoadScene("testscene2"));
+    }
+
+    private void ProcessPacket(IPacket p, NetworkManager.Protocol pt)
+    {
+        if (pt == NetworkManager.Protocol.UDP)
+            return;
+
+        if (p is Start_Game)
         {
-            if (p is Match_End)
-            {
-                _inGame = false;
-                InitHandler(false);
-                LoadScene(_sceneNames[1]);
-            }
-            //else
-                //RecvHandler(p);
+            var s = (Start_Game)p;
+            InitHandler(true, s.ip, s.port);
+            LoadScene(_sceneNames[2]);
         }
-        else
+        else if (p is Login_Ack)
         {
-            if (p is Start_Game)
-            {
-                var s = (Start_Game)p;
-                InitHandler(true, s.ip, s.port);
-                LoadScene(_sceneNames[2]);
-            }
-            else if (p is Login_Ack)
-            {
-                var s = (Login_Ack)p;
-            }
-            else if (p is Match_Succeed)
-            {
-                var s = (Match_Succeed)p;
-            }
+            var s = (Login_Ack)p;
+        }
+        else if (p is Match_Succeed)
+        {
+            var s = (Match_Succeed)p;
+        }
+        else if (p is Match_End)
+        {
+            _inGame = false;
+            InitHandler(false);
+            LoadScene(_sceneNames[1]);
         }
     }
 
     private IEnumerator LoadScene(string sName)
     {
         Scene cs = SceneManager.GetActiveScene();
-        var asyncOp = SceneManager.LoadSceneAsync(name, LoadSceneMode.Additive);
+        var asyncOp = SceneManager.LoadSceneAsync(sName, LoadSceneMode.Additive);
+        Debug.Log(asyncOp.isDone);
         while (!asyncOp.isDone)
             yield return null;
+        Debug.Log(asyncOp.isDone);
 
         _curScene = SceneManager.GetSceneByName(sName);
         SceneManager.MoveGameObjectToScene(gameObject, _curScene);

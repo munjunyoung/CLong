@@ -18,6 +18,13 @@ namespace CLongLib
     public interface IPacket
     { }
 
+    public struct Exit_Req : IPacket
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        public bool req;
+    }
+
+    #region LoginPacket
     /// <summary>
     /// Login request from CLIENT to SERVER.
     /// </summary>
@@ -44,25 +51,11 @@ namespace CLongLib
         [MarshalAs(UnmanagedType.I1)]
         public bool connected;
     }
+    #endregion
 
+    #region QueuePacket
     /// <summary>
-    /// 서버->클라 멀티캐스트 포트 전송 (매칭 성공 이후)
-    /// </summary>
-    public struct Start_Game : IPacket
-    {
-        [MarshalAs(UnmanagedType.U2)]
-        public ushort port;
-        public uint ip;
-
-        public Start_Game(ushort p, uint i)
-        {
-            port = p;
-            ip = i;
-        }
-    }
-
-    /// <summary>
-    /// 클라->서버 매칭 시작 또는 취소
+    /// QueueEntry + QueueCancel
     /// </summary>
     public struct Queue_Req : IPacket
     {
@@ -77,7 +70,7 @@ namespace CLongLib
     }
 
     /// <summary>
-    /// 서버->클라 매칭 결과
+    /// MatchingComplete
     /// </summary>
     public struct Match_Succeed : IPacket
     {
@@ -86,19 +79,27 @@ namespace CLongLib
         public bool req;
     }
 
-    public struct Match_End : IPacket
+    /// <summary>
+    /// StartGameReq
+    /// </summary>
+    public struct Start_Game : IPacket
     {
-        // true : 매칭종료, false : 매칭종료중 오류
-        [MarshalAs(UnmanagedType.I1)]
-        public bool req;
-    }
+        [MarshalAs(UnmanagedType.U2)]
+        public ushort port;
+        public uint ip;
 
-    public struct Exit_Req : IPacket
-    {
-        [MarshalAs(UnmanagedType.I1)]
-        public bool req;
+        public Start_Game(ushort p, uint i)
+        {
+            port = p;
+            ip = i;
+        }
     }
+    #endregion
 
+    #region GameStartPacket
+    /// <summary>
+    /// ClientIns
+    /// </summary>
     public struct Player_Init : IPacket
     {
         public byte clientIdx;
@@ -118,7 +119,82 @@ namespace CLongLib
             weapon2 = w2;
         }
     }
+    #endregion
 
+    #region HealthPacket
+    /// <summary>
+    /// TakeDamage
+    /// </summary>
+    public struct Player_TakeDmg : IPacket
+    {
+        public byte clientIdx;
+        public int damage;
+
+        public Player_TakeDmg(byte n, int d)
+        {
+            clientIdx = n;
+            damage = d;
+        }
+    }
+
+    /// <summary>
+    /// RecoverHealth
+    /// </summary>
+    public struct Player_Recover : IPacket
+    {
+        public byte clientIdx;
+        public int amount;
+
+        public Player_Recover(byte n, int a)
+        {
+            clientIdx = n;
+            amount = a;
+        }
+    }
+
+    /// <summary>
+    /// SyncHealth
+    /// </summary>
+    public struct Player_Sync : IPacket
+    {
+        public byte clientIdx;
+        public int hp;
+
+        public Player_Sync(byte n, int h)
+        {
+            clientIdx = n;
+            hp = h;
+        }
+    }
+
+    /// <summary>
+    /// Death
+    /// </summary>
+    public struct Player_Dead : IPacket
+    {
+        public byte clientIdx;
+
+        public Player_Dead(byte n)
+        {
+            clientIdx = n;
+        }
+    }
+    #endregion
+
+    #region MatchingPacket
+    /// <summary>
+    /// MatchingEnd
+    /// </summary>
+    public struct Match_End : IPacket
+    {
+        // true : 매칭종료, false : 매칭종료중 오류
+        [MarshalAs(UnmanagedType.I1)]
+        public bool req;
+    }
+
+    /// <summary>
+    /// SetClient
+    /// </summary>
     public struct Player_Reset : IPacket
     {
         public byte clientIdx;
@@ -133,41 +209,151 @@ namespace CLongLib
         }
     }
 
+    /// <summary>
+    /// ReadyCheck
+    /// </summary>
     public struct Player_Ready : IPacket
     {
         public byte clientIdx;
-
+        
         public Player_Ready(byte n)
         {
             clientIdx = n;
         }
     }
 
-    public struct Player_SyncHP : IPacket
-    {
-        public byte clientIdx;
-        public int curHealth;
-    }
-
-    public struct Player_Dead : IPacket
-    {
-        public byte clientIdx;
-    }
-
+    /// <summary>
+    /// RoundTimer
+    /// </summary>
     public struct Round_Timer : IPacket
     {
-        public byte remainTime;
+        public byte countDown;
+
+        public Round_Timer(byte c)
+        {
+            countDown = c;
+        }
     }
 
+    /// <summary>
+    /// RoundStart
+    /// </summary>
     public struct Round_Start : IPacket
     {
         public byte curRound;
+        public int[] roundPoint;
+
+        public Round_Start(byte r, int[] p)
+        {
+            curRound = r;
+            roundPoint = p;
+        }
     }
 
+    /// <summary>
+    /// RoundEnd
+    /// </summary>
     public struct Round_End : IPacket
     {
         public byte curRound;
-        public byte[] roundPoint;
-        public string roundResult;
+        public int[] roundPoint;
+        public bool win;
+
+        public Round_End(byte r, int[] p, bool b)
+        {
+            curRound = r;
+            roundPoint = p;
+            win = b;
+        }
     }
+    #endregion
+
+    #region MovePacket
+    /// <summary>
+    /// KeyDown + KeyUp + Zoom
+    /// </summary>
+    public struct Player_Input : IPacket
+    {
+        public byte clientIdx;
+        public byte key;
+        public bool down;
+
+        public Player_Input(byte n, byte k, bool d)
+        {
+            clientIdx = n;
+            key = k;
+            down = d;
+        }
+    }
+
+    /// <summary>
+    /// ClientDir + ClientMoveSync
+    /// </summary>
+    public struct Player_Info : IPacket
+    {
+        public byte clientIdx;
+        public float xAngle;
+        public float yAngle;
+        public Vector3 pos;
+        
+        public Player_Info(byte n, float x, float y, Vector3 p)
+        {
+            clientIdx = n;
+            xAngle = x;
+            yAngle = y;
+            pos = p;
+        }
+    }
+
+    /// <summary>
+    /// IsGrounded
+    /// </summary>
+    public struct Player_Grounded : IPacket
+    {
+        public byte clientIdx;
+        public bool state;
+
+        public Player_Grounded(byte n, bool b)
+        {
+            clientIdx = n;
+            state = b;
+        }
+    }
+    #endregion
+
+    #region WeaponPacket
+    /// <summary>
+    /// InsShell
+    /// </summary>
+    public struct Bullet_Init : IPacket
+    {
+        public byte clientIdx;
+        public Vector3 pos;
+        public Vector3 rot;
+
+        public Bullet_Init(byte n, Vector3 p, Vector3 r)
+        {
+            clientIdx = n;
+            pos = p;
+            rot = r;
+        }
+    }
+
+    /// <summary>
+    /// ThrowBomb
+    /// </summary>
+    public struct Bomb_Init : IPacket
+    {
+        public byte clientIdx;
+        public Vector3 pos;
+        public Vector3 rot;
+
+        public Bomb_Init(byte n, Vector3 p, Vector3 r)
+        {
+            clientIdx = n;
+            pos = p;
+            rot = r;
+        }
+    }
+    #endregion
 }

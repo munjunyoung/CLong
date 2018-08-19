@@ -7,13 +7,10 @@ using UnityEngine;
 using CLongLib;
 
 [RequireComponent(typeof(GlobalManager))]
-public class NetworkManager : MonoBehaviour
+public class NetworkManager : Singleton<NetworkManager>
 {
-    public static NetworkManager Instance { get { return _instance; } }
-    private static NetworkManager _instance;
-
     public enum Protocol { TCP, UDP }
-    public delegate void RecvPacketEvent(IPacket p);
+    public delegate void RecvPacketEvent(IPacket p, Protocol pt);
     public event RecvPacketEvent RecvHandler;
     
     private const string _IP = "127.0.0.1";
@@ -39,6 +36,14 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    protected override void Init()
+    {
+        _gm = GetComponent<GlobalManager>();
+        _gm.InitHandler += InitMulticast;
+        _tcpNet.Init(_IP, _PORT);
+        _procRoutineTCP = StartCoroutine(ProcPacketQueue(_tcpNet.packetQueue, Protocol.TCP));
+    }
+
     private void InitMulticast(bool b, params object[] pAry)
     {
         if (b)
@@ -46,7 +51,7 @@ public class NetworkManager : MonoBehaviour
             var ip = (uint)pAry[0];
             var port = (ushort)pAry[1];
             _udpNet.Init(ip, port);
-            _procRoutineUDP = StartCoroutine(ProcPacketQueue(_udpNet.packetQueue));
+            _procRoutineUDP = StartCoroutine(ProcPacketQueue(_udpNet.packetQueue, Protocol.UDP));
         }
         else
         {
@@ -55,16 +60,6 @@ public class NetworkManager : MonoBehaviour
             _udpNet.packetQueue.Clear();
             _tcpNet.packetQueue.Clear();
         }
-    }
-
-    private void Awake()
-    {
-        if(_instance == null)
-            _instance = this;
-        _gm = GetComponent<GlobalManager>();
-        _gm.InitHandler += InitMulticast;
-        _tcpNet.Init(_IP, _PORT);
-        _procRoutineTCP = StartCoroutine(ProcPacketQueue(_tcpNet.packetQueue));
     }
 
     private void FixedUpdate()
@@ -91,7 +86,7 @@ public class NetworkManager : MonoBehaviour
         //}
     }
 
-    private IEnumerator ProcPacketQueue(Queue<IPacket> packets)
+    private IEnumerator ProcPacketQueue(Queue<IPacket> packets, Protocol p)
     {
         while (true)
         {
@@ -99,7 +94,7 @@ public class NetworkManager : MonoBehaviour
             while (packets.Count > 0 && c < 100000)
             {
                 c++;
-                RecvHandler?.Invoke(packets.Dequeue());
+                RecvHandler?.Invoke(packets.Dequeue(), p);
                 //_gm.ProcessPacket(packets.Dequeue());
             }
             yield return new WaitForFixedUpdate();
