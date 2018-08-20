@@ -94,7 +94,9 @@ public class NetworkManager : Singleton<NetworkManager>
             while (packets.Count > 0 && c < 100000)
             {
                 c++;
-                RecvHandler?.Invoke(packets.Dequeue(), p);
+                IPacket data = packets.Dequeue();
+                Debug.Log("<color=red>" + data.GetType() + "</color>", gameObject);
+                RecvHandler?.Invoke(data, p);
                 //_gm.ProcessPacket(packets.Dequeue());
             }
             yield return new WaitForFixedUpdate();
