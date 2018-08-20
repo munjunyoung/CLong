@@ -1074,6 +1074,7 @@ GameObject:
   - component: {fileID: 1404728219}
   - component: {fileID: 1404728217}
   - component: {fileID: 1404728220}
+  - component: {fileID: 1404728218}
   m_Layer: 0
   m_Name: IngameManager
   m_TagString: Untagged
@@ -1090,6 +1091,36 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f2e8e1c5b0680fa46a38f26954dc2887, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  camManagerSc: {fileID: 783572681}
+  playerPrefab: {fileID: 1206502622049744, guid: 578f8942f79bdcc48a51b2c8b0f8fc72,
+    type: 2}
+  playerList:
+  - {fileID: 0}
+  - {fileID: 0}
+  clientPlayerNum: -1
+  inputSc: {fileID: 1404728220}
+  npSC: {fileID: 0}
+  ViewRoundPanel: {fileID: 710974505}
+  ViewRoundText: {fileID: 183276345}
+  ViewPointText: {fileID: 769998293}
+  TimerPanel: {fileID: 593296943}
+  TimerText: {fileID: 442319991}
+  TimerState: 0
+  RoundResultPanel: {fileID: 1740560613}
+  RoundResultText: {fileID: 64558075}
+  currentHealth: 100
+  healthSlider: {fileID: 1965001197}
+--- !u!114 &1404728218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1404728216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1e558c71330440489b419df6587315c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   camManagerSc: {fileID: 783572681}

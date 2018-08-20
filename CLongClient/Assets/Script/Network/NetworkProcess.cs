@@ -113,8 +113,8 @@ public class NetworkProcess : MonoBehaviour {
             yield return null;
 
         SceneManager.MoveGameObjectToScene(this.gameObject, allSceneManagerSc.currentScene = SceneManager.GetSceneByName("03IngameManager"));
-        ProcessHandlerTCP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestTCP;
-        ProcessHandlerUDP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestUDP;
+      //  ProcessHandlerTCP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestTCP;
+      //  ProcessHandlerUDP += GameObject.Find("IngameManager").GetComponent<IngameProcess>().IngameDataRequestUDP;
         Ingame = true;
         StartCoroutine("ProcessDataUDP");
         NetworkManagerTCP.SendTCP(new StartGameReq(0));

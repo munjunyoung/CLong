@@ -126,13 +126,13 @@ public class InputManager : MonoBehaviour
         //Run
         if (Input.GetKeyDown(KeyList[(int)Key.LeftShift]))
         {
-            if (myPlayer.currentActionState == (int)(ActionState.None))
+            if (myPlayer.currentActionState == (ActionState.None))
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.LeftShift].ToString()));
             //myPlayer.keyState[(int)Key.LeftShift] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftShift]))
         {
-            if (myPlayer.currentActionState == (int)(ActionState.Run))
+            if (myPlayer.currentActionState == (ActionState.Run))
                 NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.LeftShift].ToString()));
             //myPlayer.keyState[(int)Key.LeftShift] = false;
         }
@@ -140,26 +140,26 @@ public class InputManager : MonoBehaviour
         //Seat
         if (Input.GetKeyDown(KeyList[(int)Key.LeftControl]))
         {
-            if (myPlayer.currentActionState == (int)(ActionState.None))
+            if (myPlayer.currentActionState == (ActionState.None))
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.LeftControl].ToString()));
             //myPlayer.keyState[(int)Key.LeftControl] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftControl]))
         {
-            if (myPlayer.currentActionState == (int)(ActionState.Seat))
+            if (myPlayer.currentActionState == (ActionState.Seat))
                 NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.LeftControl].ToString()));
             //myPlayer.keyState[(int)Key.LeftControl] = false;
         }
         //Creep
         if (Input.GetKeyDown(KeyList[(int)Key.Z]))
         {
-            if (myPlayer.currentActionState == (int)(ActionState.None))
+            if (myPlayer.currentActionState == (ActionState.None))
                 NetworkManagerTCP.SendTCP(new KeyDown(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
             //myPlayer.keyState[(int)Key.Z] = true;
         }
         if (Input.GetKeyUp(KeyList[(int)Key.Z]))
         {
-            if (myPlayer.currentActionState == (int)(ActionState.Lie))
+            if (myPlayer.currentActionState == (ActionState.Lie))
                 NetworkManagerTCP.SendTCP(new KeyUP(myPlayer.clientNum, KeyList[(int)Key.Z].ToString()));
             //myPlayer.keyState[(int)Key.Z] = false;
         }

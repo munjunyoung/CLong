@@ -23,6 +23,7 @@ public class NetworkManager : Singleton<NetworkManager>
     
     public void SendPacket(IPacket p, Protocol pt)
     {
+        Debug.Log("Send Packet : " + p.GetType());
         switch (pt)
         {
             case Protocol.TCP:
@@ -62,16 +63,16 @@ public class NetworkManager : Singleton<NetworkManager>
 
     private void FixedUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.F4))
-        {
-            this.SendPacket(new Queue_Req { req = 0 }, Protocol.TCP);
-        }
-        if (Input.GetKeyDown(KeyCode.F5))
-        {
-            Debug.Log("Stop");
-            StopCoroutine(_procRoutineTCP);
-            StopCoroutine(_procRoutineUDP);
-        }
+        //if (Input.GetKeyDown(KeyCode.F4))
+        //{
+        //    this.SendPacket(new Queue_Req { req = 0 }, Protocol.TCP);
+        //}
+        //if (Input.GetKeyDown(KeyCode.F5))
+        //{
+        //    Debug.Log("Stop");
+        //    StopCoroutine(_procRoutineTCP);
+        //    StopCoroutine(_procRoutineUDP);
+        //}
 
         //Testcode
         //if (Input.GetKeyDown(KeyCode.F6))
@@ -175,10 +176,13 @@ public class NetworkManager : Singleton<NetworkManager>
         internal Queue<IPacket> packetQueue = new Queue<IPacket>();
         private UdpClient udp;
 
-        internal void Init(uint ip, int port)
+        internal void Init(uint ip, ushort port)
         {
             udp = new UdpClient();
-            udp.Client.Bind(new IPEndPoint(IPAddress.Any, 23010));
+            udp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            Debug.Log("IP : " + ip);
+            Debug.Log("Port : " + port);
+            udp.Client.Bind(new IPEndPoint(IPAddress.Any, port));
             var addr = new byte[] { (byte)(ip >> 24), (byte)(ip >> 16),
             (byte)(ip >> 8), (byte)ip };
             udp.JoinMulticastGroup(new IPAddress(addr));

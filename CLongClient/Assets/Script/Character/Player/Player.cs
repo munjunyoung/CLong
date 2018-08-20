@@ -14,12 +14,41 @@ public class Player : MonoBehaviour
     public PlayerWeaponManager weaponManagerSc;
     public Transform playerUpperBody;
 
-    public bool[] keyState = new bool[20];
+    private bool[] keyState = new bool[20];
     //Move
-    public float moveSpeed = 5f;
+    private float moveSpeed = 5f;
 
     //Action State
-    public int currentActionState;
+    public ActionState currentActionState
+    {
+        get
+        {
+            return _currentAc;
+        }
+        private set
+        {
+            _currentAc = value;
+            switch(_currentAc)
+            {
+                case ActionState.None:
+                    moveSpeed = 5f;
+                    break;
+                case ActionState.Run:
+                    moveSpeed = 10f;
+                    break;
+                case ActionState.Seat:
+                    moveSpeed = 3f;
+                    break;
+                case ActionState.Lie:
+                    moveSpeed = 1f;
+                    break;
+                case ActionState.Jump:
+                    moveSpeed = 3f;
+                    break;
+            }
+        }
+    }
+    private ActionState _currentAc;
     public bool isAlive = false;
 
     //Character Controller
@@ -143,15 +172,92 @@ public class Player : MonoBehaviour
         if (other.tag == "Generade")
         {
             Debug.Log("1");
-            if (!other.GetComponent<GeneradeScript>().weaponState)
+            if (!other.GetComponent<GrenadeScript>().weaponState)
             {
                 Debug.Log("2");
                 if (clientCheck)
                 {
                     Debug.Log("3");
-                    other.GetComponent<GeneradeScript>().TakeDamage(this);
+                    other.GetComponent<GrenadeScript>().TakeDamage(this);
                 }
             }
         }
     }
+    #region Key
+    /// <summary>
+    /// OtherPlayer key down for moving
+    /// </summary>
+    /// <param name="num"></param>
+    /// <param name="key"></param>
+    public void KeyDownClient(byte key, bool state)
+    {
+        switch ((Key)key)
+        {
+            case Key.W:
+                keyState[key] = state;
+                break;
+            case Key.S:
+                keyState[key] = state;
+                break;
+            case Key.A:
+                keyState[key] = state;
+                break;
+            case Key.D:
+                keyState[key] = state;
+                break;
+            case Key.LeftShift:
+                currentActionState = state.Equals(true) ? ActionState.Run : ActionState.None;
+               break;
+            case Key.LeftControl:
+                currentActionState = state.Equals(true) ? ActionState.Seat : ActionState.None;
+                break;
+            case Key.Z:
+                currentActionState = state.Equals(true) ? ActionState.Lie : ActionState.None;
+                break;
+            case Key.Alpha1:
+                //무기 스왑시 조준 풀기
+                weaponManagerSc.WeaponChange(0);
+                if (zoomState)
+                    return;
+                ZoomChange(false);
+                break;
+            case Key.Alpha2:
+                //무기 스왑시 조준 풀기
+                weaponManagerSc.WeaponChange(1);
+                if (zoomState)
+                    return;
+                ZoomChange(false);
+                break;
+            case Key.Alpha3:
+                weaponManagerSc.WeaponChange(2);
+                if (zoomState)
+                    return;
+                ZoomChange(false);
+                break;
+            case Key.Alpha4:
+                weaponManagerSc.WeaponChange(3);
+                if (zoomState)
+                    return;
+                ZoomChange(false);
+                break;
+            case Key.Space:
+                keyState[key] = state;
+                break;
+            default:
+                Debug.Log("[Ingame Process Not register Key : " + key);
+                break;
+        }
+    }
+    /// <summary>
+    /// 줌변경
+    /// </summary>
+    /// <param name="clientnum"></param>
+    /// <param name="zoomstate"></param>
+    private void ZoomChange(bool zoomstate)
+    {
+        zoomState = zoomstate;
+        weaponManagerSc.ZoomSetEquipPos(zoomstate);
+    }
+    #endregion
+
 }

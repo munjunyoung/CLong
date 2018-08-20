@@ -26,7 +26,7 @@ public class GlobalManager : Singleton<GlobalManager>
         _curScene = SceneManager.GetActiveScene();
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -51,6 +51,7 @@ public class GlobalManager : Singleton<GlobalManager>
         {
             var s = (Start_Game)p;
             InitHandler(true, s.ip, s.port);
+            StartCoroutine(LoadScene(_sceneNames[2]));
         }
         else if (p is Login_Ack)
         {
@@ -78,6 +79,8 @@ public class GlobalManager : Singleton<GlobalManager>
         else if (p is Match_Succeed)
         {
             var s = (Match_Succeed)p;
+            Debug.Log("매칭 성사");
+            //매칭 성사 UI 변경
         }
         else if (p is Match_End)
         {
@@ -99,6 +102,7 @@ public class GlobalManager : Singleton<GlobalManager>
 
         if (sName.Equals(_sceneNames[2]))
             _inGame = true;
+            
 
         SceneManager.UnloadSceneAsync(cs);
     }

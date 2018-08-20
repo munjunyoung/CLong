@@ -15,13 +15,16 @@ public class PlayerWeaponManager : MonoBehaviour
     public Transform fireTransform;
 
     //서버에서 받은 weaponEquip String을 통해 ins
-    public string[] equipWeaponArray = new string[3];
+    public byte[] equipWeaponArray = new byte[3];
+    public Dictionary<byte, string> WeaponManagerDic = new Dictionary<byte, string>();
     //Weapon 장비 위치 dic
     public Dictionary<int, Transform> equipPosObjectList = new Dictionary<int, Transform>();
 
     private void Start()
     {
         SetEquipPos();
+        WeaponManagerDicInit();
+
         WeaponEquip(equipWeaponArray);
     }
 
@@ -29,10 +32,10 @@ public class PlayerWeaponManager : MonoBehaviour
     /// Weapon Equip - Create Weapon
     /// </summary>
     /// <param name="st"></param>
-    private void WeaponEquip(string[] st)
+    private void WeaponEquip(byte[] st)
     {
         foreach (var s in st)
-            InsWeapon(s);
+            InsWeapon(WeaponManagerDic[s]);
 
         //처음 무기 설정
         weaponDic[0].enabled = true;
@@ -145,5 +148,16 @@ public class PlayerWeaponManager : MonoBehaviour
     public void ZoomSetEquipPos(bool zoomState)
     {
         currentUsingWeaponTransform.localPosition = zoomState ? new Vector3(0, -1f, 1f) : new Vector3(0.5f, -1f, 1f);
+    }
+
+    /// <summary>
+    /// dic 초기화
+    /// </summary>
+    /// <param name="num"></param>
+    public void WeaponManagerDicInit()
+    {
+        WeaponManagerDic.Add(0, "AR/AK");
+        WeaponManagerDic.Add(1, "AR/M4");
+        WeaponManagerDic.Add(2, "Throwable/HandGnerade");
     }
 }

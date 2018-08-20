@@ -43,9 +43,9 @@ public class IngameProcess : MonoBehaviour
 
     private void Start()
     {
-        npSC = GameObject.Find("AllSceneManager").GetComponent<NetworkProcess>();
+        //npSC = GameObject.Find("AllSceneManager").GetComponent<NetworkProcess>();
     }
-
+#if false
     #region packet Process
     //private List<GameObject> playerList = new List<GameObject>();
     /// <summary>
@@ -338,19 +338,8 @@ public class IngameProcess : MonoBehaviour
         //Send
         NetworkManagerTCP.SendTCP(new ReadyCheck(set.ClientNum));
     }
-    
-    /// <summary>
-    /// 줌변경
-    /// </summary>
-    /// <param name="clientnum"></param>
-    /// <param name="zoomstate"></param>
-    private void ZoomChange(int clientnum, bool zoomstate)
-    {
-        playerList[clientnum].zoomState = zoomstate;
-        playerList[clientnum].weaponManagerSc.ZoomSetEquipPos(zoomstate);
-        if (clientPlayerNum.Equals(clientnum))
-            inputSc.ZoomFunc(zoomstate);
-    }
+
+#endif
 
     #region UI Func
     /// <summary>
@@ -423,9 +412,9 @@ public class IngameProcess : MonoBehaviour
         if (RoundResultPanel.activeSelf)
             RoundResultPanel.SetActive(false);
     }
-    #endregion
+#endregion
    
-    #region ChangeVector
+#region ChangeVector
     /// <summary>
     /// return Numerics Vector3
     /// </summary>
@@ -448,9 +437,9 @@ public class IngameProcess : MonoBehaviour
         return tempPos;
     }
 
-    #endregion
+#endregion
 /*
-    #region Scene
+#region Scene
 
     /// <summary>
     /// 씬생성 (매니저 씬에 씬병합)
@@ -486,7 +475,7 @@ public class IngameProcess : MonoBehaviour
         if (SceneManager.GetSceneByName(sceneName).isLoaded)
             SceneManager.UnloadSceneAsync(sceneName);
     }
-    #endregion
+#endregion
     /// <summary>
     ///  새로운 씬 Load 후 이전 씬 Unload 
     /// Dondestroy를 사용하지 않고 직접 씬에서 씬으로 오브젝트 이동후 processHandler 추가

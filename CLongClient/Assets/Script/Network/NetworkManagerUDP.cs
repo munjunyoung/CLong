@@ -40,6 +40,7 @@ public class NetworkManagerUDP
         clientUDP = new UdpClient();
         //Socket option
         clientUDP.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+        Debug.Log("Port : " + multicastPort);
         clientEP = new IPEndPoint(IPAddress.Any, multicastPort);
         clientUDP.Client.Bind(clientEP);
         //멀티캐스트 접속

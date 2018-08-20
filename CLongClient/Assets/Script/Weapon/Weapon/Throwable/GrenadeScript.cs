@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GeneradeScript : ThrowableBase {
+public class GrenadeScript : ThrowableBase {
 
     // Update is called once per frame
     protected override void Start()
