@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class GeneradeScript : ThrowableBase {
+
     // Update is called once per frame
     protected override void Start()
     {

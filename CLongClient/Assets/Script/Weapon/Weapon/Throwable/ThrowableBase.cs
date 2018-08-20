@@ -28,7 +28,8 @@ public class ThrowableBase : WeaponBase
         bombRigidbody.AddForce(transform.forward * throwSpeed);
         //캐릭터 이동 오류로인해 false
         coll.isTrigger = false;
-        weaponState = true;
+        //다른클라가 던졌을때 ontrigger체크를 위해
+        weaponState = false;
         StartCoroutine(BombCoroutine());
     }
     /// <summary>
@@ -40,8 +41,10 @@ public class ThrowableBase : WeaponBase
     public override void ShootSendServer(int clientNum, Vector3 pos, Vector3 dir)
     {
         base.ShootSendServer(clientNum, pos, dir);
-        if (weaponState)
+        if (!weaponState)
             return;
+        //서버에서 한번만 보내도록 설정
+        weaponState = false;
         NetworkManagerTCP.SendTCP(new ThrowBomb(clientNum, IngameProcess.ToNumericVectorChange(pos), IngameProcess.ToNumericVectorChange(dir)));
     }
 
@@ -50,19 +53,12 @@ public class ThrowableBase : WeaponBase
     /// </summary>
     private void Explosion()
     {
-
         coll.isTrigger = true;
-        coll.radius = explosionRadius;  
-        /*
-        Collider[] explosionColliders = Physics.OverlapSphere(transform.position, explosionRadius);
-        
-        foreach (var c in explosionColliders)
-        {
-            if (c.tag.Equals("Player"))
-                TakeDamage(c.transform.GetComponent<Player>());
-        }*/
+        coll.radius = explosionRadius;
+        bombRigidbody.useGravity = false;
+
         //넉백 부분 놉(addExplosionForce의 경우 rigidbody가 타겟에게도 필요하므로 보류
-        Destroy(this.gameObject,0.5f);
+        StartCoroutine(SetActiveRoutine());
     }
 
     /// <summary>
@@ -91,6 +87,12 @@ public class ThrowableBase : WeaponBase
     {
         yield return new WaitForSeconds(BombTime);
         Explosion();
+    }
+
+    IEnumerator SetActiveRoutine()
+    {
+        yield return new WaitForSeconds(3f);
+        gameObject.SetActive(false);
     }
 }
 
