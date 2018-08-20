@@ -16,6 +16,8 @@ namespace CLongServer.Ingame
 {
     class GameRoom 
     {
+        private enum RoundState { ROUND_START, ROUND_END, MATCH_END };
+
         //GameRoom Number
         public int gameRoomNumber = 0;
 
@@ -27,7 +29,7 @@ namespace CLongServer.Ingame
         private List<Vector3> StartPosList = new List<Vector3>();
         
         //Team
-        private Dictionary<int, Team> TeamDic = new Dictionary<int, Team>();
+        private Dictionary<int, Player> PlayerDic = new Dictionary<int, Player>();
 
         //Round
         private int CurrentRound = 0;
@@ -38,7 +40,7 @@ namespace CLongServer.Ingame
         private System.Timers.Timer gameTimer = new System.Timers.Timer();
         private int countMaxTime = 2;
         private int countDownTime = 0;
-        private int timerState = 0; //0 : 시작타이머 , 1 : 라운드종료타이머, 2 : 게임종료 타이머
+        private RoundState roundState = RoundState.ROUND_START;
 
         //TestRoom
         private int peopleCount = 0;
@@ -71,15 +73,15 @@ namespace CLongServer.Ingame
         /// <param name="c2"></param>
         public void SetClientInGameRoom(ClientTCP c1, ClientTCP c2)
         {
-
             //Send StartGame (MultiPort 보냄) 클라이언트가 인게임씬로드 하기위한 패킷
-            c1.Send(new StartGameReq(multicastPortUDP));
-            c2.Send(new StartGameReq(multicastPortUDP));
+            Console.WriteLine("multicast port" + multicastPortUDP);
+            c1.Send(new Start_Game((ushort)multicastPortUDP, 0xB60000EF));
+            c2.Send(new Start_Game((ushort)multicastPortUDP, 0xB60000EF));
             //TeamSet
-            TeamDic.Add((int)TeamColor.BLUE, new Team(0, c1));
-            TeamDic.Add((int)TeamColor.RED, new Team(0, c2));
+            PlayerDic.Add((int)TeamColor.BLUE, new Player(0, c1));
+            PlayerDic.Add((int)TeamColor.RED, new Player(0, c2));
             
-            foreach (var team in TeamDic)
+            foreach (var team in PlayerDic)
             {
                 var c = team.Value.Client;
                 //Ingame Set
@@ -98,7 +100,7 @@ namespace CLongServer.Ingame
         /// </summary>
         void SetClientVar()
         {
-            foreach (var team in TeamDic)
+            foreach (var team in PlayerDic)
             {
                 team.Value.Ready = false;
                 var c = team.Value.Client;
@@ -119,28 +121,16 @@ namespace CLongServer.Ingame
         }
           
         /// <summary>
-        /// 클라이언트 생성 패킷 전송(로딩이 완료되었을때 전송해야 되기 때문에 따로 구분)
-        /// </summary>
-        /// <param name="c"></param>
-        void SendClientIns(ClientTCP c)
-        {
-            var cNumber = TeamDic.FirstOrDefault(x => x.Value.Client == c).Key;
-            var ocNumber = (cNumber + 1) % 2;
-            TeamDic[cNumber].Client.Send(new ClientIns(cNumber, TeamDic[cNumber].Hp, TeamDic[cNumber].StartPos, true, TeamDic[cNumber].Client.sendWeaponArray));
-            //Other Client Create
-            TeamDic[cNumber].Client.Send(new ClientIns(ocNumber, TeamDic[(ocNumber)].Hp, TeamDic[(ocNumber)].StartPos, false, TeamDic[(ocNumber)].Client.sendWeaponArray));
-        }
-        /// <summary>
         /// exit Player Remove
         /// </summary>
         /// <param name="c"></param>
         private void ClientRemove(ClientTCP c)
         {
-            var cNumber = TeamDic.FirstOrDefault(x => x.Value.Client == c).Key;
-            TeamDic.Remove(cNumber);
+            var cNumber = PlayerDic.FirstOrDefault(x => x.Value.Client == c).Key;
+            PlayerDic.Remove(cNumber);
             //Test Room
             peopleCount--;
-            c.Close();
+            c.CloseClient();
         }
 
         #endregion
@@ -151,86 +141,119 @@ namespace CLongServer.Ingame
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="p"></param>
-        private void IngameDataRequestTCP(object sender, Packet p)
+        private void IngameDataRequestTCP(object sender, IPacket p)
         {
             var c = sender as ClientTCP;
-            
-            switch (p.MsgName)
+
+            if (p is Loaded_Ingame)
             {
-                case "StartGameReq":
-                    //클라이언트 IngameSceneLoad 완료 되었을때 클라이언트에서 보내는 패킷 
-                    SendClientIns(c);               
-                    break;
-                case "ReadyCheck":
-                    var readyData = JsonConvert.DeserializeObject<ReadyCheck>(p.Data);
-                    TeamDic[readyData.ClientNum].Ready = true;
-                    c.Send(new RoundStart(CurrentRound, currentPoint));
-                    timerState = 0;
-                    //둘다 체크 되었을경우 타이머 전송시작
-                    if (TeamDic[(int)TeamColor.BLUE].Ready && TeamDic[(int)TeamColor.RED].Ready)
-                        countTimerStart();
-                    break;
-                case "KeyDown":
-                    foreach (var cl in TeamDic)
-                        cl.Value.Client.Send(p);
-                    break;
-                case "KeyUP":
-                    foreach (var cl in TeamDic)
-                        cl.Value.Client.Send(p);
-                    break;
-                case "IsGrounded":
-                    foreach (var cl in TeamDic)
-                        cl.Value.Client.Send(p);
-                    break;
-                case "ClientMoveSync":
-                    foreach (var cl in TeamDic)
-                        cl.Value.Client.Send(p);
-                    break;
-                case "InsShell":
-                    foreach (var cl in TeamDic)
-                        cl.Value.Client.Send(p);
-                    break;
-                case "ThrowBomb":
-                    foreach (var cl in TeamDic)
-                        cl.Value.Client.Send(p);
-                    break;  
-                case "Zoom":
-                    foreach (var cl in TeamDic)
-                        cl.Value.Client.Send(p);
-                    break;
-                case "TakeDamage":
-                    var damageData = JsonConvert.DeserializeObject<TakeDamage>(p.Data);
-                    TakeDamageProcessFunc(damageData, c);
-                    break;
-                case "RecoverHealth":
-                    var healData = JsonConvert.DeserializeObject<RecoverHealth>(p.Data);
-                    HealProcess(healData);
-                    break;
-                case "ExitReq":
-                    ClientRemove(c);
-                    break;
-                default:
-                    Console.WriteLine("[INGAME PROCESS] TCP : Mismatching Message" + p.MsgName+"!");
-                    break;
+                var cNumber = PlayerDic.FirstOrDefault(x => x.Value.Client == c).Key;
+                var ocNumber = (cNumber + 1) % 2;
+                var player = PlayerDic[cNumber];
+                var enemy = PlayerDic[ocNumber];
+                player.Client.Send(new IPacket[]
+                {
+                    new Player_Init((byte)cNumber, player.Hp, player.StartPos, true, 0x00, 0x01, 0x02),
+                    new Player_Init((byte)ocNumber, enemy.Hp, enemy.StartPos, false, 0x00, 0x01, 0x02)
+                });
             }
+            else if (p is Player_Ready)
+            {
+                var s = (Player_Ready)p;
+                PlayerDic[s.clientIdx].Ready = true;
+                foreach (KeyValuePair<int, Player> pair in PlayerDic)
+                {
+                    var result = pair.Value.Ready;
+                    if (result == false)
+                        return;
+                }
+                roundState = RoundState.ROUND_START;
+                countTimerStart();
+            }
+            else if(p is Player_Input
+                || p is Player_Grounded)
+            {
+                foreach (var pair in PlayerDic)
+                    pair.Value.Client.Send(p);
+            }
+            
+            //switch (p.MsgName)
+            //{
+            //    case "StartGameReq":
+            //        //클라이언트 IngameSceneLoad 완료 되었을때 클라이언트에서 보내는 패킷 
+            //        SendClientIns(c);               
+            //        break;
+            //    case "ReadyCheck":
+            //        var readyData = JsonConvert.DeserializeObject<ReadyCheck>(p.Data);
+            //        TeamDic[readyData.ClientNum].Ready = true;
+            //        c.Send(new RoundStart(CurrentRound, currentPoint));
+            //        timerState = 0;
+            //        //둘다 체크 되었을경우 타이머 전송시작
+            //        if (TeamDic[(int)TeamColor.BLUE].Ready && TeamDic[(int)TeamColor.RED].Ready)
+            //            countTimerStart();
+            //        break;
+            //    case "KeyDown":
+            //        foreach (var cl in TeamDic)
+            //            cl.Value.Client.Send(p);
+            //        break;
+            //    case "KeyUP":
+            //        foreach (var cl in TeamDic)
+            //            cl.Value.Client.Send(p);
+            //        break;
+            //    case "IsGrounded":
+            //        foreach (var cl in TeamDic)
+            //            cl.Value.Client.Send(p);
+            //        break;
+            //    case "ClientMoveSync":
+            //        foreach (var cl in TeamDic)
+            //            cl.Value.Client.Send(p);
+            //        break;
+            //    case "InsShell":
+            //        foreach (var cl in TeamDic)
+            //            cl.Value.Client.Send(p);
+            //        break;
+            //    case "ThrowBomb":
+            //        foreach (var cl in TeamDic)
+            //            cl.Value.Client.Send(p);
+            //        break;  
+            //    case "Zoom":
+            //        foreach (var cl in TeamDic)
+            //            cl.Value.Client.Send(p);
+            //        break;
+            //    case "TakeDamage":
+            //        var damageData = JsonConvert.DeserializeObject<TakeDamage>(p.Data);
+            //        TakeDamageProcessFunc(damageData, c);
+            //        break;
+            //    case "RecoverHealth":
+            //        var healData = JsonConvert.DeserializeObject<RecoverHealth>(p.Data);
+            //        HealProcess(healData);
+            //        break;
+            //    case "ExitReq":
+            //        ClientRemove(c);
+            //        break;
+            //    default:
+            //        Console.WriteLine("[INGAME PROCESS] TCP : Mismatching Message" + p.MsgName+"!");
+            //        break;
+            //}
         }
 
         /// <summary>
         /// IngameData UDP Process
         /// </summary>
         /// <param name="p"></param>
-        private void IngameDataRequestUDP(Packet p)
+        private void IngameDataRequestUDP(IPacket p)
         {
-            switch (p.MsgName)
-            {
-                case "ClientDir":
-                    var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
-                    udpServer.Send(p);
-                    break;
-                default:
-                    Console.WriteLine("[INGAME PROCESS] UDP : Mismatching Message");
-                    break;
-            }
+            udpServer.Send(p);
+            //switch (p.MsgName)
+            //{
+            //    case "ClientDir":
+            //        var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
+            //        udpServer.Send(p);
+            //        break;
+            //    default:
+            //        Console.WriteLine("[INGAME PROCESS] UDP : Mismatching Message");
+            //        break;
+            //}
         }
         #endregion
 
@@ -240,11 +263,12 @@ namespace CLongServer.Ingame
         /// <param name="data"></param>
         private void HealProcess(RecoverHealth data)
         {
-            if (!TeamDic[data.ClientNum].IsAlive)
+            if (!PlayerDic[data.ClientNum].IsAlive)
                 return;
 
-            TeamDic[data.ClientNum].Hp += data.FillHP;
-            TeamDic[data.ClientNum].Client.Send(new RecoverHealth(data.ClientNum, TeamDic[data.ClientNum].Hp));
+            PlayerDic[data.ClientNum].Hp += data.FillHP;
+            PlayerDic[data.ClientNum].Client.Send(
+                new Player_Recover((byte)data.ClientNum, PlayerDic[data.ClientNum].Hp));
         }
 
         #region game Process Func
@@ -256,24 +280,24 @@ namespace CLongServer.Ingame
         private void TakeDamageProcessFunc(TakeDamage d, ClientTCP c)
         {
             //둘중하나라도 죽었을경우 process return
-            if (!TeamDic[0].IsAlive || !TeamDic[1].IsAlive)
+            if (!PlayerDic[0].IsAlive || !PlayerDic[1].IsAlive)
                 return;
             //클라넘버
             int cn = d.ClientNum;
             
-            TeamDic[cn].Hp -= d.Damage;
+            PlayerDic[cn].Hp -= d.Damage;
 
-            if (TeamDic[cn].Hp == 0)
+            if (PlayerDic[cn].Hp == 0)
             {
-                TeamDic[cn].IsAlive = false;
-                foreach (var cl in TeamDic)
-                    cl.Value.Client.Send(new Death(cn));
+                PlayerDic[cn].IsAlive = false;
+                foreach (var cl in PlayerDic)
+                    cl.Value.Client.Send(new Player_Dead((byte)cn));
 
                 //Round 정리
                 RoundProcess(c, cn);
             }
 
-            c.Send(new SyncHealth(cn, TeamDic[cn].Hp));
+            c.Send(new Player_Sync((byte)cn, PlayerDic[cn].Hp));
             //foreach (var cl in playerDic)
             //TakeDamage등 맞았을때 이펙트 생성을위한 전송이 필요함
         }
@@ -289,21 +313,32 @@ namespace CLongServer.Ingame
             int loserIndex = n;
             int winnerIndex = ((n + 1) % 2);
 
-            TeamDic[winnerIndex].RoundPoint++;
+            PlayerDic[winnerIndex].RoundPoint++;
 
             //Set Point Data for Send;
-            currentPoint[winnerIndex] = TeamDic[winnerIndex].RoundPoint;
-            currentPoint[loserIndex] = TeamDic[loserIndex].RoundPoint;
+            currentPoint[winnerIndex] = PlayerDic[winnerIndex].RoundPoint;
+            currentPoint[loserIndex] = PlayerDic[loserIndex].RoundPoint;
             //Send Round Data
-            if (TeamDic[winnerIndex].RoundPoint.Equals(1))
-                timerState = 1;
- 
+            if (PlayerDic[winnerIndex].RoundPoint.Equals(1))
+                roundState = RoundState.ROUND_END;
+
             //Game End (winner의 point 가 2일 경우 )
-            else if (TeamDic[winnerIndex].RoundPoint.Equals(2))
-                timerState = 2;
-           
-            TeamDic[winnerIndex].Client.Send(new RoundEnd(CurrentRound, currentPoint, GameResult.WIN.ToString()));
-            TeamDic[loserIndex].Client.Send(new RoundEnd(CurrentRound, currentPoint, GameResult.LOSE.ToString()));
+            else if (PlayerDic[winnerIndex].RoundPoint.Equals(2))
+                roundState = RoundState.MATCH_END;
+
+            PlayerDic[winnerIndex].Client.Send(
+                new IPacket[]
+                {
+                    new Round_Stat((byte)CurrentRound, (byte)currentPoint[0], (byte)currentPoint[1]),
+                    new Round_Result(true)
+                });
+            PlayerDic[loserIndex].Client.Send(
+                new IPacket[]
+                {
+                    new Round_Stat((byte)CurrentRound, (byte)currentPoint[0], (byte)currentPoint[1]),
+                    new Round_Result(false)
+                });
+            
             //라운드 종료후 씬전환 전 종료 카운트 실행
             countTimerStart();
         }
@@ -315,7 +350,7 @@ namespace CLongServer.Ingame
         /// </summary>
         private void countTimerSet()
         {
-            gameTimer.Interval = 1000f;//5초
+            gameTimer.Interval = 5000f;//5초
             gameTimer.Elapsed += new System.Timers.ElapsedEventHandler(CountTimerCallBack);
             gameTimer.AutoReset = true; // 한번만 발생시킬건지 여부
         }
@@ -329,6 +364,9 @@ namespace CLongServer.Ingame
             if (gameTimer.Enabled)
                 return;
 
+            foreach(var p in PlayerDic)
+                p.Value.Client.Send(new Round_Timer(0));
+
             countDownTime = countMaxTime;
             gameTimer.Start();
         }
@@ -338,58 +376,32 @@ namespace CLongServer.Ingame
         /// </summary>
         private void CountTimerCallBack(object state, System.Timers.ElapsedEventArgs e)
         {
-            foreach (var cl in TeamDic)
-                cl.Value.Client.Send(new RoundTimer(countDownTime));
-
-            countDownTime -= 1;
-            if (countDownTime > -2)
-                return;
-
-            CountTimerEnd();
-        }
-
-        /// <summary>
-        /// Timer End
-        /// </summary>
-        private void CountTimerEnd()
-        {
             gameTimer.Stop();
             //시작타이머일 경우 리턴
-            if (timerState.Equals(0))
-                return;
-            else if (timerState.Equals(1))
-                RoundEnd();
-            else if (timerState.Equals(2))
-                MatchingEnd();
-        }
-
-        /// <summary>
-        /// 라운드 종료시 처리할 부분
-        /// </summary>
-        public void RoundEnd()
-        {
-            //종료타이머일 경우 
-            //카운트가 끝난후 다음씬으로 넘어가도록 전송
-            CurrentRound++;
-            //Client Set
-            SetClientVar();
-            Vector3[] Pos = { TeamDic[(int)TeamColor.BLUE].StartPos, TeamDic[(int)TeamColor.RED].StartPos };
-            foreach (var cl in TeamDic)
-                cl.Value.Client.Send(new SetClient(cl.Key, cl.Value.Hp, Pos));
-        }
-
-        /// <summary>
-        /// 매칭종료시 처리할부분
-        /// </summary>
-        public void MatchingEnd()
-        {
-            foreach(var p in TeamDic)
+            if (roundState == RoundState.ROUND_START)
             {
-                p.Value.Client.ingame = false;
-                p.Value.Client.Send(new MatchingEnd(0));
+                foreach (var cl in PlayerDic)
+                    cl.Value.Client.Send(new Round_Timer(1));
             }
-            //해당 게임룸 종료
-            GameRoomManager.Instance.DellGameRoom(this);
+            else if (roundState == RoundState.ROUND_END)
+            {
+                CurrentRound++;
+                //Client Set
+                SetClientVar();
+                Vector3[] Pos = { PlayerDic[(int)TeamColor.BLUE].StartPos, PlayerDic[(int)TeamColor.RED].StartPos };
+                foreach (var cl in PlayerDic)
+                    cl.Value.Client.Send(new Player_Reset((byte)cl.Key, cl.Value.Hp, Pos));
+            }
+            else if (roundState == RoundState.MATCH_END)
+            {
+                foreach (var p in PlayerDic)
+                {
+                    p.Value.Client.ingame = false;
+                    p.Value.Client.Send(new Match_End(true));
+                }
+                //해당 게임룸 종료
+                GameRoomManager.Instance.DellGameRoom(this);
+            }
         }
 
         #endregion
@@ -409,8 +421,8 @@ namespace CLongServer.Ingame
             
         }
 
-
-        #region TestSet
+#if false
+#region TestSet
         /// <summary>
         /// TestRoom Client Set
         /// </summary>
@@ -458,7 +470,7 @@ namespace CLongServer.Ingame
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="p"></param>
-        private void TestDataRequestTCP(object sender, Packet p)
+        private void TestDataRequestTCP(object sender, IPacket p)
         {
             var c = sender as ClientTCP;
 
@@ -518,14 +530,15 @@ namespace CLongServer.Ingame
             }
         }
 
-        #endregion
-    }
+#endregion
+#endif
+        }
 }
 
 /// <summary>
 /// Team Class
 /// </summary>
-public class Team
+public class Player
 {
     public bool Ready { get; set; }
     public int RoundPoint { get; set; }
@@ -551,7 +564,7 @@ public class Team
 
     private int _hp;
     //Point 
-    public Team(int p, ClientTCP c)
+    public Player(int p, ClientTCP c)
     {
         RoundPoint = p;
         Client = c;

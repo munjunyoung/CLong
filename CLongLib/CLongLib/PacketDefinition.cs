@@ -65,7 +65,7 @@ namespace CLongLib
     public struct Queue_Req : IPacket
     {
         // 0 : 신청, 1 : 취소
-        [MarshalAs(UnmanagedType.I1)]
+        [MarshalAs(UnmanagedType.U1)]
         public byte req;
 
         public Queue_Req(byte b)
@@ -77,7 +77,7 @@ namespace CLongLib
     public struct Queue_Ack : IPacket
     {
         // 신청, 취소 구분 : 0이면 큐등록, 1이면 큐취소 
-        [MarshalAs(UnmanagedType.I1)]
+        [MarshalAs(UnmanagedType.U1)]
         public byte req;
         // 신청, 취소 결과
         [MarshalAs(UnmanagedType.I1)]
@@ -105,14 +105,29 @@ namespace CLongLib
     /// </summary>
     public struct Start_Game : IPacket
     {
+        public uint ip;
         [MarshalAs(UnmanagedType.U2)]
         public ushort port;
-        public uint ip;
 
         public Start_Game(ushort p, uint i)
         {
-            port = p;
             ip = i;
+            port = p;
+        }
+    }
+
+    /// <summary>
+    /// 클라->서버 : 인게임씬 로드 완료
+    /// </summary>
+    public struct Loaded_Ingame : IPacket
+    {
+        //안씀
+        [MarshalAs(UnmanagedType.U1)]
+        public byte asd;
+
+        public Loaded_Ingame(byte b)
+        {
+            asd = b;
         }
     }
     #endregion
@@ -123,14 +138,19 @@ namespace CLongLib
     /// </summary>
     public struct Player_Init : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public int hp;
         public Vector3 startpos;
         public bool assign;
+        [MarshalAs(UnmanagedType.U1)]
         public byte weapon1;
+        [MarshalAs(UnmanagedType.U1)]
         public byte weapon2;
+        [MarshalAs(UnmanagedType.U1)]
+        public byte item;
 
-        public Player_Init(byte n, int h, Vector3 p, bool b, byte w1, byte w2)
+        public Player_Init(byte n, int h, Vector3 p, bool b, byte w1, byte w2, byte i)
         {
             clientIdx = n;
             hp = h;
@@ -138,6 +158,7 @@ namespace CLongLib
             assign = b;
             weapon1 = w1;
             weapon2 = w2;
+            item = i;
         }
     }
     #endregion
@@ -148,6 +169,7 @@ namespace CLongLib
     /// </summary>
     public struct Player_TakeDmg : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public int damage;
 
@@ -163,6 +185,7 @@ namespace CLongLib
     /// </summary>
     public struct Player_Recover : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public int amount;
 
@@ -178,6 +201,7 @@ namespace CLongLib
     /// </summary>
     public struct Player_Sync : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public int hp;
 
@@ -193,6 +217,7 @@ namespace CLongLib
     /// </summary>
     public struct Player_Dead : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
 
         public Player_Dead(byte n)
@@ -211,6 +236,11 @@ namespace CLongLib
         // true : 매칭종료, false : 매칭종료중 오류
         [MarshalAs(UnmanagedType.I1)]
         public bool req;
+
+        public Match_End(bool b)
+        {
+            req = b;
+        }
     }
 
     /// <summary>
@@ -218,6 +248,7 @@ namespace CLongLib
     /// </summary>
     public struct Player_Reset : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public int hp;
         public Vector3[] startPos;
@@ -235,6 +266,7 @@ namespace CLongLib
     /// </summary>
     public struct Player_Ready : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         
         public Player_Ready(byte n)
@@ -248,6 +280,8 @@ namespace CLongLib
     /// </summary>
     public struct Round_Timer : IPacket
     {
+        // 0 : 카운트시작해라. 1 : 시작해라.
+        [MarshalAs(UnmanagedType.U1)]
         public byte countDown;
 
         public Round_Timer(byte c)
@@ -259,34 +293,62 @@ namespace CLongLib
     /// <summary>
     /// RoundStart
     /// </summary>
-    public struct Round_Start : IPacket
-    {
-        public byte curRound;
-        public int[] roundPoint;
+    //public struct Round_Start : IPacket
+    //{
+    //    public byte curRound;
+    //    public int[] roundPoint;
 
-        public Round_Start(byte r, int[] p)
+    //    public Round_Start(byte r, int[] p)
+    //    {
+    //        curRound = r;
+    //        roundPoint = p;
+    //    }
+    //}
+
+    public struct Round_Stat : IPacket
+    {
+        [MarshalAs(UnmanagedType.U1)]
+        public byte curRound;
+        [MarshalAs(UnmanagedType.U1)]
+        public byte pointBlue;
+        [MarshalAs(UnmanagedType.U1)]
+        public byte pointRed;
+
+        public Round_Stat(byte r, byte pb, byte pr)
         {
             curRound = r;
-            roundPoint = p;
+            pointBlue = pb;
+            pointRed = pr;
+        }
+    }
+
+    public struct Round_Result : IPacket
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        public bool win;
+
+        public Round_Result(bool b)
+        {
+            win = b;
         }
     }
 
     /// <summary>
     /// RoundEnd
     /// </summary>
-    public struct Round_End : IPacket
-    {
-        public byte curRound;
-        public int[] roundPoint;
-        public bool win;
+    //public struct Round_End : IPacket
+    //{
+    //    public byte curRound;
+    //    public int[] roundPoint;
+    //    public bool win;
 
-        public Round_End(byte r, int[] p, bool b)
-        {
-            curRound = r;
-            roundPoint = p;
-            win = b;
-        }
-    }
+    //    public Round_End(byte r, int[] p, bool b)
+    //    {
+    //        curRound = r;
+    //        roundPoint = p;
+    //        win = b;
+    //    }
+    //}
     #endregion
 
     #region MovePacket
@@ -295,14 +357,17 @@ namespace CLongLib
     /// </summary>
     public struct Player_Input : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
+        [MarshalAs(UnmanagedType.U1)]
         public byte key;
+        [MarshalAs(UnmanagedType.I1)]
         public bool down;
 
-        public Player_Input(byte n, byte k, bool d)
+        public Player_Input(byte n, Key k, bool d)
         {
             clientIdx = n;
-            key = k;
+            key = (byte)k;
             down = d;
         }
     }
@@ -312,6 +377,7 @@ namespace CLongLib
     /// </summary>
     public struct Player_Info : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public float xAngle;
         public float yAngle;
@@ -331,7 +397,9 @@ namespace CLongLib
     /// </summary>
     public struct Player_Grounded : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
+        [MarshalAs(UnmanagedType.U1)]
         public bool state;
 
         public Player_Grounded(byte n, bool b)
@@ -348,6 +416,7 @@ namespace CLongLib
     /// </summary>
     public struct Bullet_Init : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public Vector3 pos;
         public Vector3 rot;
@@ -365,6 +434,7 @@ namespace CLongLib
     /// </summary>
     public struct Bomb_Init : IPacket
     {
+        [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public Vector3 pos;
         public Vector3 rot;

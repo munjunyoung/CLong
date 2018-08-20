@@ -19,15 +19,27 @@ namespace CLongLib
 
         private static readonly Dictionary<Type, byte> _typeDic = new Dictionary<Type, byte>()
         {
-            {typeof(Login_Ack), 0x00 },
-            {typeof(Login_Req), 0x01 },
-            {typeof(Start_Game), 0x02 },
-            {typeof(Queue_Req), 0x03 },
-            {typeof(Match_Succeed), 0x04 },
-            {typeof(Match_End), 0x05 },
+            {typeof(Login_Ack),         0x00 },
+            {typeof(Login_Req),         0x01 },
+            {typeof(Start_Game),        0x02 },
+            {typeof(Queue_Req),         0x03 },
+            {typeof(Queue_Ack),         0x06 },
+            {typeof(Match_Succeed),     0x04 },
+            {typeof(Match_End),         0x05 },
+            {typeof(Loaded_Ingame),     0x07 },
+            {typeof(Player_Init),       0x08 },
+            {typeof(Player_Ready),      0x09 },
+            {typeof(Round_Timer),       0x0A },
+
+            {typeof(Player_Input),      0x80 },
+            {typeof(Player_Sync),       0x81 },
+            {typeof(Player_Info),       0x82 },
+            {typeof(Player_Grounded),   0x83 },
+            {typeof(Bullet_Init),       0x84 },
+            {typeof(Bomb_Init),         0x85 },
         };
 
-        public static byte[] SetPacket(object o)
+        public static byte[] SetPacket(IPacket o)
         {
             int size = Marshal.SizeOf(o);
             byte[] ary = new byte[size+ _HEADER_SIZE];
@@ -55,7 +67,7 @@ namespace CLongLib
                     throw new Exception();
 
                 IntPtr ptr = Marshal.AllocHGlobal(size);
-                Marshal.Copy(b, _HEADER_SIZE, ptr, size);
+                Marshal.Copy(b, headerIdx + _HEADER_SIZE, ptr, size);
                 IPacket packet = Marshal.PtrToStructure(ptr, type) as IPacket;
                 Marshal.FreeHGlobal(ptr);
                 headerIdx = headerIdx + size + _HEADER_SIZE;
