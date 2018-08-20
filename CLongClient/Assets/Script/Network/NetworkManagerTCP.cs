@@ -12,7 +12,7 @@ namespace tcpNet
     class NetworkManagerTCP
     {
         //tcpClient
-        public static string ip = "127.0.0.1";//"172.30.1.24";
+        public static string ip = "172.30.1.56";//"127.0.0.1";//"172.30.1.24";
         public static int portNumber = 23000;
         public static TcpClient clientTcp = null;
         private static NetworkStream streamTcp;
