@@ -13,7 +13,7 @@ public class NetworkManager : Singleton<NetworkManager>
     public delegate void RecvPacketEvent(IPacket p, Protocol pt);
     public event RecvPacketEvent RecvHandler;
     
-    private const string _IP = "127.0.0.1";
+    private const string _IP = "172.30.1.56";
     private const int _PORT = 23000;
 
     private TCPNetwork _tcpNet = new TCPNetwork();
