@@ -119,9 +119,9 @@ namespace CLongServer
                 this.Send(new Login_Ack(true));
             }
             else if(p is Queue_Req)
-            { 
-                Console.WriteLine("Asd");
-                this.Send(new Start_Game { ip = 0xEF0000B6, port = 23000 });
+            {
+                // 큐에서 빼는 코드 필요
+                this.Send(new Queue_Ack(true));
             }
             else
             {

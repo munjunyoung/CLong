@@ -64,11 +64,11 @@ namespace CLongLib
     /// </summary>
     public struct Queue_Req : IPacket
     {
-        // true : 신청, false : 취소
+        // 0 : 신청, 1 : 취소
         [MarshalAs(UnmanagedType.I1)]
-        public bool req;
+        public byte req;
 
-        public Queue_Req(bool b)
+        public Queue_Req(byte b)
         {
             req = b;
         }
@@ -76,12 +76,16 @@ namespace CLongLib
 
     public struct Queue_Ack : IPacket
     {
-        // 신청, 취소 결과 
+        // 신청, 취소 구분 : 0이면 큐등록, 1이면 큐취소 
+        [MarshalAs(UnmanagedType.I1)]
+        public byte req;
+        // 신청, 취소 결과
         [MarshalAs(UnmanagedType.I1)]
         public bool ack;
 
-        public Queue_Ack(bool b)
+        public Queue_Ack(byte r, bool b)
         {
+            req = r;
             ack = b;
         }
     }
