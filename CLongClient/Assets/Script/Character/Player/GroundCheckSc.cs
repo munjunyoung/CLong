@@ -11,8 +11,8 @@ public class GroundCheckSc : MonoBehaviour
     {
         if(other.transform.tag == "Ground")
         {
-            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
-            NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, true));
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Grounded(myPlayer.clientNum, true), NetworkManager.Protocol.TCP);
         }
     }
 
@@ -20,8 +20,8 @@ public class GroundCheckSc : MonoBehaviour
     {
         if (other.transform.tag == "Ground")
         {
-            NetworkManagerTCP.SendTCP(new ClientMoveSync(myPlayer.clientNum, IngameProcess.ToNumericVectorChange(myPlayer.transform.position)));
-            NetworkManagerTCP.SendTCP(new IsGrounded(myPlayer.clientNum, false));
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Grounded(myPlayer.clientNum, false), NetworkManager.Protocol.TCP);
         }
     }
 }

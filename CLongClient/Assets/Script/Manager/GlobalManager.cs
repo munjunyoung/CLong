@@ -28,17 +28,25 @@ public class GlobalManager : Singleton<GlobalManager>
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F1))
+        if (SceneManager.GetActiveScene().name == "01Login")
         {
-            NetworkManager.Instance.SendPacket(new Login_Req("id", "pw"), NetworkManager.Protocol.TCP);
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                NetworkManager.Instance.SendPacket(new Login_Req("id", "pw"), NetworkManager.Protocol.TCP);
+            }
         }
-        if(Input.GetKeyDown(KeyCode.F2))
+
+
+        if (SceneManager.GetActiveScene().name == "02Lobby")
         {
-            NetworkManager.Instance.SendPacket(new Queue_Req(0), NetworkManager.Protocol.TCP);
-        }
-        if(Input.GetKeyDown(KeyCode.F3))
-        {
-            NetworkManager.Instance.SendPacket(new Queue_Req(1), NetworkManager.Protocol.TCP);
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                NetworkManager.Instance.SendPacket(new Queue_Req(0), NetworkManager.Protocol.TCP);
+            }
+            if (Input.GetKeyDown(KeyCode.F2))
+            {
+                NetworkManager.Instance.SendPacket(new Queue_Req(1), NetworkManager.Protocol.TCP);
+            }
         }
     }
 

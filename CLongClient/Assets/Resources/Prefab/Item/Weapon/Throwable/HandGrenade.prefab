@@ -26,7 +26,7 @@ GameObject:
   - component: {fileID: 114724463538059822}
   - component: {fileID: 114232171604493454}
   m_Layer: 0
-  m_Name: HandGenerade
+  m_Name: HandGrenade
   m_TagString: Generade
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

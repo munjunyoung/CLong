@@ -9,7 +9,7 @@ public class Player : MonoBehaviour
     //client Check for Ontrigger
     public bool clientCheck = false;
     //Client assigned Number
-    public int clientNum;
+    public byte clientNum;
     //add Script
     public PlayerWeaponManager weaponManagerSc;
     public Transform playerUpperBody;
@@ -171,18 +171,16 @@ public class Player : MonoBehaviour
 
         if (other.tag == "Generade")
         {
-            Debug.Log("1");
             if (!other.GetComponent<GrenadeScript>().weaponState)
             {
-                Debug.Log("2");
                 if (clientCheck)
                 {
-                    Debug.Log("3");
                     other.GetComponent<GrenadeScript>().TakeDamage(this);
                 }
             }
         }
     }
+
     #region Key
     /// <summary>
     /// OtherPlayer key down for moving
@@ -215,14 +213,12 @@ public class Player : MonoBehaviour
                 currentActionState = state.Equals(true) ? ActionState.Lie : ActionState.None;
                 break;
             case Key.Alpha1:
-                //무기 스왑시 조준 풀기
                 weaponManagerSc.WeaponChange(0);
                 if (zoomState)
                     return;
                 ZoomChange(false);
                 break;
             case Key.Alpha2:
-                //무기 스왑시 조준 풀기
                 weaponManagerSc.WeaponChange(1);
                 if (zoomState)
                     return;
@@ -243,21 +239,26 @@ public class Player : MonoBehaviour
             case Key.Space:
                 keyState[key] = state;
                 break;
+            case Key.RClick:
+                ZoomChange(state);
+                break;
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
                 break;
         }
     }
+    #endregion
     /// <summary>
-    /// 줌변경
+    /// 줌 상태 변경(무기의 위치만 변경,
     /// </summary>
     /// <param name="clientnum"></param>
     /// <param name="zoomstate"></param>
     private void ZoomChange(bool zoomstate)
     {
+        //클라이언트 줌 UI 부분은 UI 매니저에서 생성(현재 없음)
         zoomState = zoomstate;
         weaponManagerSc.ZoomSetEquipPos(zoomstate);
     }
-    #endregion
+    
 
 }

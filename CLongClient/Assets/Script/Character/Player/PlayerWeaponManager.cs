@@ -16,6 +16,7 @@ public class PlayerWeaponManager : MonoBehaviour
 
     //서버에서 받은 weaponEquip String을 통해 ins
     public byte[] equipWeaponArray = new byte[3];
+    //장비 정보를 가지고 있는 dictionary
     public Dictionary<byte, string> WeaponManagerDic = new Dictionary<byte, string>();
     //Weapon 장비 위치 dic
     public Dictionary<int, Transform> equipPosObjectList = new Dictionary<int, Transform>();
@@ -158,6 +159,6 @@ public class PlayerWeaponManager : MonoBehaviour
     {
         WeaponManagerDic.Add(0, "AR/AK");
         WeaponManagerDic.Add(1, "AR/M4");
-        WeaponManagerDic.Add(2, "Throwable/HandGnerade");
+        WeaponManagerDic.Add(2, "Throwable/HandGrenade");
     }
 }

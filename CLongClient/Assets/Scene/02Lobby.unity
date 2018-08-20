@@ -181,7 +181,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "F1 : QueueEntry \nF2 : TESTEntry "
+  m_Text: "F1 : QueueEntry \nF2 : QueueExit"
 --- !u!222 &1062597855
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -59,7 +59,7 @@ public class IngameManager : Singleton<IngameManager>
                 //받았을때 클라이언트 생성(아군 적군 모두)
                 var s = (Player_Init)p;
 
-                CreatePlayerObject(s.clientIdx, s.hp, ToUnityVectorChange(s.startpos), s.assign, s.weapon1, s.weapon2, s.item);
+                CreatePlayerObject(s.clientIdx, s.hp,TotalUtility.ToUnityVectorChange(s.startpos), s.assign, s.weapon1, s.weapon2, s.item);
                 if (s.assign)
                     NetworkManager.Instance.SendPacket(new Player_Ready(0), NetworkManager.Protocol.TCP);
 
@@ -89,20 +89,46 @@ public class IngameManager : Singleton<IngameManager>
             }
             else if(p is Player_Input)
             {
+                //Player key 관련 처리
                 var s = (Player_Input)p;
                 playerList[s.clientIdx].KeyDownClient(s.key, s.down);
             }
+            else if(p is Player_Grounded)
+            {
+                //player isGrounded 처리
+                var s = (Player_Grounded)p;
+                playerList[s.clientIdx].IsGroundedFromServer = s.state;
+            }
+            //else if()
+            
+            
             
         }
         else
         {
-
+            if (p is Player_Info)
+            {
+                //싱크(적편에게만 적용)
+                var s = (Player_Info)p;
+                if(clientPlayerNum!=s.clientIdx)
+                {
+                    var i = s.clientIdx;
+                    //Position
+                    if (playerList[i] != null)
+                    {
+                        playerList[i].transform.position = TotalUtility.ToUnityVectorChange(s.pos);
+                        //Rotation
+                        playerList[i].transform.localEulerAngles = new Vector3(0, s.yAngle, 0);
+                        playerList[i].playerUpperBody.localEulerAngles = new Vector3(s.xAngle, 0, 0);
+                    }
+                }
+            }
         }
     }
     /// <summary>
     /// Client 생성
     /// </summary>
-    public void CreatePlayerObject(int num, int health, Vector3 pos, bool clientCheck, byte w1, byte w2, byte item)
+    public void CreatePlayerObject(byte num, int health, Vector3 pos, bool clientCheck, byte w1, byte w2, byte item)
     {
         //배정되는 클라이언트 num에 prefab생성
         var tmpPrefab = Instantiate(playerPrefab);
@@ -166,28 +192,5 @@ public class IngameManager : Singleton<IngameManager>
     #endregion;
 
 
-    #region ChangeVector
-    /// <summary>
-    /// return Numerics Vector3
-    /// </summary>
-    /// <param name="pos"></param>
-    /// <returns></returns>
-    public static System.Numerics.Vector3 ToNumericVectorChange(Vector3 pos)
-    {
-        var tempPos = new System.Numerics.Vector3(pos.x, pos.y, pos.z);
-        return tempPos;
-    }
-
-    /// <summary>
-    /// return Unity Vector3
-    /// </summary>
-    /// <param name="pos"></param>
-    /// <returns></returns>
-    public static Vector3 ToUnityVectorChange(System.Numerics.Vector3 pos)
-    {
-        var tempPos = new Vector3(pos.X, pos.Y, pos.Z);
-        return tempPos;
-    }
-
-    #endregion
+    
 }
