@@ -252,12 +252,12 @@ public class Player : MonoBehaviour
     /// 줌 상태 변경(무기의 위치만 변경,
     /// </summary>
     /// <param name="clientnum"></param>
-    /// <param name="zoomstate"></param>
-    private void ZoomChange(bool zoomstate)
+    /// <param name="tmpZoom"></param>
+    private void ZoomChange(bool tmpZoom)
     {
         //클라이언트 줌 UI 부분은 UI 매니저에서 생성(현재 없음)
-        zoomState = zoomstate;
-        weaponManagerSc.ZoomSetEquipPos(zoomstate);
+        zoomState = tmpZoom;
+        weaponManagerSc.ZoomSetEquipPos(zoomState);
     }
     
 

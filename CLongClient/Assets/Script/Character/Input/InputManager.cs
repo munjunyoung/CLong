@@ -40,6 +40,7 @@ public class InputManager : MonoBehaviour
     /// </summary>
     private void Start()
     {
+        
         KeySet();
     }
 
