@@ -74,6 +74,18 @@ namespace CLongLib
         }
     }
 
+    public struct Queue_Ack : IPacket
+    {
+        // 신청, 취소 결과 
+        [MarshalAs(UnmanagedType.I1)]
+        public bool ack;
+
+        public Queue_Ack(bool b)
+        {
+            ack = b;
+        }
+    }
+
     /// <summary>
     /// MatchingComplete
     /// </summary>

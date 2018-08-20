@@ -116,11 +116,10 @@ namespace CLongServer
         {
             if(p is Login_Req)
             {
-                Console.Write("ASd");
                 this.Send(new Login_Ack(true));
             }
-            if(p is Queue_Req)
-            {
+            else if(p is Queue_Req)
+            { 
                 Console.WriteLine("Asd");
                 this.Send(new Start_Game { ip = 0xEF0000B6, port = 23000 });
             }
