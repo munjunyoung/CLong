@@ -49,7 +49,12 @@ namespace CLongLib
     public struct Login_Ack : IPacket
     {
         [MarshalAs(UnmanagedType.I1)]
-        public bool connected;
+        public bool accepted;
+
+        public Login_Ack(bool b)
+        {
+            accepted = b;
+        }
     }
     #endregion
 

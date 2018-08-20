@@ -28,8 +28,10 @@ public class GlobalManager : Singleton<GlobalManager>
 
     private void FixedUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.F11))
-            StartCoroutine(LoadScene("testscene2"));
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            NetworkManager.Instance.SendPacket(new Login_Req("id", "pw"), NetworkManager.Protocol.TCP);
+        }
     }
 
     private void ProcessPacket(IPacket p, NetworkManager.Protocol pt)
@@ -41,11 +43,11 @@ public class GlobalManager : Singleton<GlobalManager>
         {
             var s = (Start_Game)p;
             InitHandler(true, s.ip, s.port);
-            LoadScene(_sceneNames[2]);
         }
         else if (p is Login_Ack)
         {
             var s = (Login_Ack)p;
+            StartCoroutine(LoadScene(_sceneNames[1]));
         }
         else if (p is Match_Succeed)
         {
@@ -63,10 +65,8 @@ public class GlobalManager : Singleton<GlobalManager>
     {
         Scene cs = SceneManager.GetActiveScene();
         var asyncOp = SceneManager.LoadSceneAsync(sName, LoadSceneMode.Additive);
-        Debug.Log(asyncOp.isDone);
         while (!asyncOp.isDone)
             yield return null;
-        Debug.Log(asyncOp.isDone);
 
         _curScene = SceneManager.GetSceneByName(sName);
         SceneManager.MoveGameObjectToScene(gameObject, _curScene);

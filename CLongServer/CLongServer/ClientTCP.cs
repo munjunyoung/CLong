@@ -50,10 +50,10 @@ namespace CLongServer
         {
             clientTcp = tc;
             socketTcp = clientTcp.Client;
-            BeginReceive();
+            //BeginReceive();
 
             // 변경예정
-            //clientTcp.Client.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, ReceiveCb, clientTcp.Client);
+            clientTcp.Client.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, ReceiveCb, clientTcp.Client);
         }
 
         /// <summary>
@@ -114,6 +114,11 @@ namespace CLongServer
 
         private void ProcessPacket(IPacket p)
         {
+            if(p is Login_Req)
+            {
+                Console.Write("ASd");
+                this.Send(new Login_Ack(true));
+            }
             if(p is Queue_Req)
             {
                 Console.WriteLine("Asd");
