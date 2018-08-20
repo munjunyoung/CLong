@@ -19,7 +19,6 @@ public class NetworkManager : Singleton<NetworkManager>
     private UDPNetwork _udpNet = new UDPNetwork();
     private Coroutine _procRoutineTCP;
     private Coroutine _procRoutineUDP;
-
     private GlobalManager _gm;
     
     public void SendPacket(IPacket p, Protocol pt)
@@ -65,7 +64,7 @@ public class NetworkManager : Singleton<NetworkManager>
     {
         if (Input.GetKeyDown(KeyCode.F4))
         {
-            this.SendPacket(new Queue_Req { req = true }, Protocol.TCP);
+            this.SendPacket(new Queue_Req { req = 0 }, Protocol.TCP);
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {

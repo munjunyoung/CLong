@@ -32,6 +32,14 @@ public class GlobalManager : Singleton<GlobalManager>
         {
             NetworkManager.Instance.SendPacket(new Login_Req("id", "pw"), NetworkManager.Protocol.TCP);
         }
+        if(Input.GetKeyDown(KeyCode.F2))
+        {
+            NetworkManager.Instance.SendPacket(new Queue_Req(0), NetworkManager.Protocol.TCP);
+        }
+        if(Input.GetKeyDown(KeyCode.F3))
+        {
+            NetworkManager.Instance.SendPacket(new Queue_Req(1), NetworkManager.Protocol.TCP);
+        }
     }
 
     private void ProcessPacket(IPacket p, NetworkManager.Protocol pt)
@@ -48,6 +56,24 @@ public class GlobalManager : Singleton<GlobalManager>
         {
             var s = (Login_Ack)p;
             StartCoroutine(LoadScene(_sceneNames[1]));
+        }
+        else if(p is Queue_Ack)
+        {
+            var s = (Queue_Ack)p;
+            if (s.ack == true)
+            {
+                if (s.req == 0)
+                    Debug.Log("QUEUE 등록 성공");
+                else if (s.req == 1)
+                    Debug.Log("Queue 취소 성공");
+            }
+            else
+            {
+                if (s.req == 0)
+                    Debug.Log("Queue 등록 실패");
+                else if(s.req == 1)
+                    Debug.Log("Queue 취소 실패");
+            }
         }
         else if (p is Match_Succeed)
         {
