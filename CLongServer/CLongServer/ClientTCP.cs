@@ -14,33 +14,28 @@ using CLongServer.Ingame;
 namespace CLongServer
 {
     public class ClientTCP
-    { 
+    {
         //Socket
         TcpClient clientTcp;
-        public Socket socketTcp; // socket
-        
+
         //Receive
-        private Packet receivedPacket = null;
-        private byte[] _tempBufferSocket = new byte[4096];
-        private readonly List<byte[]> _bodyBufferListSocket = new List<byte[]>();
-        private readonly int headSize = 4;
-        private Queue<IPacket> _packetQueue= new Queue<IPacket>();
+        private byte[] _recvBuffer = new byte[4096];
+        private Queue<IPacket> _packetQueue = new Queue<IPacket>();
 
         //Handler
-        public delegate void myEventHandler<T>(object sender, Packet p);
-        public event myEventHandler<Packet> ProcessHandler;
+        public delegate void myEventHandler<T>(object sender, IPacket p);
+        public event myEventHandler<IPacket> ProcessHandler;
 
         #region InGame
         //Ingame 
         public bool ingame = false;
-        
+
         //StartPosition
         //public Vector3 StartPos;
 
         //Weapon
-        public string[] sendWeaponArray = { "AR/AK", "AR/M4" , "Throwable/HandGenerade"};
-        public int currentEquipWeaponNum = 0;
-   
+        public string[] sendWeaponArray = { "AR/AK", "AR/M4", "Throwable/HandGenerade" };
+
         #endregion
         /// <summary>
         /// Constructor .. Stream Save;
@@ -49,15 +44,14 @@ namespace CLongServer
         public ClientTCP(TcpClient tc)
         {
             clientTcp = tc;
-            socketTcp = clientTcp.Client;
             //BeginReceive();
 
             // 변경예정
-            clientTcp.Client.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, ReceiveCb, clientTcp.Client);
+            clientTcp.Client.BeginReceive(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None, ReceiveCb, clientTcp.Client);
         }
 
         /// <summary>
-        /// TCP 패킷을 보낸다.
+        /// TCP로 패킷을 보낸다.
         /// </summary>
         /// <param name="p">인터페이스 상속 패킷 클라스</param>
         public void Send(IPacket p)
@@ -66,14 +60,57 @@ namespace CLongServer
             {
                 var data = PacketMaker.SetPacket(p);
                 clientTcp.Client.BeginSend(data, 0, data.Length, SocketFlags.None, null, clientTcp.Client);
-                Console.WriteLine("[TCP] Send to [{0}] : {1}, Length : {2}", clientTcp.Client.RemoteEndPoint, p.GetType(), data.Length);
+                Console.WriteLine("[TCP] Send [{0}] : {1}, Length : {2}", clientTcp.Client.RemoteEndPoint, p.GetType(), data.Length);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("[TCP] Send exception : " + e.ToString());
             }
         }
-        
+
+        /// <summary>
+        /// TCP로 패킷 배열을 보낸다.
+        /// </summary>
+        /// <param name="p">인터페이스 상속 패킷 클래스 배열</param>
+        public void Send(IPacket[] p)
+        {
+            try
+            {
+                // 사이즈 오버헤드에 대한 예외처리 구현이 필요함.
+                int size = 0;
+                List<byte[]> dList = new List<byte[]>();
+                for (int i = 0; i < p.Length; ++i)
+                {
+                    var d = PacketMaker.SetPacket(p[i]);
+                    size += d.Length;
+                    dList.Add(d);
+                }
+                byte[] data = new byte[size];
+                int curIdx = 0;
+                foreach (var d in dList)
+                {
+                    Array.Copy(d, 0, data, curIdx, d.Length);
+                    curIdx += d.Length;
+                }
+                clientTcp.Client.BeginSend(data, 0, data.Length, SocketFlags.None, null, clientTcp.Client);
+                
+                for (int i = 0; i < p.Length; ++i)
+                {
+                    Console.WriteLine("[TCP] Send [{0}] : {1}, Length : {2}", clientTcp.Client.RemoteEndPoint, p[i].GetType(), dList[i].Length);
+                }
+                dList.Clear();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[TCP] Send exception : " + e.ToString());
+            }
+        }
+
+        public void CloseClient()
+        {
+            clientTcp.Client.Close();
+        }
+
         /// <summary>
         /// TCP 소켓의 BeginReceive에 등록된 콜백 메소드
         /// </summary>
@@ -85,28 +122,27 @@ namespace CLongServer
                 var sock = (Socket)ar.AsyncState;
                 var dataSize = sock.EndReceive(ar);
 
-                if(dataSize > 0)
+                if (dataSize > 0)
                 {
-                    Console.WriteLine("[TCP] Received data size : " + dataSize);
+                    Console.WriteLine("[TCP] Recv [" + dataSize + "] :  bytes.");
                     var dataAry = new byte[dataSize];
-                    Array.Copy(_tempBufferSocket, 0, dataAry, 0, dataSize);
+                    Array.Copy(_recvBuffer, 0, dataAry, 0, dataSize);
                     PacketMaker.GetPacket(dataAry, ref _packetQueue);
-                    Array.Clear(_tempBufferSocket, 0, _tempBufferSocket.Length);
-                    while(_packetQueue.Count > 0)
+                    Array.Clear(_recvBuffer, 0, _recvBuffer.Length);
+                    while (_packetQueue.Count > 0)
                     {
                         var packet = _packetQueue.Dequeue();
-                        Console.Write(packet.GetType() + ", ");
+                        Console.WriteLine("Received Packet : " + packet.GetType());
                         ProcessPacket(packet);
                     }
-                    Console.WriteLine("[TCP] Process was done.");
-                    sock.BeginReceive(_tempBufferSocket, 0, _tempBufferSocket.Length, SocketFlags.None, ReceiveCb, sock);
+                    sock.BeginReceive(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None, ReceiveCb, sock);
                 }
                 else
                 {
                     Console.WriteLine("[TCP] Receive no data.");
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e);
             }
@@ -114,22 +150,30 @@ namespace CLongServer
 
         private void ProcessPacket(IPacket p)
         {
-            if(p is Login_Req)
+            if (!ingame)
             {
-                this.Send(new Login_Ack(true));
-            }
-            else if(p is Queue_Req)
-            {
-                // 큐에서 빼는 코드 필요
-                this.Send(new Queue_Ack(true));
+                if (p is Login_Req)
+                {
+                    this.Send(new Login_Ack(true));
+                }
+                else if (p is Queue_Req)
+                {
+                    var s = (Queue_Req)p;
+                    // 큐 등록 또는 취소 코드 필요
+                    var result = MatchingManager.Instance.QueueClient(this, s.req);
+                    this.Send(new Queue_Ack(s.req, result));
+                    MatchingManager.Instance.CheckMatching();
+                }
             }
             else
             {
-                // Do something.
+                ProcessHandler(this, p);
             }
         }
-
-        #region Socket
+    }
+}
+#if false
+#region Socket
         /// <summary>
         /// send packet through socket
         /// </summary>
@@ -204,7 +248,7 @@ namespace CLongServer
                 foreach (var p in _bodyBufferListSocket)
                 {
                     DeserializePacket(p);
-                    RequestDataTCP(receivedPacket);
+                    //RequestDataTCP(receivedPacket);
                 }
 
                  _bodyBufferListSocket.Clear();
@@ -234,7 +278,7 @@ namespace CLongServer
             }
         }
 
-        #endregion
+#endregion
         /// <summary>
         /// Deserialize Data
         /// </summary>
@@ -274,33 +318,34 @@ namespace CLongServer
         /// CorrespondData
         /// </summary>
         /// <param name="p"></param>
-        private void RequestDataTCP(Packet p)
-        {
-            if (!ingame)
-            {
-                switch (p.MsgName)
-                {
-                    case "Login":
-                        this.Send(p);
-                        break;
-                    case "QueueEntry":
-                        MatchingManager.Instance.MatchingProcess(this);
-                        break;
-                    case "TestRoom":
-                        MatchingManager.Instance.EntryTestRoom(this);
-                        break;
-                    case "ExitReq":
-                        this.Close();
-                        break;
-                    default:
-                        Console.WriteLine("[TCP] Socket :  Mismatching Message");
-                        break;
-                }
-            }
-            else
-            {
-                ProcessHandler(this, p);
-            }
-        }
+        //private void RequestDataTCP(Packet p)
+        //{
+        //    if (!ingame)
+        //    {
+        //        switch (p.MsgName)
+        //        {
+        //            case "Login":
+        //                this.Send(p);
+        //                break;
+        //            case "QueueEntry":
+        //                MatchingManager.Instance.MatchingProcess(this);
+        //                break;
+        //            case "TestRoom":
+        //                MatchingManager.Instance.EntryTestRoom(this);
+        //                break;
+        //            case "ExitReq":
+        //                this.Close();
+        //                break;
+        //            default:
+        //                Console.WriteLine("[TCP] Socket :  Mismatching Message");
+        //                break;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        ProcessHandler(this, p);
+        //    }
+        //}
     }
 }
+#endif
