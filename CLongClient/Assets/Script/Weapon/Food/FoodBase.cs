@@ -19,19 +19,19 @@ class FoodBase : WeaponBase
     /// <param name="clientNum"></param>
     /// <param name="pos"></param>
     /// <param name="rot"></param>
-    public override void Shoot(int clientNum, Vector3 pos, Vector3 rot)
+    public override void Shoot(byte clientNum, Vector3 pos, Vector3 rot)
     {
         base.Shoot(clientNum, pos, rot);
         gameObject.SetActive(false);
     }
 
-    public override void ShootSendServer(int clientNum, Vector3 pos, Vector3 dir)
+    public override void ShootSendServer(byte clientNum, Vector3 pos, Vector3 dir)
     {
         base.ShootSendServer(clientNum, pos, dir);
         if (!weaponState)
             return;
         weaponState = false;
-        NetworkManagerTCP.SendTCP(new RecoverHealth(clientNum, fillHealthAmount));
+        NetworkManager.Instance.SendPacket(new Player_Recover(clientNum, fillHealthAmount), NetworkManager.Protocol.TCP); 
         
     }
 

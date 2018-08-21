@@ -37,6 +37,12 @@ namespace CLongLib
             {typeof(Player_Grounded),   0x83 },
             {typeof(Bullet_Init),       0x84 },
             {typeof(Bomb_Init),         0x85 },
+            {typeof(Player_Recover),    0x86 },
+            {typeof(Player_Dead),       0x87 },
+            {typeof(Player_TakeDmg),    0x88 },
+            {typeof(Player_Reset),      0x89 },
+            {typeof(Round_Result),      0x8A },
+            {typeof(Round_Stat),        0x8B },
         };
 
         public static byte[] SetPacket(IPacket o)

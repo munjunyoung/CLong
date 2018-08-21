@@ -6,48 +6,30 @@ using UnityEngine.UI;
 
 public class IngameManager : Singleton<IngameManager>
 {
-    //for Cam Follow through player transform
-    public CameraManager camManagerSc;
     //playerIns Prefab
     public GameObject playerPrefab;
     //Player check
     public Player[] playerList = new Player[2];
 
-    public int clientPlayerNum = -1;
+    public byte clientPlayerNum = 100;
     //Player InputManager reference
     public InputManager inputSc;
-    public NetworkProcess npSC;
-
-    #region UI Var
-    //Current Round View 
-    public GameObject ViewRoundPanel;
-    public Text ViewRoundText;
-    public Text ViewPointText;
-
-    //Timer
-    public GameObject TimerPanel;
-    public Text TimerText;
-    public int TimerState = 0;  //0 : 시작타이머, 1 : 라운드 종료 타이머
-
-    //RoundResult
-    public GameObject RoundResultPanel;
-    public Text RoundResultText;
-
-    //Health UI
-    public int currentHealth = 100;
-    public Slider healthSlider;
-    #endregion
 
     protected override void Init()
     {
         NetworkManager.Instance.RecvHandler += ProcessPacket;
         NetworkManager.Instance.SendPacket(new Loaded_Ingame(0), NetworkManager.Protocol.TCP);
+        
+    }
 
+    private void Start()
+    {
+        NetworkManager.Instance.SendPacket(new Loaded_Ingame(0), NetworkManager.Protocol.TCP);
         Cursor.lockState = CursorLockMode.Locked;
     }
-	
-	// Update is called once per frame
-	private void Update ()
+
+    // Update is called once per frame
+    private void Update ()
     {
 		
 	}
@@ -61,14 +43,15 @@ public class IngameManager : Singleton<IngameManager>
                 //받았을때 클라이언트 생성(아군 적군 모두)
                 var s = (Player_Init)p;
 
-                CreatePlayerObject(s.clientIdx, s.hp,TotalUtility.ToUnityVectorChange(s.startpos), s.assign, s.weapon1, s.weapon2, s.item);
+                CreatePlayerObject(s.clientIdx, s.hp,TotalUtility.ToUnityVectorChange(s.startPos), s.startRot, s.assign, s.weapon1, s.weapon2, s.item);
                 if (s.assign)
-                    NetworkManager.Instance.SendPacket(new Player_Ready(0), NetworkManager.Protocol.TCP);
+                    NetworkManager.Instance.SendPacket(new Player_Ready(clientPlayerNum), NetworkManager.Protocol.TCP);
 
             }
             else if (p is Player_Reset)
             {
                 var s = (Player_Reset)p;
+                ResetPlayerVar(s.clientIdx, s.hp, s.startPos, s.yAngles);
             }
             //else if (p is Round_Start)
             //{
@@ -87,7 +70,7 @@ public class IngameManager : Singleton<IngameManager>
             {
                 //Timer countdown == 0  : 타이머를 시작 1 : 타이머 종료
                 var s = (Round_Timer)p;
-                SetTimerUI(s.countDown);
+                inputSc.SetTimerUI(s.countDown);
             }
             else if(p is Player_Input)
             {
@@ -101,6 +84,57 @@ public class IngameManager : Singleton<IngameManager>
                 var s = (Player_Grounded)p;
                 playerList[s.clientIdx].IsGroundedFromServer = s.state;
             }
+            else if(p is Bullet_Init)
+            {
+                //총알 생성
+                var s = (Bullet_Init)p;
+                if (playerList[s.clientIdx] != null)
+                    playerList[s.clientIdx].weaponManagerSc.Shoot(s.clientIdx, TotalUtility.ToUnityVectorChange(s.pos), TotalUtility.ToUnityVectorChange(s.rot));
+                if(clientPlayerNum==s.clientIdx)
+                {
+                    inputSc.ReboundPlayerRotation();
+                    inputSc.ReboundAimImage();
+                }
+                //반동처리등 해야함
+            }
+            else if (p is Bomb_Init)
+            {
+                //폭탄 던지기
+                var s = (Bomb_Init)p;
+                if(playerList[s.clientIdx]!= null)
+                    playerList[s.clientIdx].weaponManagerSc.Shoot(s.clientIdx, TotalUtility.ToUnityVectorChange(s.pos), TotalUtility.ToUnityVectorChange(s.rot));
+            }
+            else if(p is Player_Sync)
+            {
+                //체력 설정
+                var s = (Player_Sync)p;
+                if (playerList[s.clientIdx] != null)
+                    playerList[s.clientIdx].weaponManagerSc.Shoot(s.clientIdx, Vector3.zero, Vector3.zero);
+                inputSc.SetHealthUI(s.hp);
+            }
+            else if(p is Player_Dead)
+            {
+                //주금
+                var s = (Player_Dead)p;
+                if(playerList[s.clientIdx] != null)
+                    playerList[s.clientIdx].Death();
+            }
+            else if(p is Round_Result)
+            {
+                var s = (Round_Result)p;
+                Debug.Log("Round 결과 패킷 받음");
+            }
+            else if(p is Match_End)
+            {
+
+            }
+
+            //총알 생성
+            //폭탄 던지기
+            //체력회복
+            //주금
+            //데미지받는부분
+
             //else if()
             
             
@@ -119,6 +153,7 @@ public class IngameManager : Singleton<IngameManager>
                     if (playerList[i] != null)
                     {
                         playerList[i].transform.position = TotalUtility.ToUnityVectorChange(s.pos);
+                        
                         //Rotation
                         playerList[i].transform.localEulerAngles = new Vector3(0, s.yAngle, 0);
                         playerList[i].playerUpperBody.localEulerAngles = new Vector3(s.xAngle, 0, 0);
@@ -130,19 +165,20 @@ public class IngameManager : Singleton<IngameManager>
     /// <summary>
     /// Client 생성
     /// </summary>
-    public void CreatePlayerObject(byte num, int health, Vector3 pos, bool clientCheck, byte w1, byte w2, byte item)
+    public void CreatePlayerObject(byte num, int health, Vector3 pos, float yDir , bool clientCheck, byte w1, byte w2, byte item)
     {
         //배정되는 클라이언트 num에 prefab생성
         var tmpPrefab = Instantiate(playerPrefab);
         tmpPrefab.GetComponent<Player>().clientNum = num;
-
         tmpPrefab.transform.position = pos;
 
         playerList[num] = tmpPrefab.GetComponent<Player>();
-
+        
         byte[] tmpItemData = { w1, w2, item };
         playerList[num].weaponManagerSc.equipWeaponArray = tmpItemData;
 
+        playerList[num].transform.eulerAngles = new Vector3(0, yDir ,0);
+        playerList[num].playerUpperBody.eulerAngles = Vector3.zero;
 
         playerList[num].isAlive = true;
 
@@ -151,48 +187,44 @@ public class IngameManager : Singleton<IngameManager>
         //클라이언트 일 경우
         clientPlayerNum = num;
         //플레이어 오브젝트 cam
-        SetHealthUI(health);
-        camManagerSc.playerObject = playerList[clientPlayerNum].transform;
-        camManagerSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
+        inputSc.SetHealthUI(health);
+        //Zoom UI 부분 설정을 위해서
+        playerList[clientPlayerNum].InpusSc = inputSc;
+        var camSc = inputSc.cam.GetComponent<CameraManager>();
+        camSc.playerObject = playerList[clientPlayerNum].transform;
+        camSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
         //Player Sc;
+        playerList[num].transform.eulerAngles = new Vector3(0, yDir, 0);
+        playerList[num].playerUpperBody.eulerAngles = Vector3.zero;
+
         inputSc.myPlayer = playerList[clientPlayerNum];
         playerList[clientPlayerNum].clientCheck = true;
         playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
     }
 
-    #region UI
     /// <summary>
-    /// set player HealthUI 
-    /// when takeDamge, and startGame Setting
+    /// 라운드가 넘어갈경우나 처음 시작할떄 초기화 해주어야할 변수
     /// </summary>
-    public void SetHealthUI(int h)
+    public void ResetPlayerVar(byte num, int hp, System.Numerics.Vector3[] p, float[] yDir)
     {
-        currentHealth = h;
-        if (currentHealth <= 0)
-            healthSlider.value = 0;
-        else
-            healthSlider.value = currentHealth;
-    }
-
-    /// <summary>
-    /// TimerUI Set
-    /// </summary>
-    /// <param name="time"></param>
-    private void SetTimerUI(byte countDown)
-    {
-        if (countDown == 0)
+        //클라이언트 플레이어 오브젝트 체력 설정
+        inputSc.SetHealthUI(hp);
+        Debug.Log("Y DIR : " + yDir[0] + " - " + yDir[1]);
+        for(int i=0; i<2; i++)
         {
-            if (!TimerPanel.activeSelf)
-                TimerPanel.SetActive(true);
+            var tmpP = playerList[i];
+            tmpP.transform.position = TotalUtility.ToUnityVectorChange(p[i]);
+            
+            tmpP.transform.eulerAngles = new Vector3(0, yDir[i], 0);
+            tmpP.playerUpperBody.eulerAngles = Vector3.zero;
+
+            if (tmpP.zoomState)
+                tmpP.ZoomChange(tmpP.zoomState = false);
+            if (!tmpP.gameObject.activeSelf)
+                tmpP.gameObject.SetActive(true);
+            tmpP.isAlive = true;
         }
-        if (countDown == 1)
-        {
-            if (TimerPanel.activeSelf)
-                TimerPanel.SetActive(false);
-        }
+        //Send
+        NetworkManager.Instance.SendPacket(new Player_Ready(clientPlayerNum), NetworkManager.Protocol.TCP);
     }
-    #endregion;
-
-
-    
 }

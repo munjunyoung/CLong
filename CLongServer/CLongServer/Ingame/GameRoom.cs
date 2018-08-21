@@ -27,6 +27,7 @@ namespace CLongServer.Ingame
 
         //Start Position Set
         private List<Vector3> StartPosList = new List<Vector3>();
+        private List<float> StartRotList = new List<float>();
         
         //Team
         private Dictionary<int, Player> PlayerDic = new Dictionary<int, Player>();
@@ -75,8 +76,8 @@ namespace CLongServer.Ingame
         {
             //Send StartGame (MultiPort 보냄) 클라이언트가 인게임씬로드 하기위한 패킷
             Console.WriteLine("multicast port" + multicastPortUDP);
-            c1.Send(new Start_Game((ushort)multicastPortUDP, 0xB60000EF));
-            c2.Send(new Start_Game((ushort)multicastPortUDP, 0xB60000EF));
+            c1.Send(new Start_Game((ushort)multicastPortUDP, 0xEF0000B6));
+            c2.Send(new Start_Game((ushort)multicastPortUDP, 0xEF0000B6));
             //TeamSet
             PlayerDic.Add((int)TeamColor.BLUE, new Player(0, c1));
             PlayerDic.Add((int)TeamColor.RED, new Player(0, c2));
@@ -91,8 +92,6 @@ namespace CLongServer.Ingame
             }
 
             SetClientVar();
-           
-            Console.WriteLine("[GAME ROOM] Set ClientInfo Complete");
         }
 
         /// <summary>
@@ -109,14 +108,22 @@ namespace CLongServer.Ingame
                 //AliveSet
                 team.Value.IsAlive = true;
 
-                
                 //Start Pos
                 if (CurrentRound.Equals(1))
+                {
                     team.Value.StartPos = StartPosList[team.Key % 2];
+                    team.Value.StartRot = StartRotList[team.Key % 2];
+                }
                 else if (CurrentRound.Equals(2)) //스타트 포지션 변경
+                {
                     team.Value.StartPos = StartPosList[(team.Key + 1) % 2];
+                    team.Value.StartRot = StartRotList[(team.Key + 1) % 2];
+                }
                 else if (CurrentRound.Equals(3))
+                {
                     team.Value.StartPos = StartPosList[team.Key % 2];
+                    team.Value.StartRot = StartRotList[team.Key % 2];
+                }
             }
         }
           
@@ -153,8 +160,8 @@ namespace CLongServer.Ingame
                 var enemy = PlayerDic[ocNumber];
                 player.Client.Send(new IPacket[]
                 {
-                    new Player_Init((byte)cNumber, player.Hp, player.StartPos, true, 0x00, 0x01, 0x02),
-                    new Player_Init((byte)ocNumber, enemy.Hp, enemy.StartPos, false, 0x00, 0x01, 0x02)
+                    new Player_Init((byte)cNumber, player.Hp, player.StartPos, player.StartRot, true, 0x00, 0x01, 0x02),
+                    new Player_Init((byte)ocNumber, enemy.Hp, enemy.StartPos, enemy.StartRot, false, 0x00, 0x01, 0x02)
                 });
             }
             else if (p is Player_Ready)
@@ -171,70 +178,35 @@ namespace CLongServer.Ingame
                 countTimerStart();
             }
             else if(p is Player_Input
-                || p is Player_Grounded)
+                || p is Player_Grounded
+                || p is Bullet_Init
+                || p is Bomb_Init)
             {
                 foreach (var pair in PlayerDic)
                     pair.Value.Client.Send(p);
             }
-            
-            //switch (p.MsgName)
-            //{
-            //    case "StartGameReq":
-            //        //클라이언트 IngameSceneLoad 완료 되었을때 클라이언트에서 보내는 패킷 
-            //        SendClientIns(c);               
-            //        break;
-            //    case "ReadyCheck":
-            //        var readyData = JsonConvert.DeserializeObject<ReadyCheck>(p.Data);
-            //        TeamDic[readyData.ClientNum].Ready = true;
-            //        c.Send(new RoundStart(CurrentRound, currentPoint));
-            //        timerState = 0;
-            //        //둘다 체크 되었을경우 타이머 전송시작
-            //        if (TeamDic[(int)TeamColor.BLUE].Ready && TeamDic[(int)TeamColor.RED].Ready)
-            //            countTimerStart();
-            //        break;
-            //    case "KeyDown":
-            //        foreach (var cl in TeamDic)
-            //            cl.Value.Client.Send(p);
-            //        break;
-            //    case "KeyUP":
-            //        foreach (var cl in TeamDic)
-            //            cl.Value.Client.Send(p);
-            //        break;
-            //    case "IsGrounded":
-            //        foreach (var cl in TeamDic)
-            //            cl.Value.Client.Send(p);
-            //        break;
-            //    case "ClientMoveSync":
-            //        foreach (var cl in TeamDic)
-            //            cl.Value.Client.Send(p);
-            //        break;
-            //    case "InsShell":
-            //        foreach (var cl in TeamDic)
-            //            cl.Value.Client.Send(p);
-            //        break;
-            //    case "ThrowBomb":
-            //        foreach (var cl in TeamDic)
-            //            cl.Value.Client.Send(p);
-            //        break;  
-            //    case "Zoom":
-            //        foreach (var cl in TeamDic)
-            //            cl.Value.Client.Send(p);
-            //        break;
-            //    case "TakeDamage":
-            //        var damageData = JsonConvert.DeserializeObject<TakeDamage>(p.Data);
-            //        TakeDamageProcessFunc(damageData, c);
-            //        break;
-            //    case "RecoverHealth":
-            //        var healData = JsonConvert.DeserializeObject<RecoverHealth>(p.Data);
-            //        HealProcess(healData);
-            //        break;
-            //    case "ExitReq":
-            //        ClientRemove(c);
-            //        break;
-            //    default:
-            //        Console.WriteLine("[INGAME PROCESS] TCP : Mismatching Message" + p.MsgName+"!");
-            //        break;
-            //}
+            else if(p is Player_Recover)
+            {
+                var s = (Player_Recover)p;
+                PlayerDic[s.clientIdx].Hp += s.amount;
+                PlayerDic[s.clientIdx].Client.Send(
+                    new Player_Sync(s.clientIdx, PlayerDic[s.clientIdx].Hp));
+            }
+            else if(p is Player_TakeDmg)
+            {
+                var s = (Player_TakeDmg)p;
+                PlayerDic[s.clientIdx].Hp -= s.damage;
+                PlayerDic[s.clientIdx].Client.Send(
+                    new Player_Sync(s.clientIdx, PlayerDic[s.clientIdx].Hp));
+                if (PlayerDic[s.clientIdx].Hp <= 0)
+                {
+                    foreach (var pair in PlayerDic)
+                    {
+                        pair.Value.Client.Send(new Player_Dead(s.clientIdx));
+                    }
+                    RoundProcess(s.clientIdx);
+                }
+            }
         }
 
         /// <summary>
@@ -244,32 +216,8 @@ namespace CLongServer.Ingame
         private void IngameDataRequestUDP(IPacket p)
         {
             udpServer.Send(p);
-            //switch (p.MsgName)
-            //{
-            //    case "ClientDir":
-            //        var clientDirData = JsonConvert.DeserializeObject<ClientDir>(p.Data);
-            //        udpServer.Send(p);
-            //        break;
-            //    default:
-            //        Console.WriteLine("[INGAME PROCESS] UDP : Mismatching Message");
-            //        break;
-            //}
         }
         #endregion
-
-        /// <summary>
-        /// 체력회복후 다시 전송 (받을때는 체력회복양, 보낼때는 회복한후 현재체력을 전송(클라에서는 체력 덧씌우기끝)
-        /// </summary>
-        /// <param name="data"></param>
-        private void HealProcess(RecoverHealth data)
-        {
-            if (!PlayerDic[data.ClientNum].IsAlive)
-                return;
-
-            PlayerDic[data.ClientNum].Hp += data.FillHP;
-            PlayerDic[data.ClientNum].Client.Send(
-                new Player_Recover((byte)data.ClientNum, PlayerDic[data.ClientNum].Hp));
-        }
 
         #region game Process Func
         /// <summary>
@@ -294,12 +242,10 @@ namespace CLongServer.Ingame
                     cl.Value.Client.Send(new Player_Dead((byte)cn));
 
                 //Round 정리
-                RoundProcess(c, cn);
+                //RoundProcess(c, cn);
             }
 
             c.Send(new Player_Sync((byte)cn, PlayerDic[cn].Hp));
-            //foreach (var cl in playerDic)
-            //TakeDamage등 맞았을때 이펙트 생성을위한 전송이 필요함
         }
 
         /// <summary>
@@ -307,7 +253,7 @@ namespace CLongServer.Ingame
         /// </summary>
         /// <param name="c"></param>
         /// Death Player
-        public void RoundProcess(ClientTCP c, int n)
+        public void RoundProcess(int n)
         {
             // c = Loser; 
             int loserIndex = n;
@@ -321,7 +267,6 @@ namespace CLongServer.Ingame
             //Send Round Data
             if (PlayerDic[winnerIndex].RoundPoint.Equals(1))
                 roundState = RoundState.ROUND_END;
-
             //Game End (winner의 point 가 2일 경우 )
             else if (PlayerDic[winnerIndex].RoundPoint.Equals(2))
                 roundState = RoundState.MATCH_END;
@@ -389,8 +334,9 @@ namespace CLongServer.Ingame
                 //Client Set
                 SetClientVar();
                 Vector3[] Pos = { PlayerDic[(int)TeamColor.BLUE].StartPos, PlayerDic[(int)TeamColor.RED].StartPos };
+                float[] Rot = { PlayerDic[(int)TeamColor.BLUE].StartRot, PlayerDic[(int)TeamColor.RED].StartRot };
                 foreach (var cl in PlayerDic)
-                    cl.Value.Client.Send(new Player_Reset((byte)cl.Key, cl.Value.Hp, Pos));
+                    cl.Value.Client.Send(new Player_Reset((byte)cl.Key, cl.Value.Hp, Pos, Rot));
             }
             else if (roundState == RoundState.MATCH_END)
             {
@@ -414,13 +360,9 @@ namespace CLongServer.Ingame
             //1.1f 인 이유는 skinwidth
             StartPosList.Add(new Vector3(5, 1f, 5));
             StartPosList.Add(new Vector3(10, 1f, 10));
+            StartRotList.Add(45);
+            StartRotList.Add(225);
         }
-
-        public void GameRoomClose()
-        {
-            
-        }
-
 #if false
 #region TestSet
         /// <summary>
@@ -560,6 +502,7 @@ public class Player
     }
     public bool IsAlive { get; set; }
     public Vector3 StartPos { get; set; }
+    public float StartRot { get; set; }
     public ClientTCP Client { get; set; }
 
     private int _hp;

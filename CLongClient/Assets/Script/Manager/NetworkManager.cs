@@ -184,12 +184,12 @@ public class NetworkManager : Singleton<NetworkManager>
             Debug.Log("Port : " + port);
 
             udp.Client.Bind(new IPEndPoint(IPAddress.Any, port));
-            var addr = new byte[] {(byte)ip,(byte)(ip >> 8),
-                    (byte)(ip >> 16), (byte)(ip >> 24)  };
+            var addr = new byte[] { (byte)(ip >> 24) , (byte)(ip >> 16)
+                ,(byte)(ip >> 8), (byte)ip};
             Debug.Log("Addr : " + new IPAddress(addr));
             serverEP = new IPEndPoint(IPAddress.Parse(_IP), port);
             Debug.Log("EP : " + serverEP.Address + " Port : " + serverEP.Port);
-            udp.JoinMulticastGroup(IPAddress.Parse("239.0.0.182"));
+            udp.JoinMulticastGroup(new IPAddress(addr));
             udp.BeginReceive(ReceiveCb, udp);
         }
 

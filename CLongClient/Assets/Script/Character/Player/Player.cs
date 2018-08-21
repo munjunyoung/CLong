@@ -13,6 +13,8 @@ public class Player : MonoBehaviour
     //add Script
     public PlayerWeaponManager weaponManagerSc;
     public Transform playerUpperBody;
+    public InputManager InpusSc = null;
+    
 
     private bool[] keyState = new bool[20];
     //Move
@@ -163,7 +165,7 @@ public class Player : MonoBehaviour
                 if (clientCheck)
                 {
                     //TakeDamage(other.GetComponent<ShellScript>().damage);
-                    NetworkManagerTCP.SendTCP(new TakeDamage(clientNum, other.GetComponent<ShellScript>().damage));
+                    NetworkManager.Instance.SendPacket(new Player_TakeDmg(clientNum, other.GetComponent<ShellScript>().damage) ,NetworkManager.Protocol.TCP);
                 }
                 Destroy(other.gameObject);
             }
@@ -215,32 +217,30 @@ public class Player : MonoBehaviour
             case Key.Alpha1:
                 weaponManagerSc.WeaponChange(0);
                 if (zoomState)
-                    return;
-                ZoomChange(false);
+                    ZoomChange(false);
                 break;
             case Key.Alpha2:
                 weaponManagerSc.WeaponChange(1);
                 if (zoomState)
-                    return;
-                ZoomChange(false);
+                    ZoomChange(false);
                 break;
             case Key.Alpha3:
                 weaponManagerSc.WeaponChange(2);
                 if (zoomState)
-                    return;
-                ZoomChange(false);
+                    ZoomChange(false);
                 break;
             case Key.Alpha4:
                 weaponManagerSc.WeaponChange(3);
                 if (zoomState)
-                    return;
-                ZoomChange(false);
+                    ZoomChange(false);
                 break;
             case Key.Space:
                 keyState[key] = state;
                 break;
             case Key.RClick:
                 ZoomChange(state);
+                //if(clientCheck)
+                    
                 break;
             default:
                 Debug.Log("[Ingame Process Not register Key : " + key);
@@ -251,14 +251,17 @@ public class Player : MonoBehaviour
     /// <summary>
     /// 줌 상태 변경(무기의 위치만 변경,
     /// </summary>
-    /// <param name="clientnum"></param>
     /// <param name="tmpZoom"></param>
-    private void ZoomChange(bool tmpZoom)
+    public void ZoomChange(bool tmpZoom)
     {
         //클라이언트 줌 UI 부분은 UI 매니저에서 생성(현재 없음)
         zoomState = tmpZoom;
         weaponManagerSc.ZoomSetEquipPos(zoomState);
-    }
+    
     
 
+        if (clientCheck)
+            InpusSc.ZoomFunc(zoomState);
+           
+    }
 }
