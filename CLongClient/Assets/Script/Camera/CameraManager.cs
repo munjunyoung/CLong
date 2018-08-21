@@ -24,11 +24,11 @@ public class CameraManager : MonoBehaviour {
     private void FollowCam()
     {
         //상체와 하체 방향값
-        Quaternion rotVal = Quaternion.Euler(playerUpperBody.eulerAngles.x, playerUpperBody.eulerAngles.y, 0);
+        Quaternion rotVal = Quaternion.Euler(playerUpperBody.eulerAngles.x, playerObject.eulerAngles.y, 0);
         Vector3 newPos = playerObject.transform.position + (rotVal * Vector3.back * camBackDistance) + (Vector3.up * camHeightDistance);
         transform.position = newPos;
         //transform.LookAt(playerUpperBody);
-        transform.eulerAngles = new Vector3(playerUpperBody.eulerAngles.x, playerUpperBody.eulerAngles.y, 0);
+        transform.eulerAngles = new Vector3(playerUpperBody.eulerAngles.x, playerObject.eulerAngles.y, 0);
        
     }
     /// <summary>

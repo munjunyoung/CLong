@@ -41,7 +41,9 @@ public class IngameManager : Singleton<IngameManager>
     protected override void Init()
     {
         NetworkManager.Instance.RecvHandler += ProcessPacket;
-        NetworkManager.Instance.SendPacket(new Loaded_Ingame(0), NetworkManager.Protocol.TCP);        
+        NetworkManager.Instance.SendPacket(new Loaded_Ingame(0), NetworkManager.Protocol.TCP);
+
+        Cursor.lockState = CursorLockMode.Locked;
     }
 	
 	// Update is called once per frame

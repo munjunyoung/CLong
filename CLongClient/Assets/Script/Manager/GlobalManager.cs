@@ -24,8 +24,6 @@ public class GlobalManager : Singleton<GlobalManager>
         _nm = GetComponent<NetworkManager>();
         _nm.RecvHandler += ProcessPacket;
         _curScene = SceneManager.GetActiveScene();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = true;
     }
 
     private void Update()
