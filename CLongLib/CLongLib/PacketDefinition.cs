@@ -141,7 +141,8 @@ namespace CLongLib
         [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public int hp;
-        public Vector3 startpos;
+        public Vector3 startPos;
+        public float startRot;
         public bool assign;
         [MarshalAs(UnmanagedType.U1)]
         public byte weapon1;
@@ -150,11 +151,12 @@ namespace CLongLib
         [MarshalAs(UnmanagedType.U1)]
         public byte item;
 
-        public Player_Init(byte n, int h, Vector3 p, bool b, byte w1, byte w2, byte i)
+        public Player_Init(byte n, int h, Vector3 p, float r, bool b, byte w1, byte w2, byte i)
         {
             clientIdx = n;
             hp = h;
-            startpos = p;
+            startPos = p;
+            startRot = r;
             assign = b;
             weapon1 = w1;
             weapon2 = w2;
@@ -248,16 +250,20 @@ namespace CLongLib
     /// </summary>
     public struct Player_Reset : IPacket
     {
-        [MarshalAs(UnmanagedType.U1)]
+        [MarshalAs(UnmanagedType.U1, SizeConst = 1)]
         public byte clientIdx;
         public int hp;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.Struct, SizeConst = 2)]
         public Vector3[] startPos;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 2)]
+        public float[] yAngles;
 
-        public Player_Reset(byte n, int h, Vector3[] p)
+        public Player_Reset(byte n, int h, Vector3[] p, float[] r)
         {
             clientIdx = n;
             hp = h;
             startPos = p;
+            yAngles = r;
         }
     }
 
