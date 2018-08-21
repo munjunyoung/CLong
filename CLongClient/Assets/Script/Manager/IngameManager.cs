@@ -17,9 +17,7 @@ public class IngameManager : Singleton<IngameManager>
 
     protected override void Init()
     {
-        NetworkManager.Instance.RecvHandler += ProcessPacket;
-        NetworkManager.Instance.SendPacket(new Loaded_Ingame(0), NetworkManager.Protocol.TCP);
-        
+        NetworkManager.Instance.RecvHandler += ProcessPacket;   
     }
 
     private void Start()
@@ -155,7 +153,7 @@ public class IngameManager : Singleton<IngameManager>
                         playerList[i].transform.position = TotalUtility.ToUnityVectorChange(s.pos);
                         
                         //Rotation
-                        playerList[i].transform.localEulerAngles = new Vector3(0, s.yAngle, 0);
+                        playerList[i].transform.eulerAngles = new Vector3(0, s.yAngle, 0);
                         playerList[i].playerUpperBody.localEulerAngles = new Vector3(s.xAngle, 0, 0);
                     }
                 }
@@ -178,7 +176,8 @@ public class IngameManager : Singleton<IngameManager>
         playerList[num].weaponManagerSc.equipWeaponArray = tmpItemData;
 
         playerList[num].transform.eulerAngles = new Vector3(0, yDir ,0);
-        playerList[num].playerUpperBody.eulerAngles = Vector3.zero;
+        playerList[num].playerUpperBody.localEulerAngles = Vector3.zero;
+        
 
         playerList[num].isAlive = true;
 
@@ -193,11 +192,11 @@ public class IngameManager : Singleton<IngameManager>
         var camSc = inputSc.cam.GetComponent<CameraManager>();
         camSc.playerObject = playerList[clientPlayerNum].transform;
         camSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
-        //Player Sc;
-        playerList[num].transform.eulerAngles = new Vector3(0, yDir, 0);
-        playerList[num].playerUpperBody.eulerAngles = Vector3.zero;
-
+        
         inputSc.myPlayer = playerList[clientPlayerNum];
+        //Turning 시작값 변경
+        inputSc.SetRot();
+
         playerList[clientPlayerNum].clientCheck = true;
         playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
     }
@@ -216,13 +215,16 @@ public class IngameManager : Singleton<IngameManager>
             tmpP.transform.position = TotalUtility.ToUnityVectorChange(p[i]);
             
             tmpP.transform.eulerAngles = new Vector3(0, yDir[i], 0);
-            tmpP.playerUpperBody.eulerAngles = Vector3.zero;
+            tmpP.playerUpperBody.localEulerAngles = Vector3.zero;
 
             if (tmpP.zoomState)
                 tmpP.ZoomChange(tmpP.zoomState = false);
             if (!tmpP.gameObject.activeSelf)
                 tmpP.gameObject.SetActive(true);
             tmpP.isAlive = true;
+            //Client플레이어 일 경우 InputManager turning 시작 rot값 설정
+            if(num==i)
+                inputSc.SetRot();
         }
         //Send
         NetworkManager.Instance.SendPacket(new Player_Ready(clientPlayerNum), NetworkManager.Protocol.TCP);

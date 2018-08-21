@@ -16,8 +16,8 @@ public class InputManager : MonoBehaviour
     //Rotation
     private float xSens = 1.0f;
     private float ySens = 1.0f;
-    private float xRot = 0f;
-    private float yRot = 0f;
+    public float xRot = -1f;
+    public float yRot = -1f;
 
     //Turning Send Packet
     float mousePacketSendFrame = 0f;
@@ -215,6 +215,15 @@ public class InputManager : MonoBehaviour
     }
 
     #region Turning
+
+    /// <summary>
+    /// Rotation강제 변경시 처리
+    /// </summary>
+    public void SetRot()
+    {
+        xRot = myPlayer.transform.localEulerAngles.y;
+        yRot = myPlayer.playerUpperBody.localEulerAngles.x;
+    }
     /// <summary>
     /// Player Turning
     /// </summary>
@@ -223,12 +232,11 @@ public class InputManager : MonoBehaviour
         xRot += Input.GetAxis("Mouse X") * xSens;
         yRot += Input.GetAxis("Mouse Y") * ySens;
         yRot = Mathf.Clamp(yRot, -50.0f, 60.0f);
-        //Send Data Rotation
-        SendAngleYData();
 
         //하체, 상체 따로 분리
         myPlayer.transform.localEulerAngles = new Vector3(0, xRot, 0);
         myPlayer.playerUpperBody.localEulerAngles = new Vector3(-yRot, 0, 0);
+        SendAngleYData();
     }
 
     /// <summary>
