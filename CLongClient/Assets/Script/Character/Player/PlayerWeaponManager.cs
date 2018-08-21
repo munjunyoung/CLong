@@ -128,7 +128,7 @@ public class PlayerWeaponManager : MonoBehaviour
     /// </summary>
     /// <param name="pos"></param>
     /// <param name="rot"></param>
-    public void Shoot(int clientnum, Vector3 pos, Vector3 rot)
+    public void Shoot(byte clientnum, Vector3 pos, Vector3 rot)
     {
         currentUsingWeapon.Shoot(clientnum, pos, rot);
     }
@@ -136,7 +136,7 @@ public class PlayerWeaponManager : MonoBehaviour
     /// <summary>
     /// 슛하기전 서버로 전송 -> 무기로 접근해서 전송
     /// </summary>
-    public void SendShootToServer(int clientNum, Vector3 dir)
+    public void SendShootToServer(byte clientNum, Vector3 dir)
     {
         if (currentUsingWeapon.weaponState.Equals(true))
             currentUsingWeapon.ShootSendServer(clientNum, fireTransform.position, dir);

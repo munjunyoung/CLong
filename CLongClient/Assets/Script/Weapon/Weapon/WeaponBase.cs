@@ -29,7 +29,7 @@ public class WeaponBase : MonoBehaviour
     /// <summary>
     /// 서버에서 패킷을 받은후 총알을 생성하기위함
     /// </summary>
-    public virtual void Shoot(int clientNum, Vector3 pos, Vector3 rot)
+    public virtual void Shoot(byte clientNum, Vector3 pos, Vector3 rot)
     {
         //연사속도관련
      
@@ -41,7 +41,7 @@ public class WeaponBase : MonoBehaviour
     /// <param name="clientNum"></param>
     /// <param name="pos"></param>
     /// <param name="dir"></param>
-    public virtual void ShootSendServer(int clientNum, Vector3 pos, Vector3 dir)
+    public virtual void ShootSendServer(byte clientNum, Vector3 pos, Vector3 dir)
     {
         
     }

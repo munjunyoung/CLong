@@ -23,7 +23,7 @@ public class ARBase : WeaponBase
     /// <param name="clientNum"></param>
     /// <param name="pos"></param>
     /// <param name="rot"></param>
-    public override void Shoot(int clientNum, Vector3 pos, Vector3 dir)
+    public override void Shoot(byte clientNum, Vector3 pos, Vector3 dir)
     {
         base.Shoot(clientNum, pos, dir);
 
@@ -36,12 +36,12 @@ public class ARBase : WeaponBase
     /// <param name="clientNum"></param>
     /// <param name="pos"></param>
     /// <param name="dir"></param>
-    public override void ShootSendServer(int clientNum, Vector3 pos, Vector3 dir)
+    public override void ShootSendServer(byte clientNum, Vector3 pos, Vector3 dir)
     {
         base.ShootSendServer(clientNum, pos, dir);
         if (shootPeriodCount > ShootPeriod)
         {
-            NetworkManagerTCP.SendTCP(new InsShell(clientNum, IngameProcess.ToNumericVectorChange(pos), IngameProcess.ToNumericVectorChange(dir)));
+            NetworkManager.Instance.SendPacket(new Bullet_Init(clientNum,TotalUtility.ToNumericVectorChange(pos),TotalUtility.ToNumericVectorChange(dir)), NetworkManager.Protocol.TCP);
             shootPeriodCount = 0;
         }
         shootPeriodCount++;
@@ -50,7 +50,7 @@ public class ARBase : WeaponBase
     /// Create Shell
     /// </summary>
     /// <param name="st"></param>
-    protected virtual void ShellIns(string st, int num, Vector3 pos, Vector3 rot)
+    protected virtual void ShellIns(string st, byte num, Vector3 pos, Vector3 rot)
     {
         shellPrefab = Instantiate(Resources.Load("Prefab/Item/Weapon/Shell/" + st)) as GameObject;
         //var weaponFireTransform = transform.Find("FirePosition").transform;

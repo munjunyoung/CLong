@@ -16,7 +16,7 @@ public class ThrowableBase : WeaponBase
     /// <summary>
     /// 던져라
     /// </summary>
-    public override void Shoot(int clientNum, Vector3 pos, Vector3 rot)
+    public override void Shoot(byte clientNum, Vector3 pos, Vector3 rot)
     {
         base.Shoot(clientNum, pos, rot);
         //Rb
@@ -38,14 +38,14 @@ public class ThrowableBase : WeaponBase
     /// <param name="clientNum"></param>
     /// <param name="pos"></param>
     /// <param name="dir"></param>
-    public override void ShootSendServer(int clientNum, Vector3 pos, Vector3 dir)
+    public override void ShootSendServer(byte clientNum, Vector3 pos, Vector3 dir)
     {
         base.ShootSendServer(clientNum, pos, dir);
         if (!weaponState)
             return;
         //서버에서 한번만 보내도록 설정
         weaponState = false;
-        NetworkManagerTCP.SendTCP(new ThrowBomb(clientNum, IngameProcess.ToNumericVectorChange(pos), IngameProcess.ToNumericVectorChange(dir)));
+        NetworkManager.Instance.SendPacket(new Bomb_Init(clientNum, TotalUtility.ToNumericVectorChange(pos), TotalUtility.ToNumericVectorChange(dir)), NetworkManager.Protocol.TCP);
     }
 
     /// <summary>
@@ -75,8 +75,8 @@ public class ThrowableBase : WeaponBase
 
         float tmpDamage = relativeDistance * damage;
         int realDamage = Mathf.FloorToInt(tmpDamage);
-       
-        NetworkManagerTCP.SendTCP(new TakeDamage(c.clientNum, realDamage));
+
+        NetworkManager.Instance.SendPacket(new Player_TakeDmg(c.clientNum, realDamage), NetworkManager.Protocol.TCP);
     }
 
     /// <summary>
@@ -91,8 +91,9 @@ public class ThrowableBase : WeaponBase
 
     IEnumerator SetActiveRoutine()
     {
-        yield return new WaitForSeconds(3f);
-        gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.5f);
+        if(this.gameObject.activeSelf)
+        this.gameObject.SetActive(false);
     }
 }
 

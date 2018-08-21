@@ -5,7 +5,7 @@ using UnityEngine;
 public class ShellScript : MonoBehaviour {
 
     public float shellSpeed;
-    public float clientNum;
+    public byte clientNum;
     public int damage;
 	// Use this for initialization
 	private void Start () {

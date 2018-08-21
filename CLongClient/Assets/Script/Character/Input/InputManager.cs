@@ -22,10 +22,7 @@ public class InputManager : MonoBehaviour
     //Turning Send Packet
     float mousePacketSendFrame = 0f;
     float mouseDelay = 1f;
-
-    //Shooting
-    int shootPeriodCount = 0;
-
+    
     //Aim
     public bool zoomStateServerSend = false;
     public Camera cam;
@@ -35,6 +32,25 @@ public class InputManager : MonoBehaviour
     public Transform[] aimImage = new Transform[4];
     private float ReboundValue = 0f;
 
+    #region UI Var
+    //Current Round View 
+    public GameObject ViewRoundPanel;
+    public Text ViewRoundText;
+    public Text ViewPointText;
+
+    //Timer
+    public GameObject TimerPanel;
+    public Text TimerText;
+    public int TimerState = 0;  //0 : 시작타이머, 1 : 라운드 종료 타이머
+
+    //RoundResult
+    public GameObject RoundResultPanel;
+    public Text RoundResultText;
+
+    //Health UI
+    public int currentHealth = 100;
+    public Slider healthSlider;
+    #endregion
     /// <summary>
     /// 키셋팅 및 현재 체력 설정
     /// </summary>
@@ -224,7 +240,7 @@ public class InputManager : MonoBehaviour
             if (mousePacketSendFrame < mouseDelay)
             {
                 // NetworkManager.Instance.SendPacket(new ClientDir(0, this.transform.eulerAngles.y));
-                NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+                NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.playerUpperBody.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
                 mousePacketSendFrame++;
             }
             else
@@ -307,9 +323,43 @@ public class InputManager : MonoBehaviour
         var reboundValue = myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity;
         yRot += (reboundValue * 0.1f);
         xRot += Random.Range(-reboundValue * 0.5f, reboundValue * 0.5f);
-        NetworkManagerUDP.SendUdp(new ClientDir(myPlayer.clientNum, myPlayer.transform.eulerAngles.y, myPlayer.playerUpperBody.eulerAngles.x));
+        NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum
+            ,myPlayer.playerUpperBody.transform.eulerAngles.x, myPlayer.transform.eulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP); 
     }
     #endregion
+
+    #region UIManager?
+    /// <summary>
+    /// set player HealthUI 
+    /// when takeDamge, and startGame Setting
+    /// </summary>
+    public void SetHealthUI(int h)
+    {
+        currentHealth = h;
+        if (currentHealth <= 0)
+            healthSlider.value = 0;
+        else
+            healthSlider.value = currentHealth;
+    }
+
+    /// <summary>
+    /// TimerUI Set
+    /// </summary>
+    /// <param name="time"></param>
+    public void SetTimerUI(byte countDown)
+    {
+        if (countDown == 0)
+        {
+            if (!TimerPanel.activeSelf)
+                TimerPanel.SetActive(true);
+        }
+        else if (countDown == 1)
+        {
+            if (TimerPanel.activeSelf)
+                TimerPanel.SetActive(false);
+        }
+    }
+    #endregion;
 
     /// <summary>
     /// setting Key List;
