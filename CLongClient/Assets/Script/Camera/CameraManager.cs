@@ -9,8 +9,18 @@ public class CameraManager : MonoBehaviour {
     /// <summary>
     /// Cam Distance -> 기본 : 5,3 조준 2~2,5 , 0
     /// </summary>
-    private float camBackDistance = 5f;
-    private float camHeightDistance = 3f;
+    private float camBackDistance = 0;
+    private float camHeightDistance = 0;
+    private float maxBack = 1f;
+    private float maxHeight = 1f;
+    private float minBack = 0.5f;
+    private float minHeight = 1.5f;
+
+    private void Start()
+    {
+        camBackDistance = maxBack;
+        camHeightDistance = maxHeight;
+    }
 
     private void Update()
     {
@@ -24,11 +34,11 @@ public class CameraManager : MonoBehaviour {
     private void FollowCam()
     {
         //상체와 하체 방향값
-        Quaternion rotVal = Quaternion.Euler(playerUpperBody.eulerAngles.x, playerObject.eulerAngles.y, 0);
+        Quaternion rotVal = Quaternion.Euler(-playerUpperBody.eulerAngles.z, playerObject.eulerAngles.y, 0);
         Vector3 newPos = playerObject.transform.position + (rotVal * Vector3.back * camBackDistance) + (Vector3.up * camHeightDistance);
         transform.position = newPos;
         //transform.LookAt(playerUpperBody);
-        transform.eulerAngles = new Vector3(playerUpperBody.eulerAngles.x, playerObject.eulerAngles.y, 0);
+        transform.eulerAngles = new Vector3(-playerUpperBody.eulerAngles.z, playerObject.eulerAngles.y, 0);
        
     }
     /// <summary>
@@ -36,7 +46,7 @@ public class CameraManager : MonoBehaviour {
     /// </summary>
     public void ZoomSetCamPos(bool zoomState)
     {
-        camBackDistance = zoomState ? 0.5f : 5f;
-        camHeightDistance = zoomState ? 1.5f : 3f;
+        camBackDistance = zoomState ? minBack : maxBack;
+        camHeightDistance = zoomState ? minHeight : maxHeight;
     }
 }

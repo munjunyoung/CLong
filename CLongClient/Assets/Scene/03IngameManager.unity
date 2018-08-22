@@ -1092,7 +1092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1e558c71330440489b419df6587315c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 1206502622049744, guid: 578f8942f79bdcc48a51b2c8b0f8fc72,
+  playerPrefab: {fileID: 1934229012652060, guid: b3415cb3a41a9b743a98f0ba7e645532,
     type: 2}
   playerList:
   - {fileID: 0}
@@ -1124,6 +1124,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myPlayer: {fileID: 0}
+  xRot: -1
+  yRot: -1
   zoomStateServerSend: 0
   cam: {fileID: 783572679}
   aimImage:

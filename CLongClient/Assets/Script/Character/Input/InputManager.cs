@@ -222,7 +222,7 @@ public class InputManager : MonoBehaviour
     public void SetRot()
     {
         xRot = myPlayer.transform.localEulerAngles.y;
-        yRot = myPlayer.playerUpperBody.localEulerAngles.x;
+        yRot = myPlayer.playerUpperBody.localEulerAngles.z;
     }
     /// <summary>
     /// Player Turning
@@ -231,11 +231,11 @@ public class InputManager : MonoBehaviour
     {
         xRot += Input.GetAxis("Mouse X") * xSens;
         yRot += Input.GetAxis("Mouse Y") * ySens;
-        yRot = Mathf.Clamp(yRot, -50.0f, 60.0f);
+        //yRot = Mathf.Clamp(yRot, -50.0f, 60.0f);
 
         //하체, 상체 따로 분리
         myPlayer.transform.localEulerAngles = new Vector3(0, xRot, 0);
-        myPlayer.playerUpperBody.localEulerAngles = new Vector3(-yRot, 0, 0);
+        myPlayer.playerUpperBody.localEulerAngles = new Vector3(0, 0, yRot);
         SendAngleYData();
     }
 

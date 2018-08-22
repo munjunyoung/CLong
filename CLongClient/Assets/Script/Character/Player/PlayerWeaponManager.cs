@@ -19,11 +19,10 @@ public class PlayerWeaponManager : MonoBehaviour
     //장비 정보를 가지고 있는 dictionary
     public Dictionary<byte, string> WeaponManagerDic = new Dictionary<byte, string>();
     //Weapon 장비 위치 dic
-    public Dictionary<int, Transform> equipPosObjectList = new Dictionary<int, Transform>();
+    public Transform[] equipPosObjectList = new Transform[3];
 
     private void Start()
     {
-        SetEquipPos();
         WeaponManagerDicInit();
 
         WeaponEquip(equipWeaponArray);
@@ -44,7 +43,6 @@ public class PlayerWeaponManager : MonoBehaviour
         currentUsingWeapon.transform.parent = currentUsingWeaponTransform;
         currentUsingWeapon.transform.localPosition = Vector3.zero;
         currentUsingWeapon.transform.localEulerAngles = Vector3.zero;
-        fireTransform = currentUsingWeaponTransform.Find("FirePosition").transform;
     }
 
     /// <summary>
@@ -81,19 +79,7 @@ public class PlayerWeaponManager : MonoBehaviour
             weaponDic[foodData.equipWeaponNum].enabled = false;
         }
     }
-
-    /// <summary>
-    /// 무기생성후 위치할 포지션 LIST SET
-    /// </summary>
-    private void SetEquipPos()
-    {
-        currentUsingWeaponTransform = transform.Find("PlayerUpperBody").transform.Find("CurrentWeaponEquip");
-
-        equipPosObjectList.Add(0, transform.Find("WeaponEquip0"));
-        equipPosObjectList.Add(1, transform.Find("WeaponEquip1"));
-        equipPosObjectList.Add(2, transform.Find("WeaponEquip2"));
-    }
-
+    
     /// <summary>
     ///  player Change Weapon by input key
     /// </summary>
@@ -148,7 +134,7 @@ public class PlayerWeaponManager : MonoBehaviour
     /// </summary>
     public void ZoomSetEquipPos(bool zoomState)
     {
-        currentUsingWeaponTransform.localPosition = zoomState ? new Vector3(0, -1f, 1f) : new Vector3(0.5f, -1f, 1f);
+        //currentUsingWeaponTransform.localPosition = zoomState ? new Vector3(0, -1f, 1f) : new Vector3(0.5f, -1f, 1f);
     }
 
     /// <summary>
