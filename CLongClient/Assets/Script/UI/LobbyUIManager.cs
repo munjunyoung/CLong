@@ -30,13 +30,13 @@ public class LobbyUIManager : MonoBehaviour
             if (_waitTimer != null)
                 return;
 
-            //NetworkManager.Instance.SendPacket(new Queue_Req(_MATCH_REGISTER), NetworkManager.Protocol.TCP);
+            NetworkManager.Instance.SendPacket(new Queue_Req(_MATCH_REGISTER), NetworkManager.Protocol.TCP);
             _waitTimer = StartCoroutine(MatchTimer(waitTime));
             matchWaitingUI.DOAnchorPosY(-98.55f, 0.25f);
         }
         else
         {
-            //NetworkManager.Instance.SendPacket(new Queue_Req(_MATCH_CANCEL), NetworkManager.Protocol.TCP);
+            NetworkManager.Instance.SendPacket(new Queue_Req(_MATCH_CANCEL), NetworkManager.Protocol.TCP);
             StopCoroutine(_waitTimer);
             _waitTimer = null;
             matchWaitingUI.DOAnchorPosY(98.55f, 0.25f);
