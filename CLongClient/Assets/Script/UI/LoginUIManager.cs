@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using CLongLib;
 
 public class LoginUIManager : Singleton<LoginUIManager>
 {
@@ -12,7 +13,12 @@ public class LoginUIManager : Singleton<LoginUIManager>
     {
         var strId = id.text;
         var strPw = pw.text;
-        //send
+        NetworkManager.Instance.SendPacket(new Login_Req(strId, strPw), NetworkManager.Protocol.TCP);
+    }
+
+    public void OnClickSetting()
+    {
+
     }
 
     protected override void Init()
