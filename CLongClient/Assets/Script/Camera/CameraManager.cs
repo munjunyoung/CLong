@@ -23,6 +23,9 @@ public class CameraManager : MonoBehaviour {
     private float maxX = 60f;
     private float minX = -50f;
 
+    private float maxY = 90f;
+    private float minY = -90f;
+
     private bool zoomS = false;
     private void Start()
     {
