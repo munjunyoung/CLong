@@ -18,7 +18,7 @@ AnimatorController:
     m_BlendingMode: 0
     m_SyncedLayerIndex: -1
     m_DefaultWeight: 0
-    m_IKPass: 0
+    m_IKPass: 1
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
 --- !u!1102 &110200000
@@ -1181,23 +1181,29 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 110253312}
-    m_Position: {x: 384, y: 48, z: 0}
+    m_Position: {x: -828, y: 348, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 110253310}
-    m_Position: {x: 348, y: -12, z: 0}
+    m_Position: {x: -864, y: 288, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102073907640231962}
-    m_Position: {x: 384, y: 120, z: 0}
+    m_Position: {x: -828, y: 420, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 1102383508515148100}
+    m_Position: {x: -786.4424, y: 517.0011, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 1102077674453433800}
+    m_Position: {x: -735.7982, y: 603.13824, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
-  m_AnyStatePosition: {x: 50, y: 20, z: 0}
-  m_EntryPosition: {x: 50, y: 120, z: 0}
-  m_ExitPosition: {x: 800, y: 120, z: 0}
+  m_AnyStatePosition: {x: -1164, y: 324, z: 0}
+  m_EntryPosition: {x: -1164, y: 420, z: 0}
+  m_ExitPosition: {x: -408, y: 420, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
-  m_DefaultState: {fileID: 110253312}
+  m_DefaultState: {fileID: 1102383508515148100}
 --- !u!1102 &1102073907640231962
 AnimatorState:
   serializedVersion: 5
@@ -1218,6 +1224,56 @@ AnimatorState:
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: 7400000, guid: f8f73dd38b8cd7946a262dfd44635c73, type: 3}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
+--- !u!1102 &1102077674453433800
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: standA@loop
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7400000, guid: 0f662a6c4724cc845b3aa03405479684, type: 2}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
+--- !u!1102 &1102383508515148100
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: MIL2_M3_W2_Walk_Aim_F_Loop_IP 0
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7400000, guid: 5bd1c72090e13374bb517175a06119ab, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

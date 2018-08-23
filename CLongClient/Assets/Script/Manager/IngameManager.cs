@@ -190,12 +190,12 @@ public class IngameManager : Singleton<IngameManager>
         //Zoom UI 부분 설정을 위해서
         playerList[clientPlayerNum].InpusSc = inputSc;
         var camSc = inputSc.cam.GetComponent<CameraManager>();
-        camSc.playerObject = playerList[clientPlayerNum].transform;
-        camSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
+        //camSc.playerObject = playerList[clientPlayerNum].transform;
+        //camSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
         
         inputSc.myPlayer = playerList[clientPlayerNum];
         //Turning 시작값 변경
-        inputSc.SetRot();
+        //inputSc.SetRot();
 
         playerList[clientPlayerNum].clientCheck = true;
         playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
@@ -223,8 +223,8 @@ public class IngameManager : Singleton<IngameManager>
                 tmpP.gameObject.SetActive(true);
             tmpP.isAlive = true;
             //Client플레이어 일 경우 InputManager turning 시작 rot값 설정
-            if(num==i)
-                inputSc.SetRot();
+            //if(num==i)
+               // inputSc.SetRot();
         }
         //Send
         NetworkManager.Instance.SendPacket(new Player_Ready(clientPlayerNum), NetworkManager.Protocol.TCP);

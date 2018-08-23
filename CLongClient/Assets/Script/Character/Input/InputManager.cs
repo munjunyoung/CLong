@@ -66,7 +66,7 @@ public class InputManager : MonoBehaviour
             return;
         if (!myPlayer.isAlive)
             return;
-        Tunring();
+        // Tunring();
 
     }
 
@@ -78,7 +78,7 @@ public class InputManager : MonoBehaviour
             return;
 
         SendKeyData();
-        SendAngleYData();
+        // SendAngleYData();
 
         ReturnAimImage();
     }
@@ -214,49 +214,7 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    #region Turning
-
-    /// <summary>
-    /// Rotation강제 변경시 처리
-    /// </summary>
-    public void SetRot()
-    {
-        xRot = myPlayer.transform.localEulerAngles.y;
-        yRot = myPlayer.playerUpperBody.localEulerAngles.z;
-    }
-    /// <summary>
-    /// Player Turning
-    /// </summary>
-    void Tunring()
-    {
-        xRot += Input.GetAxis("Mouse X") * xSens;
-        yRot += Input.GetAxis("Mouse Y") * ySens;
-        //yRot = Mathf.Clamp(yRot, -50.0f, 60.0f);
-
-        //하체, 상체 따로 분리
-        myPlayer.transform.localEulerAngles = new Vector3(0, xRot, 0);
-        myPlayer.playerUpperBody.localEulerAngles = new Vector3(0, 0, yRot);
-        SendAngleYData();
-    }
-
-    /// <summary>
-    /// send Packet AngleY when Mouse input Y change
-    /// </summary>
-    void SendAngleYData()
-    {
-        if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0)
-        {
-            if (mousePacketSendFrame < mouseDelay)
-            {
-                // NetworkManager.Instance.SendPacket(new ClientDir(0, this.transform.eulerAngles.y));
-                NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.playerUpperBody.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
-                mousePacketSendFrame++;
-            }
-            else
-                mousePacketSendFrame = 0;
-        }
-    }
-    #endregion
+    
 
     #region Aim
     /// <summary>
