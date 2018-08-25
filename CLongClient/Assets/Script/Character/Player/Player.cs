@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     public PlayerWeaponManager weaponManagerSc;
     public Transform playerUpperBody;
     public InputManager InpusSc = null;
+    public PlayerAnimatorIK animSc;
     
 
     private bool[] keyState = new bool[20];
@@ -35,14 +36,17 @@ public class Player : MonoBehaviour
                 case ActionState.None:
                     moveSpeed = 5f;
                     break;
+                case ActionState.CrouchWalk:
+                    moveSpeed = 1f;
+                    break;
+                case ActionState.Walk:
+                    moveSpeed = 5f;
+                    break;
                 case ActionState.Run:
                     moveSpeed = 10f;
                     break;
                 case ActionState.Seat:
                     moveSpeed = 3f;
-                    break;
-                case ActionState.Lie:
-                    moveSpeed = 1f;
                     break;
                 case ActionState.Jump:
                     moveSpeed = 3f;
@@ -69,12 +73,63 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isAlive)
-            return;
+        //if (!isAlive)
+        //    return;
 
         Move();
+        
     }
 
+    private void Update()
+    {
+        TestFunc();
+        animSc.AnimActionState = currentActionState;
+    }
+
+    private void TestFunc()
+    {
+        if(Input.GetKey(KeyCode.W))
+        {
+            keyState[(int)Key.W] = true;
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            keyState[(int)Key.S] = true;
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            keyState[(int)Key.A] = true;
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            keyState[(int)Key.D] = true;
+        }
+        
+        if(Input.GetKeyUp(KeyCode.W))
+        {
+            keyState[(int)Key.W] = false;
+        }
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            keyState[(int)Key.S] = false;
+        }
+        if (Input.GetKeyUp(KeyCode.A))
+        {
+            keyState[(int)Key.A] = false;
+        }
+        if (Input.GetKeyUp(KeyCode.D))
+        {
+            keyState[(int)Key.D] = false;
+        }
+
+        if (Input.GetKey(KeyCode.Z))
+            currentActionState = ActionState.CrouchWalk;
+        else if (Input.GetKey(KeyCode.LeftShift))
+            currentActionState = ActionState.Run;
+        else if (Input.GetKey(KeyCode.LeftControl))
+            currentActionState = ActionState.Seat;
+    }
+    
     /// <summary>
     /// Player Move
     /// </summary>
@@ -97,7 +152,17 @@ public class Player : MonoBehaviour
         //Gravity
         Fall();
 
+        var prevPos = this.transform.position;
         playerController.Move(moveDirection * Time.deltaTime);
+        var currentPos = this.transform.position;
+        if (prevPos.Equals(currentPos))
+        {
+            currentActionState = ActionState.None;
+        }
+        else
+        {
+            currentActionState = ActionState.Walk;
+        }
     }
 
     /// <summary>
@@ -212,7 +277,7 @@ public class Player : MonoBehaviour
                 currentActionState = state.Equals(true) ? ActionState.Seat : ActionState.None;
                 break;
             case Key.Z:
-                currentActionState = state.Equals(true) ? ActionState.Lie : ActionState.None;
+                currentActionState = state.Equals(true) ? ActionState.CrouchWalk : ActionState.None;
                 break;
             case Key.Alpha1:
                 weaponManagerSc.WeaponChange(0);
@@ -262,6 +327,5 @@ public class Player : MonoBehaviour
 
         if (clientCheck)
             InpusSc.ZoomFunc(zoomState);
-           
     }
 }

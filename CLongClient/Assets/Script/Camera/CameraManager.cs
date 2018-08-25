@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class CameraManager : MonoBehaviour {
 
-    public IKExample playerIK;
+    public PlayerAnimatorIK playerIK;
     /// <summary>
     /// Cam Distance -> 기본 - max 조준 min
     /// </summary>
     private float camBackDistance = 0;
     private float camHeightDistance = 0;
     private float maxBack = 2f;
-    private float maxHeight = 1.2f;
+    private float maxHeight = 1f;
     private float minBack = 0f;
     private float minHeight = 0.7f;
     
@@ -27,6 +27,8 @@ public class CameraManager : MonoBehaviour {
     private float minY = -90f;
 
     private bool zoomS = false;
+    //줌상태일 경우 카메라를 총의 줌포지션 위치로 고정
+    public Transform ZoomPos;
     private void Start()
     {
         camBackDistance = maxBack;
@@ -40,7 +42,7 @@ public class CameraManager : MonoBehaviour {
 
         if(Input.GetMouseButtonDown(1))
         {
-            ZoomSetCamPos(zoomS = zoomS.Equals(true) ? false : true);
+            zoomS = zoomS.Equals(true) ? false : true;
         }
     }
 
@@ -58,9 +60,14 @@ public class CameraManager : MonoBehaviour {
 
         transform.Rotate(0, Input.GetAxis("Mouse X"), 0, Space.World);
 
-        Quaternion rotVal = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, 0);
-        this.transform.position = playerIK.transform.position + (rotVal * Vector3.back * camBackDistance) + (Vector3.up * camHeightDistance);
-        //TargetTransform 전달
+        if (!zoomS)
+        {
+            Quaternion rotVal = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, 0);
+            this.transform.position = playerIK.transform.position + (rotVal * Vector3.back * camBackDistance) + (Vector3.up * camHeightDistance);
+        }
+        else
+            this.transform.position = ZoomPos.position;
+            //TargetTransform 전달
         playerIK.lookTarget = transform.forward * 100;
 
     }

@@ -161,7 +161,7 @@ public class InputManager : MonoBehaviour
         }
         if (Input.GetKeyUp(KeyList[(int)Key.Z]))
         {
-            if (myPlayer.currentActionState == (ActionState.Lie))
+            if (myPlayer.currentActionState == (ActionState.CrouchWalk))
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Z, false), NetworkManager.Protocol.TCP);
         }
         //Jump

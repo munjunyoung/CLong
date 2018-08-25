@@ -4,7 +4,7 @@ using UnityEngine;
 using CLongLib;
 using tcpNet;
 
-public class GroundCheckSc : MonoBehaviour
+public class PlayerGroundCheckSc : MonoBehaviour
 {
     public Player myPlayer;
     private void OnTriggerEnter(Collider other)
