@@ -5,8 +5,10 @@ using UnityEngine.UI;
 using DG.Tweening;
 using CLongLib;
 
-public class LobbyUIManager : MonoBehaviour
+public class LobbyUIManager : Singleton<LobbyUIManager>
 {
+    private enum PanelMove { UP = 0, DOWN, LEFT, RIGHT, RETURN}
+
     public GameObject effectChangeCharacter;
     public GameObject[] mainCharacterList;
     public Transform pivot;
@@ -44,9 +46,28 @@ public class LobbyUIManager : MonoBehaviour
         }
     }
 
-    public void OnClickMovePanel(int value)
+    public void OnClickMovePanel(int i)
     {
-        pivot.DOLocalMoveY(value, 0.3f);
+        var p = (PanelMove)i;
+        switch (p)
+        {
+            case PanelMove.UP:
+                pivot.DOLocalMoveY(1080, 0.3f);
+                break;
+            case PanelMove.DOWN:
+                pivot.DOLocalMoveY(-1080, 0.3f);
+                break;
+            case PanelMove.LEFT:
+                pivot.DOLocalMoveX(-1920, 0.3f);
+                break;
+            case PanelMove.RIGHT:
+                pivot.DOLocalMoveX(1920, 0.3f);
+                break;
+            case PanelMove.RETURN:
+                pivot.DOLocalMoveX(0, 0.3f);
+                pivot.DOLocalMoveY(0, 0.3f);
+                break;
+        }
     }
 
     public void OnClickOption()
@@ -66,10 +87,10 @@ public class LobbyUIManager : MonoBehaviour
         _curCharacter.SetActive(true);
     }
 
-    private void Awake()
+    protected override void Init()
     {
         _curCharacter = mainCharacterList[0];
-        OnClickChangeCharacter(0);
+        //OnClickChangeCharacter(0);
         DOTween.defaultEaseType = Ease.OutBack;
     }
 
