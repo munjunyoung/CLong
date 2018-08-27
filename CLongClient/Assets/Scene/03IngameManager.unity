@@ -236,7 +236,7 @@ CharacterController:
   m_Radius: 0.3
   m_SlopeLimit: 45
   m_StepOffset: 0.3
-  m_SkinWidth: 0.08
+  m_SkinWidth: 0.1
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!114 &45298158
@@ -253,8 +253,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 45298160}
   lookTarget: {x: 0, y: 0, z: 0}
+  camEulerAngle: {x: 0, y: 0, z: 0}
   leftHandTargetIK: {fileID: 1217391318}
   equipWeaponTransform: {fileID: 1219834149}
+  leftHand: {fileID: 0}
   lookWeight: 1
   bodyWeight: 1
   headWeight: 0
@@ -282,6 +284,7 @@ MonoBehaviour:
   animSc: {fileID: 45298158}
   isAlive: 0
   playerController: {fileID: 45298157}
+  MoveCheck: 0
   zoomState: 0
   IsGroundedFromServer: 0
   GroundCheckObject: {fileID: 560122910}
@@ -312,7 +315,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 45298155}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1356649359}
@@ -543,7 +546,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4180898819338396, guid: ff6da6ad5527a144b849362388412546, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0.08
+      value: 0.085
       objectReference: {fileID: 0}
     - target: {fileID: 4180898819338396, guid: ff6da6ad5527a144b849362388412546, type: 2}
       propertyPath: m_LocalPosition.z

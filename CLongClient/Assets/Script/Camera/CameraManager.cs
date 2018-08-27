@@ -55,10 +55,9 @@ public class CameraManager : MonoBehaviour {
         xRot += Input.GetAxis("Mouse Y") * Sens;
         xRot = Mathf.Clamp(xRot,minX, maxX );
         transform.localEulerAngles = new Vector3(-xRot, yRot, 0);
-        
-        transform.Rotate(-Input.GetAxis("Mouse Y"), 0, 0);
 
-        transform.Rotate(0, Input.GetAxis("Mouse X"), 0, Space.World);
+        //transform.Rotate(-Input.GetAxis("Mouse Y"), 0, 0);
+        //transform.Rotate(0, Input.GetAxis("Mouse X"), 0, Space.World);
 
         if (!zoomS)
         {
@@ -67,8 +66,10 @@ public class CameraManager : MonoBehaviour {
         }
         else
             this.transform.position = ZoomPos.position;
-            //TargetTransform 전달
+
+        //TargetTransform 전달
         playerIK.lookTarget = transform.forward * 100;
+        playerIK.camEulerAngle = transform.eulerAngles;
 
     }
     /// <summary>

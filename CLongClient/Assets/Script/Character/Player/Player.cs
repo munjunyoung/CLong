@@ -34,19 +34,19 @@ public class Player : MonoBehaviour
             switch(_currentAc)
             {
                 case ActionState.None:
-                    moveSpeed = 5f;
+                    moveSpeed = 3f;
                     break;
                 case ActionState.CrouchWalk:
                     moveSpeed = 1f;
                     break;
                 case ActionState.Walk:
-                    moveSpeed = 5f;
+                    moveSpeed = 3f;
                     break;
                 case ActionState.Run:
-                    moveSpeed = 10f;
+                    moveSpeed = 4f;
                     break;
                 case ActionState.Seat:
-                    moveSpeed = 3f;
+                    moveSpeed = 2f;
                     break;
                 case ActionState.Jump:
                     moveSpeed = 3f;
@@ -60,7 +60,10 @@ public class Player : MonoBehaviour
     //Character Controller
     public CharacterController playerController;
     private Vector3 moveDirection = Vector3.zero;
-    
+
+    //Rotation
+    public bool MoveCheck; //로테이션 설정을 위해 (멈춰있을경우 하체가 바로 로테이션에 적용되지 않도록
+
     //Zoom
     public bool zoomState = false;
 
@@ -88,19 +91,19 @@ public class Player : MonoBehaviour
 
     private void TestFunc()
     {
-        if(Input.GetKey(KeyCode.W))
+        if(Input.GetKeyDown(KeyCode.W))
         {
             keyState[(int)Key.W] = true;
         }
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S))
         {
             keyState[(int)Key.S] = true;
         }
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.A))
         {
             keyState[(int)Key.A] = true;
         }
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKeyDown(KeyCode.D))
         {
             keyState[(int)Key.D] = true;
         }
@@ -153,13 +156,23 @@ public class Player : MonoBehaviour
         Fall();
 
         var prevPos = this.transform.position;
+        var prePosHegiht = this.transform.position.y;
+
         playerController.Move(moveDirection * Time.deltaTime);
+
         var currentPos = this.transform.position;
-        if (prevPos.Equals(currentPos))
+        var currentPosHeight = this.transform.position.y;
+
+        if (prevPos == currentPos)
         {
             currentActionState = ActionState.None;
         }
-        else
+        else if(prePosHegiht>currentPosHeight)
+        {
+            MoveCheck = true;
+            //떨어지는중
+        }
+        else if(prevPos.x!=currentPos.x||prevPos.z!=currentPos.z)
         {
             currentActionState = ActionState.Walk;
         }
@@ -190,8 +203,8 @@ public class Player : MonoBehaviour
     /// </summary>
     void Fall()
     {
-        if (IsGroundedFromServer)
-            return;
+       // if (IsGroundedFromServer)
+       //     return;
         moveDirection.y -= gravity;
     }
 
