@@ -4,31 +4,29 @@ using UnityEngine;
 
 public class CameraManager : MonoBehaviour {
 
-    public PlayerAnimatorIK playerIK;
+    public PlayerAnimatorIK myPlayerIK;
+    
     /// <summary>
     /// Cam Distance -> 기본 - max 조준 min
     /// </summary>
     private float camBackDistance = 0;
     private float camHeightDistance = 0;
-    private float maxBack = 2f;
-    private float maxHeight = 1f;
+    private float maxBack = 5f;
+    private float maxHeight = 1.3f;
     private float minBack = 0f;
     private float minHeight = 0.7f;
-    
+    private float sideDistance = 0.5f;
+
     //Camera Tunring
     private float yRot = 0;
     private float xRot = 0;
     private float Sens = 1f;
     //마우스 Turing 최소 최대값
-    private float maxX = 60f;
-    private float minX = -50f;
-
-    private float maxY = 90f;
-    private float minY = -90f;
-
-    private bool zoomS = false;
-    //줌상태일 경우 카메라를 총의 줌포지션 위치로 고정
+    private float maxX = 45f;
+    private float minX = -45f;
+    
     public Transform ZoomPos;
+    public float zoomSpeed = 20f;
     private void Start()
     {
         camBackDistance = maxBack;
@@ -37,13 +35,8 @@ public class CameraManager : MonoBehaviour {
 
     private void Update()
     {
-        if(playerIK!=null)
+        if(myPlayerIK!=null)
             FollowCam();
-
-        if(Input.GetMouseButtonDown(1))
-        {
-            zoomS = zoomS.Equals(true) ? false : true;
-        }
     }
 
     /// <summary>
@@ -53,25 +46,26 @@ public class CameraManager : MonoBehaviour {
     {
         yRot += Input.GetAxis("Mouse X") * Sens;
         xRot += Input.GetAxis("Mouse Y") * Sens;
-        xRot = Mathf.Clamp(xRot,minX, maxX );
-        transform.localEulerAngles = new Vector3(-xRot, yRot, 0);
-
-        //transform.Rotate(-Input.GetAxis("Mouse Y"), 0, 0);
-        //transform.Rotate(0, Input.GetAxis("Mouse X"), 0, Space.World);
-
-        if (!zoomS)
+        xRot = Mathf.Clamp(xRot, minX, maxX);
+       
+        transform.eulerAngles = new Vector3(-xRot, yRot, 0);
+        if (!myPlayerIK.GetComponent<Player>().zoomState)
         {
             Quaternion rotVal = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, 0);
-            this.transform.position = playerIK.transform.position + (rotVal * Vector3.back * camBackDistance) + (Vector3.up * camHeightDistance);
+            this.transform.position = myPlayerIK.transform.position + (rotVal * Vector3.back * camBackDistance) + (Vector3.up * camHeightDistance);
         }
+        //줌상태일 경우 카메라를 총의 줌포지션 위치로 고정
         else
-            this.transform.position = ZoomPos.position;
+            this.transform.position = Vector3.Slerp(this.transform.position, ZoomPos.position, Time.deltaTime * zoomSpeed );
 
         //TargetTransform 전달
-        playerIK.lookTarget = transform.forward * 100;
-        playerIK.camEulerAngle = transform.eulerAngles;
+        myPlayerIK.lookTarget = transform.forward * 100;
+        myPlayerIK.camRot = this.transform;
 
     }
+
+
+    /*
     /// <summary>
     /// Zoom State
     /// </summary>
@@ -80,7 +74,8 @@ public class CameraManager : MonoBehaviour {
         camBackDistance = zoomState ? minBack : maxBack;
         camHeightDistance = zoomState ? minHeight : maxHeight;
     }
-    /*
+    
+    
     /// <summary>
     /// send Packet AngleY when Mouse input Y change
     /// </summary>

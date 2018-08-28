@@ -15,7 +15,6 @@ public class Player : MonoBehaviour
     public Transform playerUpperBody;
     public InputManager InpusSc = null;
     public PlayerAnimatorIK animSc;
-    
 
     private bool[] keyState = new bool[20];
     //Move
@@ -34,22 +33,25 @@ public class Player : MonoBehaviour
             switch(_currentAc)
             {
                 case ActionState.None:
-                    moveSpeed = 3f;
+                    moveSpeed = 1.5f;
                     break;
-                case ActionState.CrouchWalk:
-                    moveSpeed = 1f;
+                case ActionState.SlowWalk:
+                    moveSpeed = 0.5f;
                     break;
                 case ActionState.Walk:
-                    moveSpeed = 3f;
+                    moveSpeed = 1.5f;
                     break;
                 case ActionState.Run:
-                    moveSpeed = 4f;
-                    break;
-                case ActionState.Seat:
                     moveSpeed = 2f;
                     break;
+                case ActionState.Seat:
+                    moveSpeed = 0.5f;
+                    break;
+                case ActionState.SeatWalk:
+                    moveSpeed = 0.5f;
+                    break;  
                 case ActionState.Jump:
-                    moveSpeed = 3f;
+                    moveSpeed = 1.5f;
                     break;
             }
         }
@@ -70,7 +72,7 @@ public class Player : MonoBehaviour
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
     public bool IsGroundedFromServer = false;
     private float gravity = 10f;
-    private float jumpSpeed = 30f;
+    private float jumpSpeed = 15f;
     private float jumpTimer = 0f;
     public GameObject GroundCheckObject;
 
@@ -80,7 +82,6 @@ public class Player : MonoBehaviour
         //    return;
 
         Move();
-        
     }
 
     private void Update()
@@ -125,12 +126,32 @@ public class Player : MonoBehaviour
             keyState[(int)Key.D] = false;
         }
 
-        if (Input.GetKey(KeyCode.Z))
-            currentActionState = ActionState.CrouchWalk;
-        else if (Input.GetKey(KeyCode.LeftShift))
-            currentActionState = ActionState.Run;
-        else if (Input.GetKey(KeyCode.LeftControl))
-            currentActionState = ActionState.Seat;
+        if (Input.GetKeyDown(KeyCode.Z))
+            keyState[(int)Key.Z] = true;
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+            keyState[(int)Key.LeftShift] = true;
+
+        if (Input.GetKeyUp(KeyCode.Z))
+            keyState[(int)Key.Z] = false;
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+            keyState[(int)Key.LeftShift] = false;
+
+        if (Input.GetKeyDown(KeyCode.Space))
+            keyState[(int)Key.Space] = true;
+
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+            keyState[(int)Key.LeftControl] = true;
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+            keyState[(int)Key.LeftControl] = false;
+
+        if (Input.GetMouseButtonDown(0))
+            animSc.anim.SetTrigger("Shoot");
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            zoomState = zoomState.Equals(true) ? false : true;
+            animSc.anim.SetBool("ZoomState", zoomState);
+        }
     }
     
     /// <summary>
@@ -163,19 +184,30 @@ public class Player : MonoBehaviour
         var currentPos = this.transform.position;
         var currentPosHeight = this.transform.position.y;
 
+        //애니메이션
+        //제자리일 경우
         if (prevPos == currentPos)
         {
-            currentActionState = ActionState.None;
+            if (keyState[(int)Key.LeftControl])
+                currentActionState = ActionState.Seat;
+            else
+                currentActionState = ActionState.None;
         }
-        else if(prePosHegiht>currentPosHeight)
+        //이동중일 경우
+        else if (prevPos.x != currentPos.x || prevPos.z != currentPos.z)
         {
-            MoveCheck = true;
-            //떨어지는중
+            if (keyState[(int)Key.Z])
+                currentActionState = ActionState.SlowWalk;
+            else if (keyState[(int)Key.LeftShift])
+                currentActionState = ActionState.Run;
+            else if (keyState[(int)Key.LeftControl])
+                currentActionState = ActionState.SeatWalk;
+            else
+                currentActionState = ActionState.Walk;
         }
-        else if(prevPos.x!=currentPos.x||prevPos.z!=currentPos.z)
-        {
-            currentActionState = ActionState.Walk;
-        }
+        //y값이 다른 경우
+        else if (prePosHegiht > currentPosHeight)
+            currentActionState = ActionState.Fall;
     }
 
     /// <summary>
@@ -284,13 +316,13 @@ public class Player : MonoBehaviour
                 keyState[key] = state;
                 break;
             case Key.LeftShift:
-                currentActionState = state.Equals(true) ? ActionState.Run : ActionState.None;
+                keyState[key] = state;
                break;
             case Key.LeftControl:
-                currentActionState = state.Equals(true) ? ActionState.Seat : ActionState.None;
+                keyState[key] = state;
                 break;
             case Key.Z:
-                currentActionState = state.Equals(true) ? ActionState.CrouchWalk : ActionState.None;
+                keyState[key] = state;
                 break;
             case Key.Alpha1:
                 weaponManagerSc.WeaponChange(0);

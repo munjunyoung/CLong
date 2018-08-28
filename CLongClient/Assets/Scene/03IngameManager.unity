@@ -251,17 +251,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ff5b83d4397c714c88c84935c65d0e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 45298160}
+  anim: {fileID: 45298160}
   lookTarget: {x: 0, y: 0, z: 0}
-  camEulerAngle: {x: 0, y: 0, z: 0}
-  leftHandTargetIK: {fileID: 1217391318}
+  camRot: {fileID: 0}
   equipWeaponTransform: {fileID: 1219834149}
+  leftHandTargetIK: {fileID: 1217391318}
   leftHand: {fileID: 0}
   lookWeight: 1
   bodyWeight: 1
-  headWeight: 0
+  headWeight: 1
   eyesWeight: 1
-  clampWeight: 0.48
+  clampWeight: 1
   leftHandWeight: 1
   AnimActionState: 0
 --- !u!114 &45298159
@@ -530,26 +530,6 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4686943535202464, guid: ff6da6ad5527a144b849362388412546, type: 2}
       propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4686943535202464, guid: ff6da6ad5527a144b849362388412546, type: 2}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4686943535202464, guid: ff6da6ad5527a144b849362388412546, type: 2}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4180898819338396, guid: ff6da6ad5527a144b849362388412546, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4180898819338396, guid: ff6da6ad5527a144b849362388412546, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0.085
-      objectReference: {fileID: 0}
-    - target: {fileID: 4180898819338396, guid: ff6da6ad5527a144b849362388412546, type: 2}
-      propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -2225,7 +2205,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.15
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 30
   orthographic: 0
@@ -2269,8 +2249,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 210db9e0b377a9b4cb55d2a28a17ecd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerIK: {fileID: 45298158}
+  myPlayerIK: {fileID: 45298158}
   ZoomPos: {fileID: 1971358217}
+  zoomSpeed: 10
 --- !u!1 &841173979
 GameObject:
   m_ObjectHideFlags: 0
@@ -5805,7 +5786,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2002871967
 Transform:
   m_ObjectHideFlags: 0

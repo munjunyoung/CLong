@@ -5,16 +5,18 @@ using CLongLib;
 
 public class PlayerAnimatorIK : MonoBehaviour
 {
-    public Animator animator;
+    public Animator anim;
     public Vector3 lookTarget;
-    public Vector3 camEulerAngle;
-
-    public Transform leftHandTargetIK;
-
+    public Transform camRot;
+    
+    //Weapon
     public Transform equipWeaponTransform;
-
+    public Transform leftHandTargetIK;
+    //Player 부위 
     public Transform leftHand;
     private Transform spine;
+    private Transform head;
+    
     //-0.065 0.016 0.03
     [Range(0.0f, 1.0f)]
     public float lookWeight;
@@ -30,74 +32,84 @@ public class PlayerAnimatorIK : MonoBehaviour
 
     [Range(0.0f, 1.0f)]
     public float leftHandWeight;
-
-    //Animation Bool
-    bool StandRelaxedState = false;
-    bool StandAimState = false;
-
-    int standAnimatorInt = 0;
-    int moveAnimatorInt = 0;
+    
+    //AnimationBool
+    bool TurnCoroutineState = false;
 
     public ActionState AnimActionState;
 
     void Start()
     {
-        leftHand = animator.GetBoneTransform(HumanBodyBones.LeftHand);
-        spine = animator.GetBoneTransform(HumanBodyBones.Spine);
+        leftHand = anim.GetBoneTransform(HumanBodyBones.LeftHand);
+        spine = anim.GetBoneTransform(HumanBodyBones.Spine);
+       
+        head = anim.GetBoneTransform(HumanBodyBones.Head);
     }
     //0.07 -0.15 0.1
     //-0.12 -0.17
     private void Update()
     {
-        animator.SetInteger("StateParam", (int)AnimActionState);
-
-        //LookTarget으로 할시에 각도가 안맞을경우가 생김.. 
-        equipWeaponTransform.eulerAngles = camEulerAngle;
-        //equipWeaponTransform.LookAt(lookTarget);
+        anim.SetInteger("StateParam", (int)AnimActionState);
     }
     private void LateUpdate()
     {
         //조준상태가 아닐경우 localEuler x : 0 y : -90 z : -90
         leftHand.position = leftHandTargetIK.position;
+
+        equipWeaponTransform.rotation = Quaternion.Slerp(equipWeaponTransform.rotation, camRot.rotation, 10 * Time.deltaTime);
+        //LookTarget으로 할시에 줌을 했을때 각도가 안맞는경우가 생기는거같은데 잘모르겠다; 결국 카메라 로테이션 가져오는것으로 변경
+        //equipWeaponTransform.LookAt(lookTarget);
+
+        // equipWeaponTransform.eulerAngles = Vector3.Slerp(equipWeaponTransform.eulerAngles, camEulerAngle, 10 * Time.deltaTime);
+        //equipWeaponTransform.LookAt(lookTarget);
     }
 
     void OnAnimatorIK(int layerInex)
     {
-        animator.SetLookAtWeight(lookWeight, bodyWeight, headWeight, eyesWeight, clampWeight);
-        animator.SetLookAtPosition(lookTarget);
-
+         anim.SetLookAtWeight(lookWeight, bodyWeight, headWeight, eyesWeight, clampWeight);
+         anim.SetLookAtPosition(lookTarget);
+       
         //이동중일경우 y값을 직접적용 
         if (AnimActionState != ActionState.None)
         {
-            var dir = lookTarget - animator.bodyPosition;
+            var dir = lookTarget - anim.bodyPosition;
             dir = dir.normalized;
 
             Quaternion q = Quaternion.identity;
             q.SetLookRotation(dir, Vector3.up);
             this.transform.eulerAngles = new Vector3(0, q.eulerAngles.y, 0);
         }
-        //Debug.Log(spine.localRotation);
-        if(spine.localRotation.x>0.4||spine.localRotation.x < -0.4)
-        {
-            var dir = lookTarget - animator.bodyPosition;
-            dir = dir.normalized;
-
-            Quaternion endQ = Quaternion.identity;
-            endQ.SetLookRotation(dir, Vector3.up);
-            this.transform.eulerAngles = new Vector3(0,Mathf.Lerp(this.transform.eulerAngles.y, endQ.eulerAngles.y,Time.deltaTime), 0);
-           // animator.SetTrigger("RightTurn");
-        }
-
+        
+        //카메라에서 변수로 처리하게되면 다른 오브젝트 처리가 불가하므로 playerik에서 처리
+        if (spine.localRotation.x > 0.15)
+            this.transform.eulerAngles = this.transform.eulerAngles + new Vector3(0, Mathf.Lerp(0, 60, 5*Time.deltaTime));
+        else if (spine.localRotation.x < -0.15)
+            this.transform.eulerAngles = this.transform.eulerAngles + new Vector3(0, Mathf.Lerp(0, -60, 5*Time.deltaTime));
+        
         //왼손처리
-        animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, leftHandWeight);
-        animator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandTargetIK.position);
-        animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1);
-        animator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandTargetIK.rotation);
+        anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, leftHandWeight);
+        anim.SetIKPosition(AvatarIKGoal.LeftHand, leftHandTargetIK.position);
+        anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1);
+        anim.SetIKRotation(AvatarIKGoal.LeftHand, leftHandTargetIK.rotation);
     }
-
-    IEnumerator TurnCharacter()
+    /*
+    /// <summary>
+    /// 방향에따라 설정변경 
+    /// </summary>
+    /// <param name="dir"></param>
+    /// <param name="duration"></param>
+    /// <returns></returns>
+    IEnumerator TurnCharacter(float turnDir, float duration)
     {
-
-        yield return null;
-    }
+        if (TurnCoroutineState)
+            yield 
+        TurnCoroutineState = true;
+        while (duration > 0)
+        {
+            duration -= Time.deltaTime;
+            
+            yield return null;
+        }
+        TurnCoroutineState = false;
+    }*/
 }

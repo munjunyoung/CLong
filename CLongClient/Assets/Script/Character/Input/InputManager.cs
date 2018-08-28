@@ -161,7 +161,7 @@ public class InputManager : MonoBehaviour
         }
         if (Input.GetKeyUp(KeyList[(int)Key.Z]))
         {
-            if (myPlayer.currentActionState == (ActionState.CrouchWalk))
+            if (myPlayer.currentActionState == (ActionState.SlowWalk))
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Z, false), NetworkManager.Protocol.TCP);
         }
         //Jump
@@ -223,7 +223,7 @@ public class InputManager : MonoBehaviour
     public void ZoomFunc(bool zoomStateValue)
     {
         //카메라 포지션변경
-        cam.GetComponent<CameraManager>().ZoomSetCamPos(zoomStateValue);
+        //cam.GetComponent<CameraManager>().ZoomSetCamPos(zoomStateValue);
         //AimImage 변경
         aimImageStartPosValue = zoomStateValue ? 0 : 10f;
         foreach (var a in aimImage)
