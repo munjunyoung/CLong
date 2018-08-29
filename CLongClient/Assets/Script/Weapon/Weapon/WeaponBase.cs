@@ -26,6 +26,7 @@ public class WeaponBase : MonoBehaviour
     protected virtual void Start()
     {
     }
+    
     /// <summary>
     /// 서버에서 패킷을 받은후 총알을 생성하기위함
     /// </summary>

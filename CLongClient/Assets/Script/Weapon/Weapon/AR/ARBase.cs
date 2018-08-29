@@ -17,6 +17,12 @@ public class ARBase : WeaponBase
 
     public int shootPeriodCount = 0;
 
+    private void LateUpdate()
+    {
+     
+        Debug.DrawRay(transform.position, transform.forward * 100f, Color.green);
+    }
+
     /// <summary>
     /// AR 총
     /// </summary>

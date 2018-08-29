@@ -5,18 +5,15 @@ using CLongLib;
 
 public class PlayerAnimatorIK : MonoBehaviour
 {
+    public Player thisPlayer;
     public Animator anim;
     public Vector3 lookTarget;
-    public Transform camRot;
-    
-    //Weapon
-    public Transform equipWeaponTransform;
+
     public Transform leftHandTargetIK;
     //Player 부위 
-    public Transform leftHand;
+    private Transform leftHand;
     private Transform spine;
-    private Transform head;
-    
+
     //-0.065 0.016 0.03
     [Range(0.0f, 1.0f)]
     public float lookWeight;
@@ -32,9 +29,6 @@ public class PlayerAnimatorIK : MonoBehaviour
 
     [Range(0.0f, 1.0f)]
     public float leftHandWeight;
-    
-    //AnimationBool
-    bool TurnCoroutineState = false;
 
     public ActionState AnimActionState;
 
@@ -42,56 +36,95 @@ public class PlayerAnimatorIK : MonoBehaviour
     {
         leftHand = anim.GetBoneTransform(HumanBodyBones.LeftHand);
         spine = anim.GetBoneTransform(HumanBodyBones.Spine);
-       
-        head = anim.GetBoneTransform(HumanBodyBones.Head);
     }
     //0.07 -0.15 0.1
     //-0.12 -0.17
     private void Update()
     {
-        anim.SetInteger("StateParam", (int)AnimActionState);
+
     }
     private void LateUpdate()
     {
-        //조준상태가 아닐경우 localEuler x : 0 y : -90 z : -90
         leftHand.position = leftHandTargetIK.position;
 
-        equipWeaponTransform.rotation = Quaternion.Slerp(equipWeaponTransform.rotation, camRot.rotation, 10 * Time.deltaTime);
-        //LookTarget으로 할시에 줌을 했을때 각도가 안맞는경우가 생기는거같은데 잘모르겠다; 결국 카메라 로테이션 가져오는것으로 변경
-        //equipWeaponTransform.LookAt(lookTarget);
-
-        // equipWeaponTransform.eulerAngles = Vector3.Slerp(equipWeaponTransform.eulerAngles, camEulerAngle, 10 * Time.deltaTime);
-        //equipWeaponTransform.LookAt(lookTarget);
+        anim.SetInteger("StateParam", (int)AnimActionState);
     }
 
+    /// <summary>
+    /// iK관련 함수 왼쪽 손 포지션, 움직이지않을경우 어느각도 이상 TURN했을경우 전체 로테이션변경, 
+    /// </summary>
+    /// <param name="layerInex"></param>
     void OnAnimatorIK(int layerInex)
     {
-         anim.SetLookAtWeight(lookWeight, bodyWeight, headWeight, eyesWeight, clampWeight);
-         anim.SetLookAtPosition(lookTarget);
-       
-        //이동중일경우 y값을 직접적용 
+        anim.SetLookAtWeight(lookWeight, bodyWeight, headWeight, eyesWeight, clampWeight);
+        anim.SetLookAtPosition(lookTarget);
+
+        //이동중일경우 y값을 오브젝트 최선임에게 적용 
         if (AnimActionState != ActionState.None)
         {
-            var dir = lookTarget - anim.bodyPosition;
+            var dir = lookTarget - this.transform.position;
             dir = dir.normalized;
 
             Quaternion q = Quaternion.identity;
             q.SetLookRotation(dir, Vector3.up);
             this.transform.eulerAngles = new Vector3(0, q.eulerAngles.y, 0);
         }
-        
+
+        //플레이어 중심과 바라보는 방향 각도구하기
+        var LowerDir = transform.forward;
+        var UpperDir = new Vector3(lookTarget.x, transform.position.y, lookTarget.z) - transform.position;
+        UpperDir = UpperDir.normalized;
+        var angle = Vector3.Angle(LowerDir, UpperDir);
+        //법선벡터의 y값이 양수면 우측turn 음수면 좌측turn 
+        var turnDir = Vector3.Cross(LowerDir, UpperDir).y;
+
+        if (angle > 60)
+        {
+            //우측Turn
+            if (turnDir > 0)
+            {
+                this.transform.eulerAngles = this.transform.eulerAngles + new Vector3(0, Mathf.Lerp(0, 60, 5 * Time.deltaTime));
+                //anim.SetBool("RightTurn", true);
+            }
+            //좌측Turn
+            else
+            {
+                this.transform.eulerAngles = this.transform.eulerAngles + new Vector3(0, Mathf.Lerp(0, -60, 5 * Time.deltaTime));
+                //anim.SetBool("LeftTurn", true);
+            }
+        }
+        else
+        {
+            //anim.SetBool("RightTurn", false);
+            //anim.SetBool("LeftTurn", false);
+        }
+
+        Debug.Log(LowerDir + " " + UpperDir + " " + angle + " " + turnDir);
         //카메라에서 변수로 처리하게되면 다른 오브젝트 처리가 불가하므로 playerik에서 처리
-        if (spine.localRotation.x > 0.15)
-            this.transform.eulerAngles = this.transform.eulerAngles + new Vector3(0, Mathf.Lerp(0, 60, 5*Time.deltaTime));
-        else if (spine.localRotation.x < -0.15)
-            this.transform.eulerAngles = this.transform.eulerAngles + new Vector3(0, Mathf.Lerp(0, -60, 5*Time.deltaTime));
-        
+        //if (spine.localRotation.x > 0.15)
+        //    anim.SetBool("RightTurn", true);
+        //else if (spine.localRotation.x < -0.15)
+        //    anim.SetBool("LeftTurn", true);
+        //else
+        //{
+        //    anim.SetBool("RightTurn", false);
+        //    anim.SetBool("LeftTurn", false);
+        //}
+
+
+
+        // if (spine.localRotation.x > 0.15)    
+        //      this.transform.eulerAngles = this.transform.eulerAngles + new Vector3(0, Mathf.Lerp(0, 60, 5*Time.deltaTime));
+        //else if (spine.localRotation.x < -0.15)
+        //      this.transform.eulerAngles = this.transform.eulerAngles + new Vector3(0, Mathf.Lerp(0, -60, 5*Time.deltaTime));
+
         //왼손처리
         anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, leftHandWeight);
         anim.SetIKPosition(AvatarIKGoal.LeftHand, leftHandTargetIK.position);
         anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1);
         anim.SetIKRotation(AvatarIKGoal.LeftHand, leftHandTargetIK.rotation);
     }
+
     /*
     /// <summary>
     /// 방향에따라 설정변경 

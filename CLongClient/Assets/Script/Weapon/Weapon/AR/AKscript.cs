@@ -16,4 +16,5 @@ public class AKscript : ARBase
         reboundIntensity = 7;
         reboundRecoveryTime = 2f;
     }
+    
 }

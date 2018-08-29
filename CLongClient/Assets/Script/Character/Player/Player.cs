@@ -20,6 +20,27 @@ public class Player : MonoBehaviour
     //Move
     private float moveSpeed = 5f;
 
+    //Health
+    public bool isAlive = false;
+
+    //Character Controller
+    public CharacterController playerController;
+    private Vector3 moveDirection = Vector3.zero;
+
+    //Zoom
+    public bool zoomState = false;
+    public bool AimingState = false;
+
+    //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
+    public bool IsGroundedFromServer = false;
+    private float gravity = 10f;
+    private float jumpSpeed = 20f;
+    private float jumpTimer = 0f;
+    public GameObject GroundCheckObject;
+
+    //Equip
+    public Transform equipWeaponTransform;
+
     //Action State
     public ActionState currentActionState
     {
@@ -33,48 +54,31 @@ public class Player : MonoBehaviour
             switch(_currentAc)
             {
                 case ActionState.None:
-                    moveSpeed = 1.5f;
+                    moveSpeed = 3f;
                     break;
                 case ActionState.SlowWalk:
-                    moveSpeed = 0.5f;
+                    moveSpeed = 1f;
                     break;
                 case ActionState.Walk:
-                    moveSpeed = 1.5f;
+                    moveSpeed = 3f;
                     break;
                 case ActionState.Run:
-                    moveSpeed = 2f;
+                    moveSpeed = 5f;
                     break;
                 case ActionState.Seat:
-                    moveSpeed = 0.5f;
+                    moveSpeed = 1.5f;
                     break;
                 case ActionState.SeatWalk:
-                    moveSpeed = 0.5f;
+                    moveSpeed = 1.5f;
                     break;  
                 case ActionState.Jump:
-                    moveSpeed = 1.5f;
+                    moveSpeed = 3f;
                     break;
             }
         }
     }
     private ActionState _currentAc;
-    public bool isAlive = false;
-
-    //Character Controller
-    public CharacterController playerController;
-    private Vector3 moveDirection = Vector3.zero;
-
-    //Rotation
-    public bool MoveCheck; //로테이션 설정을 위해 (멈춰있을경우 하체가 바로 로테이션에 적용되지 않도록
-
-    //Zoom
-    public bool zoomState = false;
-
-    //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
-    public bool IsGroundedFromServer = false;
-    private float gravity = 10f;
-    private float jumpSpeed = 15f;
-    private float jumpTimer = 0f;
-    public GameObject GroundCheckObject;
+   
 
     private void FixedUpdate()
     {
@@ -89,6 +93,13 @@ public class Player : MonoBehaviour
         TestFunc();
         animSc.AnimActionState = currentActionState;
     }
+
+    private void LateUpdate()
+    {
+        WeaponRotation();
+    }
+
+
 
     private void TestFunc()
     {
@@ -145,15 +156,26 @@ public class Player : MonoBehaviour
             keyState[(int)Key.LeftControl] = false;
 
         if (Input.GetMouseButtonDown(0))
+        {
             animSc.anim.SetTrigger("Shoot");
+            AimingState = true;
+            animSc.anim.SetBool("AimingState", AimingState);
+        }
 
         if (Input.GetMouseButtonDown(1))
         {
             zoomState = zoomState.Equals(true) ? false : true;
-            animSc.anim.SetBool("ZoomState", zoomState);
+
+            if (zoomState)
+            {
+                AimingState = zoomState;
+                animSc.anim.SetBool("AimingState", AimingState);
+            }
         }
     }
-    
+
+   
+
     /// <summary>
     /// Player Move
     /// </summary>
@@ -358,6 +380,57 @@ public class Player : MonoBehaviour
         }
     }
     #endregion
+
+    #region Weapon
+    /// <summary>
+    /// 줌상태일경우 WeaponRotation 상태
+    /// </summary>
+    private void WeaponRotation()
+    {
+        if (AimingState)
+        {
+            var dir = animSc.lookTarget - equipWeaponTransform.position;
+            dir = dir.normalized;
+            var tmpRot = Quaternion.LookRotation(dir);
+            equipWeaponTransform.rotation = Quaternion.Slerp(equipWeaponTransform.rotation, tmpRot, 7 * Time.deltaTime);
+           // equipWeaponTransform.LookAt(animSc.lookTarget);
+        }
+     
+    }
+    
+    /// <summary>
+    /// 애니메이션 이벤트 추가 (클립 Aiming), 줌이 풀릴때에도 실행
+    /// </summary>
+    public void AimStateStopEvent()
+    {
+        //줌상태일경우 이벤트 실행 ㄴ
+        if (zoomState)
+            return;
+        if (AimingState)
+            AimingState = false;
+        animSc.anim.SetBool("AimingState", AimingState);
+
+        StartCoroutine(GunRotation());
+    }
+
+    /// <summary>
+    /// GunRotation 변경 slerp처리
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator GunRotation()
+    {
+
+        yield return new WaitForSeconds(0.2f);
+        equipWeaponTransform.localRotation = Quaternion.identity;
+        //while (equipWeaponTransform.localRotation != Quaternion.identity)
+        //{
+        //    
+        //    equipWeaponTransform.localRotation = Quaternion.Slerp(equipWeaponTransform.localRotation, Quaternion.identity, 30 * Time.deltaTime);
+        //    yield return null;
+        //}
+    }
+    #endregion
+
     /// <summary>
     /// 줌 상태 변경(무기의 위치만 변경,
     /// </summary>

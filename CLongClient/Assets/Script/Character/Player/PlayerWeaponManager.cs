@@ -20,14 +20,17 @@ public class PlayerWeaponManager : MonoBehaviour
     public Dictionary<byte, string> WeaponManagerDic = new Dictionary<byte, string>();
     //Weapon 장비 위치 dic
     public Transform[] equipPosObjectList = new Transform[3];
-
+   
     private void Start()
     {
+        for(byte i=0; i<3; i++)
+        {
+            equipWeaponArray[i] = i;
+        }
         WeaponManagerDicInit();
-
         WeaponEquip(equipWeaponArray);
     }
-
+    
     /// <summary>
     /// Weapon Equip - Create Weapon
     /// </summary>
@@ -52,7 +55,6 @@ public class PlayerWeaponManager : MonoBehaviour
     /// <param name="name"></param>
     private void InsWeapon(string name)
     {
-
         var weaponPrefab = Instantiate(Resources.Load("Prefab/Item/Weapon/" + name)) as GameObject;
 
         string[] tmpdata = name.Split('/');
