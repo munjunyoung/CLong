@@ -5,7 +5,7 @@ using CLongLib;
 public class CameraManager : MonoBehaviour
 {
 
-    public PlayerAnimatorIK myPlayerIK;
+    public Player myPlayer;
     /// <summary>
     /// Cam Distance -> 기본 - max 조준 min
     /// </summary>
@@ -24,13 +24,10 @@ public class CameraManager : MonoBehaviour
     //마우스 Turing 최소 최대값
     private float maxX = 45f;
     private float minX = -45f;
-
-    public Transform ZoomPos;
-    public float zoomSpeed = 30f;
-
-    public bool Test = false;
-    private Vector3 testT;
-
+    
+    public Vector3 target;
+    
+    
     private void Start()
     {
         camBackDistance = maxBack;
@@ -39,7 +36,7 @@ public class CameraManager : MonoBehaviour
     
     private void LateUpdate()
     {
-        if (myPlayerIK != null)
+        if (myPlayer != null)
             FollowCam();
     }
 
@@ -53,18 +50,21 @@ public class CameraManager : MonoBehaviour
         xRot = Mathf.Clamp(xRot, minX, maxX);
 
         transform.eulerAngles = new Vector3(-xRot, yRot, 0);
-        if (!myPlayerIK.GetComponent<Player>().zoomState)
+        if (!myPlayer.zoomState)
         {
             if (this.transform.parent != null)
                 this.transform.parent = null;
             Quaternion rotVal = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, 0);
-            this.transform.position = myPlayerIK.transform.position + (rotVal * Vector3.back * camBackDistance) + (Vector3.up * camHeightDistance);
+            this.transform.position = myPlayer.transform.position + (rotVal * Vector3.back * camBackDistance) + (Vector3.up * camHeightDistance);
         }
         else
-            this.transform.position = ZoomPos.position;
-            
+        {
+            if (myPlayer.weaponManagerSc.CurrentZoomPosTarget != null)
+                this.transform.position = myPlayer.weaponManagerSc.CurrentZoomPosTarget.position;
+        }  
 
-        myPlayerIK.lookTarget = this.transform.position + this.transform.forward * 100;
+        target = this.transform.position + this.transform.forward * 100;
+        myPlayer.lookTarget = target;
     }
 }
 

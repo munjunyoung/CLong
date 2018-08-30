@@ -23,15 +23,9 @@ public class IngameManager : Singleton<IngameManager>
     private void Start()
     {
         NetworkManager.Instance.SendPacket(new Loaded_Ingame(0), NetworkManager.Protocol.TCP);
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
     }
-
-    // Update is called once per frame
-    private void Update ()
-    {
-		
-	}
-
+    
     private void ProcessPacket(IPacket p, NetworkManager.Protocol pt)
     {
         if (pt == NetworkManager.Protocol.TCP)
@@ -41,7 +35,7 @@ public class IngameManager : Singleton<IngameManager>
                 //받았을때 클라이언트 생성(아군 적군 모두)
                 var s = (Player_Init)p;
 
-                CreatePlayerObject(s.clientIdx, s.hp,TotalUtility.ToUnityVectorChange(s.startPos), s.startRot, s.assign, s.weapon1, s.weapon2, s.item);
+                CreatePlayerObject(s.clientIdx, s.hp,TotalUtility.ToUnityVectorChange(s.startPos), TotalUtility.ToUnityVectorChange(s.startLook), s.assign, s.weapon1, s.weapon2, s.item);
                 if (s.assign)
                     NetworkManager.Instance.SendPacket(new Player_Ready(clientPlayerNum), NetworkManager.Protocol.TCP);
 
@@ -49,7 +43,7 @@ public class IngameManager : Singleton<IngameManager>
             else if (p is Player_Reset)
             {
                 var s = (Player_Reset)p;
-                ResetPlayerVar(s.clientIdx, s.hp, s.startPos, s.yAngles);
+                ResetPlayerVar(s.clientIdx, s.hp, s.startPos, s.LookPos);
             }
             //else if (p is Round_Start)
             //{
@@ -106,9 +100,14 @@ public class IngameManager : Singleton<IngameManager>
             {
                 //체력 설정
                 var s = (Player_Sync)p;
+                inputSc.SetHealthUI(s.hp);
+            }
+            else if (p is Player_Recover)
+            {
+                var s = (Player_Recover)p;
                 if (playerList[s.clientIdx] != null)
                     playerList[s.clientIdx].weaponManagerSc.Shoot(s.clientIdx, Vector3.zero, Vector3.zero);
-                inputSc.SetHealthUI(s.hp);
+                    inputSc.SetHealthUI(s.amount);
             }
             else if(p is Player_Dead)
             {
@@ -134,9 +133,6 @@ public class IngameManager : Singleton<IngameManager>
             //데미지받는부분
 
             //else if()
-            
-            
-            
         }
         else
         {
@@ -151,10 +147,8 @@ public class IngameManager : Singleton<IngameManager>
                     if (playerList[i] != null)
                     {
                         playerList[i].transform.position = TotalUtility.ToUnityVectorChange(s.pos);
-                        
-                        //Rotation
-                        playerList[i].transform.eulerAngles = new Vector3(0, s.yAngle, 0);
-                        playerList[i].playerUpperBody.localEulerAngles = new Vector3(s.xAngle, 0, 0);
+
+                        playerList[i].lookTarget = TotalUtility.ToUnityVectorChange(s.lookTarget);
                     }
                 }
             }
@@ -163,7 +157,7 @@ public class IngameManager : Singleton<IngameManager>
     /// <summary>
     /// Client 생성
     /// </summary>
-    public void CreatePlayerObject(byte num, int health, Vector3 pos, float yDir , bool clientCheck, byte w1, byte w2, byte item)
+    public void CreatePlayerObject(byte num, int health, Vector3 pos, Vector3 look , bool clientCheck, byte w1, byte w2, byte item)
     {
         //배정되는 클라이언트 num에 prefab생성
         var tmpPrefab = Instantiate(playerPrefab);
@@ -174,10 +168,8 @@ public class IngameManager : Singleton<IngameManager>
         
         byte[] tmpItemData = { w1, w2, item };
         playerList[num].weaponManagerSc.equipWeaponArray = tmpItemData;
-
-        playerList[num].transform.eulerAngles = new Vector3(0, yDir ,0);
-        playerList[num].playerUpperBody.localEulerAngles = Vector3.zero;
         
+        playerList[num].lookTarget = look;
 
         playerList[num].isAlive = true;
 
@@ -190,12 +182,9 @@ public class IngameManager : Singleton<IngameManager>
         //Zoom UI 부분 설정을 위해서
         playerList[clientPlayerNum].InpusSc = inputSc;
         var camSc = inputSc.cam.GetComponent<CameraManager>();
-        //camSc.playerObject = playerList[clientPlayerNum].transform;
-        //camSc.playerUpperBody = playerList[clientPlayerNum].playerUpperBody;
+        camSc.myPlayer = playerList[clientPlayerNum];
         
         inputSc.myPlayer = playerList[clientPlayerNum];
-        //Turning 시작값 변경
-        //inputSc.SetRot();
 
         playerList[clientPlayerNum].clientCheck = true;
         playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
@@ -204,27 +193,22 @@ public class IngameManager : Singleton<IngameManager>
     /// <summary>
     /// 라운드가 넘어갈경우나 처음 시작할떄 초기화 해주어야할 변수
     /// </summary>
-    public void ResetPlayerVar(byte num, int hp, System.Numerics.Vector3[] p, float[] yDir)
+    public void ResetPlayerVar(byte num, int hp, System.Numerics.Vector3[] p, System.Numerics.Vector3[] target)
     {
         //클라이언트 플레이어 오브젝트 체력 설정
         inputSc.SetHealthUI(hp);
-        Debug.Log("Y DIR : " + yDir[0] + " - " + yDir[1]);
         for(int i=0; i<2; i++)
         {
             var tmpP = playerList[i];
             tmpP.transform.position = TotalUtility.ToUnityVectorChange(p[i]);
-            
-            tmpP.transform.eulerAngles = new Vector3(0, yDir[i], 0);
-            tmpP.playerUpperBody.localEulerAngles = Vector3.zero;
+
+            tmpP.lookTarget = TotalUtility.ToUnityVectorChange(target[i]);
 
             if (tmpP.zoomState)
                 tmpP.ZoomChange(tmpP.zoomState = false);
             if (!tmpP.gameObject.activeSelf)
                 tmpP.gameObject.SetActive(true);
             tmpP.isAlive = true;
-            //Client플레이어 일 경우 InputManager turning 시작 rot값 설정
-            //if(num==i)
-               // inputSc.SetRot();
         }
         //Send
         NetworkManager.Instance.SendPacket(new Player_Ready(clientPlayerNum), NetworkManager.Protocol.TCP);

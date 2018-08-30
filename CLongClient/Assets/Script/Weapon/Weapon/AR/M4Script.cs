@@ -4,7 +4,7 @@ class M4Script : ARBase
     /// <summary>
     /// Set AK
     /// </summary>
-    protected override void Start()
+    protected override void Awake()
     {
         weaponType = "AR";
         weaponName = "M4";

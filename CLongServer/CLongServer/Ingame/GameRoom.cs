@@ -14,7 +14,7 @@ using System.Net;
 
 namespace CLongServer.Ingame
 {
-    class GameRoom 
+    class GameRoom
     {
         private enum RoundState { ROUND_START, ROUND_END, MATCH_END };
 
@@ -27,8 +27,7 @@ namespace CLongServer.Ingame
 
         //Start Position Set
         private List<Vector3> StartPosList = new List<Vector3>();
-        private List<float> StartRotList = new List<float>();
-        
+
         //Team
         private Dictionary<int, Player> PlayerDic = new Dictionary<int, Player>();
 
@@ -66,7 +65,7 @@ namespace CLongServer.Ingame
             //Set Timer;
             countTimerSet();
         }
-        
+
         /// <summary>
         /// when GameRoom entry, Set Client Info
         /// </summary>
@@ -81,7 +80,7 @@ namespace CLongServer.Ingame
             //TeamSet
             PlayerDic.Add((int)TeamColor.BLUE, new Player(0, c1));
             PlayerDic.Add((int)TeamColor.RED, new Player(0, c2));
-            
+
             foreach (var team in PlayerDic)
             {
                 var c = team.Value.Client;
@@ -112,21 +111,21 @@ namespace CLongServer.Ingame
                 if (CurrentRound.Equals(1))
                 {
                     team.Value.StartPos = StartPosList[team.Key % 2];
-                    team.Value.StartRot = StartRotList[team.Key % 2];
+                    team.Value.StartLookPos = StartPosList[(team.Key+1) % 2];
                 }
                 else if (CurrentRound.Equals(2)) //스타트 포지션 변경
                 {
                     team.Value.StartPos = StartPosList[(team.Key + 1) % 2];
-                    team.Value.StartRot = StartRotList[(team.Key + 1) % 2];
+                    team.Value.StartLookPos = StartPosList[team.Key % 2];
                 }
                 else if (CurrentRound.Equals(3))
                 {
                     team.Value.StartPos = StartPosList[team.Key % 2];
-                    team.Value.StartRot = StartRotList[team.Key % 2];
+                    team.Value.StartLookPos = StartPosList[(team.Key + 1) % 2];
                 }
             }
         }
-          
+
         /// <summary>
         /// exit Player Remove
         /// </summary>
@@ -160,8 +159,8 @@ namespace CLongServer.Ingame
                 var enemy = PlayerDic[ocNumber];
                 player.Client.Send(new IPacket[]
                 {
-                    new Player_Init((byte)cNumber, player.Hp, player.StartPos, player.StartRot, true, 0x00, 0x01, 0x02),
-                    new Player_Init((byte)ocNumber, enemy.Hp, enemy.StartPos, enemy.StartRot, false, 0x00, 0x01, 0x02)
+                    new Player_Init((byte)cNumber, player.Hp, player.StartPos, player.StartLookPos, true, 0x00, 0x01, 0x02),
+                    new Player_Init((byte)ocNumber, enemy.Hp, enemy.StartPos, enemy.StartLookPos, false, 0x00, 0x01, 0x02)
                 });
             }
             else if (p is Player_Ready)
@@ -177,7 +176,7 @@ namespace CLongServer.Ingame
                 roundState = RoundState.ROUND_START;
                 countTimerStart();
             }
-            else if(p is Player_Input
+            else if (p is Player_Input
                 || p is Player_Grounded
                 || p is Bullet_Init
                 || p is Bomb_Init)
@@ -185,14 +184,15 @@ namespace CLongServer.Ingame
                 foreach (var pair in PlayerDic)
                     pair.Value.Client.Send(p);
             }
-            else if(p is Player_Recover)
+            //다시보낼떄 sync로 처리했더니 맞을때도 아이템먹는걸로 처리되서 보내는걸 recover로 다시변경 (클라->서버 amount : 회복량 , 서버->클라 amount : 플레이어 현재체력)
+            else if (p is Player_Recover)
             {
                 var s = (Player_Recover)p;
                 PlayerDic[s.clientIdx].Hp += s.amount;
                 PlayerDic[s.clientIdx].Client.Send(
-                    new Player_Sync(s.clientIdx, PlayerDic[s.clientIdx].Hp));
+                    new Player_Recover(s.clientIdx, PlayerDic[s.clientIdx].Hp));
             }
-            else if(p is Player_TakeDmg)
+            else if (p is Player_TakeDmg)
             {
                 var s = (Player_TakeDmg)p;
                 PlayerDic[s.clientIdx].Hp -= s.damage;
@@ -232,7 +232,7 @@ namespace CLongServer.Ingame
                 return;
             //클라넘버
             int cn = d.ClientNum;
-            
+
             PlayerDic[cn].Hp -= d.Damage;
 
             if (PlayerDic[cn].Hp == 0)
@@ -283,7 +283,7 @@ namespace CLongServer.Ingame
                     new Round_Stat((byte)CurrentRound, (byte)currentPoint[0], (byte)currentPoint[1]),
                     new Round_Result(false)
                 });
-            
+
             //라운드 종료후 씬전환 전 종료 카운트 실행
             countTimerStart();
         }
@@ -309,7 +309,7 @@ namespace CLongServer.Ingame
             if (gameTimer.Enabled)
                 return;
 
-            foreach(var p in PlayerDic)
+            foreach (var p in PlayerDic)
                 p.Value.Client.Send(new Round_Timer(0));
 
             countDownTime = countMaxTime;
@@ -334,9 +334,9 @@ namespace CLongServer.Ingame
                 //Client Set
                 SetClientVar();
                 Vector3[] Pos = { PlayerDic[(int)TeamColor.BLUE].StartPos, PlayerDic[(int)TeamColor.RED].StartPos };
-                float[] Rot = { PlayerDic[(int)TeamColor.BLUE].StartRot, PlayerDic[(int)TeamColor.RED].StartRot };
+                Vector3[] LookPos = { PlayerDic[(int)TeamColor.BLUE].StartLookPos, PlayerDic[(int)TeamColor.RED].StartLookPos };
                 foreach (var cl in PlayerDic)
-                    cl.Value.Client.Send(new Player_Reset((byte)cl.Key, cl.Value.Hp, Pos, Rot));
+                    cl.Value.Client.Send(new Player_Reset((byte)cl.Key, cl.Value.Hp, Pos, LookPos));
             }
             else if (roundState == RoundState.MATCH_END)
             {
@@ -360,9 +360,48 @@ namespace CLongServer.Ingame
             //1.1f 인 이유는 skinwidth
             StartPosList.Add(new Vector3(5, 1f, 5));
             StartPosList.Add(new Vector3(10, 1f, 10));
-            StartRotList.Add(45);
-            StartRotList.Add(225);
         }
+
+    }
+}
+
+/// <summary>
+/// Team Class
+/// </summary>
+public class Player
+{
+    public bool Ready { get; set; }
+    public int RoundPoint { get; set; }
+    public int Hp
+    {
+        get
+        {
+            return _hp;
+        }
+        set
+        {
+            _hp = value;
+            if (_hp >= 100)
+                _hp = 100;
+            else if (_hp <= 0)
+                _hp = 0;
+            else
+                _hp = value;
+        }
+    }
+    public bool IsAlive { get; set; }
+    public Vector3 StartPos { get; set; }
+    public Vector3 StartLookPos { get; set; }
+    public ClientTCP Client { get; set; }
+
+    private int _hp;
+    //Point 
+    public Player(int p, ClientTCP c)
+    {
+        RoundPoint = p;
+        Client = c;
+    }
+}
 #if false
 #region TestSet
         /// <summary>
@@ -474,46 +513,6 @@ namespace CLongServer.Ingame
 
 #endregion
 #endif
-        }
-}
-
-/// <summary>
-/// Team Class
-/// </summary>
-public class Player
-{
-    public bool Ready { get; set; }
-    public int RoundPoint { get; set; }
-    public int Hp {
-        get
-        {
-            return _hp;
-        }
-        set
-        {
-            _hp = value;
-            if (_hp >= 100)
-                _hp = 100;
-            else if (_hp <= 0)
-                _hp = 0;
-            else
-                _hp = value;
-        }
-    }
-    public bool IsAlive { get; set; }
-    public Vector3 StartPos { get; set; }
-    public float StartRot { get; set; }
-    public ClientTCP Client { get; set; }
-
-    private int _hp;
-    //Point 
-    public Player(int p, ClientTCP c)
-    {
-        RoundPoint = p;
-        Client = c;
-    }
-}
-
 /*
 
 */

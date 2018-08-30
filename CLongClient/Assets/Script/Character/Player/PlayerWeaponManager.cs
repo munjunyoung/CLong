@@ -5,8 +5,11 @@ using System.Linq;
 
 public class PlayerWeaponManager : MonoBehaviour
 {
+    //해당플레이어 스크립트 (ANIMSC 를 접근하기위해)
+    public Player ownPlayer;
+
     //현재 가지고 있는 무기 dictionary
-    public Dictionary<int, WeaponBase> weaponDic = new Dictionary<int, WeaponBase>();
+    public Dictionary<int, WeaponBase> EquipweaponDic = new Dictionary<int, WeaponBase>();
 
     //현재 사용하고 있는 무기
     public WeaponBase currentUsingWeapon;
@@ -20,13 +23,13 @@ public class PlayerWeaponManager : MonoBehaviour
     public Dictionary<byte, string> WeaponManagerDic = new Dictionary<byte, string>();
     //Weapon 장비 위치 dic
     public Transform[] equipPosObjectList = new Transform[3];
+
+    //각 필요한 포지션의 위치(lefthand 애니매이션 손처리, zoompos는 카메라 위치처리)
+    public Transform CurrentleftHandTarget;
+    public Transform CurrentZoomPosTarget;
    
     private void Start()
     {
-        for(byte i=0; i<3; i++)
-        {
-            equipWeaponArray[i] = i;
-        }
         WeaponManagerDicInit();
         WeaponEquip(equipWeaponArray);
     }
@@ -41,11 +44,21 @@ public class PlayerWeaponManager : MonoBehaviour
             InsWeapon(WeaponManagerDic[s]);
 
         //처음 무기 설정
-        weaponDic[0].enabled = true;
-        currentUsingWeapon = weaponDic[0];
+        EquipweaponDic[0].enabled = true;
+        currentUsingWeapon = EquipweaponDic[0];
         currentUsingWeapon.transform.parent = currentUsingWeaponTransform;
         currentUsingWeapon.transform.localPosition = Vector3.zero;
         currentUsingWeapon.transform.localEulerAngles = Vector3.zero;
+        if(currentUsingWeapon.weaponType.Equals("AR"))
+        {
+            CurrentleftHandTarget = ((ARBase)currentUsingWeapon).LeftHand;
+            CurrentZoomPosTarget = ((ARBase)currentUsingWeapon).ZoomPos;
+        }
+        else
+        {
+            CurrentleftHandTarget = null;
+            CurrentZoomPosTarget = null;
+        }
     }
 
     /// <summary>
@@ -61,24 +74,25 @@ public class PlayerWeaponManager : MonoBehaviour
 
         var prefabWeaponSc = weaponPrefab.GetComponent(tmpdata[0] + "Base") as WeaponBase;
         //WeaponBase
-        prefabWeaponSc.equipWeaponNum = weaponDic.Count();
-        weaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
+        prefabWeaponSc.equipWeaponNum = EquipweaponDic.Count();
+        EquipweaponDic.Add(prefabWeaponSc.equipWeaponNum, prefabWeaponSc);
         //Object 장착(Parent설정)
-        weaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[prefabWeaponSc.equipWeaponNum];
+        EquipweaponDic[prefabWeaponSc.equipWeaponNum].transform.parent = equipPosObjectList[prefabWeaponSc.equipWeaponNum];
 
-        weaponDic[prefabWeaponSc.equipWeaponNum].transform.localPosition = Vector3.zero;
-        weaponDic[prefabWeaponSc.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
-        weaponDic[prefabWeaponSc.equipWeaponNum].weaponState = true;
-        weaponDic[prefabWeaponSc.equipWeaponNum].enabled = false;
+        EquipweaponDic[prefabWeaponSc.equipWeaponNum].transform.localPosition = Vector3.zero;
+        EquipweaponDic[prefabWeaponSc.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+        EquipweaponDic[prefabWeaponSc.equipWeaponNum].weaponState = true;
+        EquipweaponDic[prefabWeaponSc.equipWeaponNum].enabled = false;
+        
 
         //수류탄일경우 먹을것도 같이 저장
         if (tmpdata[0].Equals("Throwable"))
         {
             var foodData = weaponPrefab.GetComponent<FoodBase>();
-            foodData.equipWeaponNum = weaponDic.Count();
-            weaponDic.Add(foodData.equipWeaponNum, foodData);
-            weaponDic[foodData.equipWeaponNum].weaponState = true;
-            weaponDic[foodData.equipWeaponNum].enabled = false;
+            foodData.equipWeaponNum = EquipweaponDic.Count();
+            EquipweaponDic.Add(foodData.equipWeaponNum, foodData);
+            EquipweaponDic[foodData.equipWeaponNum].weaponState = true;
+            EquipweaponDic[foodData.equipWeaponNum].enabled = false;
         }
     }
     
@@ -97,18 +111,29 @@ public class PlayerWeaponManager : MonoBehaviour
             //3~5번은 통합이므로 모두 3번으로 들어가있어야함
             var tmpNumber = (tmpObject.equipWeaponNum >= 2) ? 2 : tmpObject.equipWeaponNum;
 
-            weaponDic[tmpObject.equipWeaponNum].transform.parent = equipPosObjectList[tmpNumber];
-            weaponDic[tmpObject.equipWeaponNum].transform.localPosition = Vector3.zero;
-            weaponDic[tmpObject.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
-            weaponDic[tmpObject.equipWeaponNum].enabled = false;
+            EquipweaponDic[tmpObject.equipWeaponNum].transform.parent = equipPosObjectList[tmpNumber];
+            EquipweaponDic[tmpObject.equipWeaponNum].transform.localPosition = Vector3.zero;
+            EquipweaponDic[tmpObject.equipWeaponNum].transform.localEulerAngles = Vector3.zero;
+            EquipweaponDic[tmpObject.equipWeaponNum].enabled = false;
+          
         }
         //새로운 무기로 스왑
-        weaponDic[pushNumber].enabled = true;
-        currentUsingWeapon = weaponDic[pushNumber];
+        EquipweaponDic[pushNumber].enabled = true;
+        currentUsingWeapon = EquipweaponDic[pushNumber];
         //Transform 스왑
         currentUsingWeapon.transform.parent = currentUsingWeaponTransform;
         currentUsingWeapon.transform.localPosition = Vector3.zero;
         currentUsingWeapon.transform.localEulerAngles = Vector3.zero;
+        if (currentUsingWeapon.weaponType.Equals("AR"))
+        {
+            CurrentleftHandTarget = currentUsingWeapon.transform.GetComponent<ARBase>().LeftHand;
+            CurrentZoomPosTarget = currentUsingWeapon.transform.GetComponent<ARBase>().ZoomPos;
+        }
+        else
+        {
+            CurrentleftHandTarget = null;
+            CurrentZoomPosTarget = null;
+        }
     }
 
     /// <summary>
@@ -118,6 +143,7 @@ public class PlayerWeaponManager : MonoBehaviour
     /// <param name="rot"></param>
     public void Shoot(byte clientnum, Vector3 pos, Vector3 rot)
     {
+        ownPlayer.AimStateChangeFunc();
         currentUsingWeapon.Shoot(clientnum, pos, rot);
     }
 
@@ -129,16 +155,7 @@ public class PlayerWeaponManager : MonoBehaviour
         if (currentUsingWeapon.weaponState.Equals(true))
             currentUsingWeapon.ShootSendServer(clientNum, fireTransform.position, dir);
     }
-
-
-    /// <summary>
-    /// 정조준시 무기위치 변경
-    /// </summary>
-    public void ZoomSetEquipPos(bool zoomState)
-    {
-        //currentUsingWeaponTransform.localPosition = zoomState ? new Vector3(0, -1f, 1f) : new Vector3(0.5f, -1f, 1f);
-    }
-
+    
     /// <summary>
     /// dic 초기화
     /// </summary>

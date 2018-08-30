@@ -216,7 +216,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1524512521165128}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.3, z: 0.35}
+  m_LocalPosition: {x: 0, y: 0.092, z: 0.35}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4564257545124958}
@@ -408,4 +408,6 @@ MonoBehaviour:
   equipWeaponNum: 0
   weaponState: 0
   ShootPeriod: 0
+  LeftHand: {fileID: 4389486184874746}
+  ZoomPos: {fileID: 4908727687950934}
   shootPeriodCount: 0

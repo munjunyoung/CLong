@@ -214,7 +214,6 @@ public class NetworkManager : Singleton<NetworkManager>
 
         private void ReceiveCb(IAsyncResult ar)
         {
-            Debug.Log("[UDP] Received data size : ");
             try
             {
                 var uc = (UdpClient)ar.AsyncState;

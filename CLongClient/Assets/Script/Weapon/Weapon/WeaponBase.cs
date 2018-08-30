@@ -19,11 +19,11 @@ public class WeaponBase : MonoBehaviour
     public bool weaponState = false;
     //Bomb
     //Eating
-
+    
     /// <summary>
     /// 상속
     /// </summary>
-    protected virtual void Start()
+    protected virtual void Awake()
     {
     }
     

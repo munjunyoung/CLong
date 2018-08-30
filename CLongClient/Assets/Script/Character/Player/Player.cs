@@ -12,10 +12,10 @@ public class Player : MonoBehaviour
     public byte clientNum;
     //add Script
     public PlayerWeaponManager weaponManagerSc;
-    public Transform playerUpperBody;
     public InputManager InpusSc = null;
     public PlayerAnimatorIK animSc;
 
+    //Key
     private bool[] keyState = new bool[20];
     //Move
     private float moveSpeed = 5f;
@@ -30,6 +30,7 @@ public class Player : MonoBehaviour
     //Zoom
     public bool zoomState = false;
     public bool AimingState = false;
+    public Vector3 lookTarget;
 
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
     public bool IsGroundedFromServer = false;
@@ -40,6 +41,7 @@ public class Player : MonoBehaviour
 
     //Equip
     public Transform equipWeaponTransform;
+    public bool weaponSwaping = false;
 
     //Action State
     public ActionState currentActionState
@@ -82,100 +84,23 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //if (!isAlive)
-        //    return;
+        if (!isAlive)
+            return;
 
         Move();
     }
 
     private void Update()
     {
-        TestFunc();
+        //TestFunc();
         animSc.AnimActionState = currentActionState;
     }
 
     private void LateUpdate()
     {
-        WeaponRotation();
+        WeaponRotationFunc();
     }
-
-
-
-    private void TestFunc()
-    {
-        if(Input.GetKeyDown(KeyCode.W))
-        {
-            keyState[(int)Key.W] = true;
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            keyState[(int)Key.S] = true;
-        }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            keyState[(int)Key.A] = true;
-        }
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            keyState[(int)Key.D] = true;
-        }
-        
-        if(Input.GetKeyUp(KeyCode.W))
-        {
-            keyState[(int)Key.W] = false;
-        }
-        if (Input.GetKeyUp(KeyCode.S))
-        {
-            keyState[(int)Key.S] = false;
-        }
-        if (Input.GetKeyUp(KeyCode.A))
-        {
-            keyState[(int)Key.A] = false;
-        }
-        if (Input.GetKeyUp(KeyCode.D))
-        {
-            keyState[(int)Key.D] = false;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Z))
-            keyState[(int)Key.Z] = true;
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-            keyState[(int)Key.LeftShift] = true;
-
-        if (Input.GetKeyUp(KeyCode.Z))
-            keyState[(int)Key.Z] = false;
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-            keyState[(int)Key.LeftShift] = false;
-
-        if (Input.GetKeyDown(KeyCode.Space))
-            keyState[(int)Key.Space] = true;
-
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-            keyState[(int)Key.LeftControl] = true;
-        if (Input.GetKeyUp(KeyCode.LeftControl))
-            keyState[(int)Key.LeftControl] = false;
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            animSc.anim.SetTrigger("Shoot");
-            AimingState = true;
-            animSc.anim.SetBool("AimingState", AimingState);
-        }
-
-        if (Input.GetMouseButtonDown(1))
-        {
-            zoomState = zoomState.Equals(true) ? false : true;
-
-            if (zoomState)
-            {
-                AimingState = zoomState;
-                animSc.anim.SetBool("AimingState", AimingState);
-            }
-        }
-    }
-
-   
-
+    
     /// <summary>
     /// Player Move
     /// </summary>
@@ -257,8 +182,8 @@ public class Player : MonoBehaviour
     /// </summary>
     void Fall()
     {
-       // if (IsGroundedFromServer)
-       //     return;
+        if (IsGroundedFromServer)
+            return;
         moveDirection.y -= gravity;
     }
 
@@ -289,6 +214,7 @@ public class Player : MonoBehaviour
     /// <param name="other"></param>
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other.tag);
         if (other.tag == "Shell")
         {
             //내가 쏜 총알이 아닐 경우에
@@ -323,6 +249,7 @@ public class Player : MonoBehaviour
     /// <param name="key"></param>
     public void KeyDownClient(byte key, bool state)
     {
+        Debug.Log("Key : " + (Key)key);
         switch ((Key)key)
         {
             case Key.W:
@@ -347,24 +274,29 @@ public class Player : MonoBehaviour
                 keyState[key] = state;
                 break;
             case Key.Alpha1:
-                weaponManagerSc.WeaponChange(0);
                 if (zoomState)
                     ZoomChange(false);
+                weaponManagerSc.WeaponChange(0);
+                AimStateStopEvent();
                 break;
             case Key.Alpha2:
-                weaponManagerSc.WeaponChange(1);
+                
                 if (zoomState)
                     ZoomChange(false);
+                weaponManagerSc.WeaponChange(1);
+                AimStateStopEvent();
                 break;
             case Key.Alpha3:
-                weaponManagerSc.WeaponChange(2);
                 if (zoomState)
                     ZoomChange(false);
+                weaponManagerSc.WeaponChange(2);
+                AimStateStopEvent();
                 break;
             case Key.Alpha4:
-                weaponManagerSc.WeaponChange(3);
                 if (zoomState)
                     ZoomChange(false);
+                weaponManagerSc.WeaponChange(3);
+                AimStateStopEvent();
                 break;
             case Key.Space:
                 keyState[key] = state;
@@ -385,11 +317,11 @@ public class Player : MonoBehaviour
     /// <summary>
     /// 줌상태일경우 WeaponRotation 상태
     /// </summary>
-    private void WeaponRotation()
+    private void WeaponRotationFunc()
     {
         if (AimingState)
         {
-            var dir = animSc.lookTarget - equipWeaponTransform.position;
+            var dir = lookTarget - equipWeaponTransform.position;
             dir = dir.normalized;
             var tmpRot = Quaternion.LookRotation(dir);
             equipWeaponTransform.rotation = Quaternion.Slerp(equipWeaponTransform.rotation, tmpRot, 7 * Time.deltaTime);
@@ -397,12 +329,23 @@ public class Player : MonoBehaviour
         }
      
     }
-    
+
     /// <summary>
-    /// 애니메이션 이벤트 추가 (클립 Aiming), 줌이 풀릴때에도 실행
+    /// 총을쏘기 시작할경우 변경
+    /// </summary>
+    public void AimStateChangeFunc()
+    {
+        animSc.anim.SetTrigger("Shoot");
+        AimingState = true;
+        animSc.anim.SetBool("AimingState", AimingState);
+    }
+
+    /// <summary>
+    /// 애니메이션 이벤트 추가 (클립 Aiming) , 웨폰 스왑시에 함수실행
     /// </summary>
     public void AimStateStopEvent()
     {
+        weaponSwaping = true;
         //줌상태일경우 이벤트 실행 ㄴ
         if (zoomState)
             return;
@@ -414,22 +357,23 @@ public class Player : MonoBehaviour
     }
 
     /// <summary>
-    /// GunRotation 변경 slerp처리
+    /// GunRotation 변경 slerp처리하려다가 slerp가끝나기전에 변경되거나하면 slerp가 멈추지않는경우가 생겨서 변경 
+    /// 다시 slerp로 변경(state 설정하여 다른부분을 금지)
     /// </summary>
     /// <returns></returns>
     IEnumerator GunRotation()
     {
-
-        yield return new WaitForSeconds(0.2f);
-        equipWeaponTransform.localRotation = Quaternion.identity;
-        //while (equipWeaponTransform.localRotation != Quaternion.identity)
-        //{
-        //    
-        //    equipWeaponTransform.localRotation = Quaternion.Slerp(equipWeaponTransform.localRotation, Quaternion.identity, 30 * Time.deltaTime);
-        //    yield return null;
-        //}
+        //yield return new WaitForSeconds(0.2f);
+        //equipWeaponTransform.localRotation = Quaternion.identity;
+        while (equipWeaponTransform.localRotation != Quaternion.identity)
+        {
+            
+            equipWeaponTransform.localRotation = Quaternion.Slerp(equipWeaponTransform.localRotation, Quaternion.identity, 30 * Time.deltaTime);
+            yield return null;
+        }
+        weaponSwaping = false;
     }
-    #endregion
+    
 
     /// <summary>
     /// 줌 상태 변경(무기의 위치만 변경,
@@ -439,11 +383,87 @@ public class Player : MonoBehaviour
     {
         //클라이언트 줌 UI 부분은 UI 매니저에서 생성(현재 없음)
         zoomState = tmpZoom;
-        weaponManagerSc.ZoomSetEquipPos(zoomState);
-    
-    
+        if (zoomState)
+        {
+            AimingState = zoomState;
+            animSc.anim.SetBool("AimingState", AimingState);
+        }
 
         if (clientCheck)
             InpusSc.ZoomFunc(zoomState);
     }
+    #endregion
+
+
+    /// <summary>
+    /// TestFunc
+    /// </summary>
+    private void TestFunc()
+    {
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            keyState[(int)Key.W] = true;
+        }
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            keyState[(int)Key.S] = true;
+        }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            keyState[(int)Key.A] = true;
+        }
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            keyState[(int)Key.D] = true;
+        }
+
+        if (Input.GetKeyUp(KeyCode.W))
+        {
+            keyState[(int)Key.W] = false;
+        }
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            keyState[(int)Key.S] = false;
+        }
+        if (Input.GetKeyUp(KeyCode.A))
+        {
+            keyState[(int)Key.A] = false;
+        }
+        if (Input.GetKeyUp(KeyCode.D))
+        {
+            keyState[(int)Key.D] = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+            keyState[(int)Key.Z] = true;
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+            keyState[(int)Key.LeftShift] = true;
+
+        if (Input.GetKeyUp(KeyCode.Z))
+            keyState[(int)Key.Z] = false;
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+            keyState[(int)Key.LeftShift] = false;
+
+        if (Input.GetKeyDown(KeyCode.Space))
+            keyState[(int)Key.Space] = true;
+
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+            keyState[(int)Key.LeftControl] = true;
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+            keyState[(int)Key.LeftControl] = false;
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            animSc.anim.SetTrigger("Shoot");
+            AimingState = true;
+            animSc.anim.SetBool("AimingState", AimingState);
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            zoomState = zoomState.Equals(true) ? false : true;
+
+        }
+    }
+
 }

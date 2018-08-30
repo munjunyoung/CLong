@@ -15,6 +15,9 @@ public class ARBase : WeaponBase
     protected string shellType; //사용하는 총알의 종류
     protected GameObject shellPrefab; // 총알 오브젝트 PREFAB
 
+    public Transform LeftHand;
+    public Transform ZoomPos;
+
     public int shootPeriodCount = 0;
 
     private void LateUpdate()
@@ -56,13 +59,13 @@ public class ARBase : WeaponBase
     /// Create Shell
     /// </summary>
     /// <param name="st"></param>
-    protected virtual void ShellIns(string st, byte num, Vector3 pos, Vector3 rot)
+    protected virtual void ShellIns(string st, byte num, Vector3 pos, Vector3 dir)
     {
         shellPrefab = Instantiate(Resources.Load("Prefab/Item/Weapon/Shell/" + st)) as GameObject;
         //var weaponFireTransform = transform.Find("FirePosition").transform;
-        var tmpShellSc = shellPrefab.GetComponent<ShellScript>();
-        tmpShellSc.transform.localPosition = pos;
-        tmpShellSc.transform.eulerAngles = rot;
+        var tmpShellSc = shellPrefab.GetComponentInChildren<ShellScript>();
+        tmpShellSc.parentTransform.localPosition = pos;
+        tmpShellSc.parentTransform.eulerAngles= dir;
         tmpShellSc.shellSpeed = shellSpeed;
         tmpShellSc.clientNum = num;
         tmpShellSc.damage = damage;

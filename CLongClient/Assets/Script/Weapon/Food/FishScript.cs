@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 class FishScript : FoodBase
 {
-    protected override void Start()
+    protected override void Awake()
     {
         fillHealthAmount = 50;
         eatingTime = 2;

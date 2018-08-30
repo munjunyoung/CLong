@@ -627,4 +627,6 @@ MonoBehaviour:
   equipWeaponNum: 0
   weaponState: 0
   ShootPeriod: 0
+  LeftHand: {fileID: 4144364372695224}
+  ZoomPos: {fileID: 4180898819338396}
   shootPeriodCount: 0

@@ -142,7 +142,7 @@ namespace CLongLib
         public byte clientIdx;
         public int hp;
         public Vector3 startPos;
-        public float startRot;
+        public Vector3 startLook;
         public bool assign;
         [MarshalAs(UnmanagedType.U1)]
         public byte weapon1;
@@ -151,12 +151,12 @@ namespace CLongLib
         [MarshalAs(UnmanagedType.U1)]
         public byte item;
 
-        public Player_Init(byte n, int h, Vector3 p, float r, bool b, byte w1, byte w2, byte i)
+        public Player_Init(byte n, int h, Vector3 p, Vector3 l, bool b, byte w1, byte w2, byte i)
         {
             clientIdx = n;
             hp = h;
             startPos = p;
-            startRot = r;
+            startLook = l;
             assign = b;
             weapon1 = w1;
             weapon2 = w2;
@@ -256,14 +256,14 @@ namespace CLongLib
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.Struct, SizeConst = 2)]
         public Vector3[] startPos;
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 2)]
-        public float[] yAngles;
+        public Vector3[] LookPos;
 
-        public Player_Reset(byte n, int h, Vector3[] p, float[] r)
+        public Player_Reset(byte n, int h, Vector3[] p, Vector3[] l)
         {
             clientIdx = n;
             hp = h;
             startPos = p;
-            yAngles = r;
+            LookPos = l;
         }
     }
 
@@ -385,15 +385,13 @@ namespace CLongLib
     {
         [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
-        public float xAngle;
-        public float yAngle;
+        public Vector3 lookTarget;
         public Vector3 pos;
         
-        public Player_Info(byte n, float x, float y, Vector3 p)
+        public Player_Info(byte n, Vector3 l, Vector3 p)
         {
             clientIdx = n;
-            xAngle = x;
-            yAngle = y;
+            lookTarget = l;
             pos = p;
         }
     }

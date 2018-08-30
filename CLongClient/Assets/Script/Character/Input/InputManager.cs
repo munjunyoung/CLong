@@ -25,7 +25,7 @@ public class InputManager : MonoBehaviour
     
     //Aim
     public bool zoomStateServerSend = false;
-    public Camera cam;
+    public CameraManager cam;
     private Vector3 shellDirection = Vector3.zero;
     private float aimImageStartPosValue = 10f; //조준상태가 아닐경우 에임 이미지 위치 넓히기위함
     //Aim Rebound
@@ -91,77 +91,76 @@ public class InputManager : MonoBehaviour
         //Move Direction Key
         if (Input.GetKeyDown(KeyList[(int)Key.W]))
         {
-            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
             NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.W, true), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyDown(KeyList[(int)Key.S]))
         {
-            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
             NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.S, true), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyDown(KeyList[(int)Key.A]))
         {
-            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
             NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.A, true), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyDown(KeyList[(int)Key.D]))
         {
-            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
             NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.D, true), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyUp(KeyList[(int)Key.W]))
         {
-            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
             NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.W, false), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyUp(KeyList[(int)Key.S]))
         {
-            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
             NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.S, false), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyUp(KeyList[(int)Key.A]))
         {
-            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
             NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.A, false), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyUp(KeyList[(int)Key.D]))
         {
-            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, myPlayer.transform.localEulerAngles.x, myPlayer.transform.localEulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
             NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.D, false), NetworkManager.Protocol.TCP);
         }
 
         //Run
         if (Input.GetKeyDown(KeyList[(int)Key.LeftShift]))
         {
-            if (myPlayer.currentActionState == (ActionState.None))
+            //if (myPlayer.currentActionState == (ActionState.None) || myPlayer.currentActionState == ActionState.Walk) 
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.LeftShift, true), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftShift]))
         {
-            if (myPlayer.currentActionState == (ActionState.Run))
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.LeftShift, false), NetworkManager.Protocol.TCP);
         }
 
         //Seat
         if (Input.GetKeyDown(KeyList[(int)Key.LeftControl]))
         {
-            if (myPlayer.currentActionState == (ActionState.None))
+            //if (myPlayer.currentActionState == (ActionState.None))
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.LeftControl, true), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyUp(KeyList[(int)Key.LeftControl]))
         {
-            if (myPlayer.currentActionState == (ActionState.Seat))
+            //if (myPlayer.currentActionState == (ActionState.Seat))
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.LeftControl, false), NetworkManager.Protocol.TCP);
         }
         //Creep
         if (Input.GetKeyDown(KeyList[(int)Key.Z]))
         {
-            if (myPlayer.currentActionState == (ActionState.None))
+            //if (myPlayer.currentActionState == (ActionState.None))
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Z, true), NetworkManager.Protocol.TCP);
         }
         if (Input.GetKeyUp(KeyList[(int)Key.Z]))
         {
-            if (myPlayer.currentActionState == (ActionState.SlowWalk))
+            //if (myPlayer.currentActionState == (ActionState.SlowWalk))
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Z, false), NetworkManager.Protocol.TCP);
         }
         //Jump
@@ -188,7 +187,7 @@ public class InputManager : MonoBehaviour
             if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 2)
             {
                 //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
-                if (myPlayer.weaponManagerSc.weaponDic[2].weaponState.Equals(true))
+                if (myPlayer.weaponManagerSc.EquipweaponDic[2].weaponState.Equals(true))
                     NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha3, true), NetworkManager.Protocol.TCP);
             }
         }
@@ -197,28 +196,36 @@ public class InputManager : MonoBehaviour
             if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 3)
             {
                 //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
-                if (myPlayer.weaponManagerSc.weaponDic[3].weaponState.Equals(true))
+                if (myPlayer.weaponManagerSc.EquipweaponDic[3].weaponState.Equals(true))
                     NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha4, true), NetworkManager.Protocol.TCP);
             }
         }
         //Shooting
         if (Input.GetMouseButton(0))
         {
+            //웨폰 포지션 slerp가 종료되지않았을경우
+            if(!myPlayer.weaponSwaping)
             myPlayer.weaponManagerSc.SendShootToServer(myPlayer.clientNum, ReboundShell());
         }
         //Zoom
         if (Input.GetMouseButtonDown(1))
         {
             if (myPlayer.weaponManagerSc.currentUsingWeapon.weaponType.Equals("AR"))
-                NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.RClick, zoomStateServerSend = zoomStateServerSend.Equals(true) ? false : true), NetworkManager.Protocol.TCP);
+            {
+                //웨폰포지션의 slerp가 종료된 후에
+                if(!myPlayer.weaponSwaping)
+                NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.RClick, myPlayer.zoomState.Equals(true) ? false : true), NetworkManager.Protocol.TCP);
+            }
         }
-    }
 
-    
+        //Turning Send
+        if (Mathf.Abs(Input.GetAxis("Mouse X")) > 0 || Mathf.Abs(Input.GetAxis("Mouse Y")) > 0)
+            NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+    }
 
     #region Aim
     /// <summary>
-    /// 인게임에서 조준(총의 위치와 카메라 위치 변경)Zoom
+    /// 인게임에서 조준(총의 위치와 카메라 위치 변경)Zoom (UI로 넘기는게 좋을거같다)
     /// </summary>
     public void ZoomFunc(bool zoomStateValue)
     {
@@ -236,7 +243,7 @@ public class InputManager : MonoBehaviour
     private Vector3 ReboundShell()
     {
         //정중앙 (반동추가)
-        var ShellDestination = cam.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f + Random.Range(-ReboundValue, ReboundValue), Screen.height * 0.5f + Random.Range(-ReboundValue, ReboundValue), 100f));
+        var ShellDestination = cam.target;
 
         myPlayer.weaponManagerSc.fireTransform.LookAt(ShellDestination);
         var shellDirection = myPlayer.weaponManagerSc.fireTransform.eulerAngles;
@@ -290,8 +297,7 @@ public class InputManager : MonoBehaviour
         var reboundValue = myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity;
         yRot += (reboundValue * 0.1f);
         xRot += Random.Range(-reboundValue * 0.5f, reboundValue * 0.5f);
-        NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum
-            ,myPlayer.playerUpperBody.transform.eulerAngles.x, myPlayer.transform.eulerAngles.y, TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP); 
+        NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
     }
     #endregion
 

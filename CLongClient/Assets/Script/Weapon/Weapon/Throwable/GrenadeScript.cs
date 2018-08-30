@@ -5,7 +5,7 @@ using UnityEngine;
 public class GrenadeScript : ThrowableBase {
 
     // Update is called once per frame
-    protected override void Start()
+    protected override void Awake()
     {
         weaponType = "Throwable";
         damage = 50;
