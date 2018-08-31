@@ -44,6 +44,16 @@ public class Player : MonoBehaviour
     public bool weaponSwaping = false;
 
     //Action State
+    private float verticalWeight;
+    public float verticalParam;
+    private float horizontalWeight;
+    public float horizontalParam;
+    private float dirWeight;
+    public float dirWeightParam;
+    
+
+    private float blendChangeSpeed = 5;
+    
     public ActionState currentActionState
     {
         get
@@ -90,12 +100,6 @@ public class Player : MonoBehaviour
         Move();
     }
 
-    private void Update()
-    {
-        //TestFunc();
-        animSc.AnimActionState = currentActionState;
-    }
-
     private void LateUpdate()
     {
         WeaponRotationFunc();
@@ -110,6 +114,19 @@ public class Player : MonoBehaviour
         var s = keyState[(int)Key.S] ? -1 : 0;
         var a = keyState[(int)Key.A] ? -1 : 0;
         var d = keyState[(int)Key.D] ? 1 : 0;
+        verticalWeight = w + s;
+        //뒤로가고있을댄 사이즈가 반대로되어야함
+        horizontalWeight = verticalWeight.Equals(-1)? -(a + d) : a + d;
+
+        //너무 딱딱끊기게 움직여서 lerp추가
+        verticalParam = Mathf.Lerp(verticalParam, verticalWeight, Time.deltaTime * blendChangeSpeed);//verticalWeight.Equals(0)? 0 : 
+        horizontalParam = Mathf.Lerp(horizontalParam, horizontalWeight, Time.deltaTime * blendChangeSpeed);//horizontalWeight.Equals(0)?0 :
+
+        // -1이면 수직, 1이면 수평 0이면 섞는다
+        var verTmp = verticalWeight.Equals(0) ? 0 : -1;
+        var horTmp = horizontalWeight.Equals(0) ? 0 : 1;
+        dirWeight = verTmp + horTmp;
+        dirWeightParam = Mathf.Lerp(dirWeightParam, dirWeight, blendChangeSpeed * Time.deltaTime);
 
 
         moveDirection = new Vector3(a + d, 0, w + s);

@@ -27,8 +27,7 @@ public class PlayerAnimatorIK : MonoBehaviour
 
     [Range(0.0f, 1.0f)]
     public float leftHandWeight;
-
-    public ActionState AnimActionState;
+    
 
     void Start()
     {
@@ -39,7 +38,11 @@ public class PlayerAnimatorIK : MonoBehaviour
     //-0.12 -0.17
     private void LateUpdate()
     {
-        anim.SetInteger("StateParam", (int)AnimActionState);
+        anim.SetInteger("StateParam", (int)OwnPlayer.currentActionState);
+        anim.SetFloat("WeightParam", OwnPlayer.dirWeightParam);
+        anim.SetFloat("VerticalParam", OwnPlayer.verticalParam);
+        anim.SetFloat("HorizontalParam", OwnPlayer.horizontalParam);
+
     }
     /// <summary>
     /// iK관련 함수 왼쪽 손 포지션, 움직이지않을경우 어느각도 이상 TURN했을경우 전체 로테이션변경, 
@@ -51,7 +54,7 @@ public class PlayerAnimatorIK : MonoBehaviour
         anim.SetLookAtPosition(OwnPlayer.lookTarget);
 
         //이동중일경우 y값을 오브젝트 최선임에게 적용 
-        if (AnimActionState != ActionState.None)
+        if (OwnPlayer.currentActionState != ActionState.None)
         {
             var dir = OwnPlayer.lookTarget - this.transform.position;
             dir = dir.normalized;
