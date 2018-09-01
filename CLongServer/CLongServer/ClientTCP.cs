@@ -29,6 +29,7 @@ namespace CLongServer
         #region InGame
         //Ingame 
         public bool ingame = false;
+        public Player player;
 
         //Weapon
         public string[] sendWeaponArray = { "AR/AK", "AR/M4", "Throwable/HandGenerade" };
@@ -40,9 +41,9 @@ namespace CLongServer
         /// <param name="t"></param>
         public ClientTCP(TcpClient tc)
         {
+            player = new Player(0, this);
             clientTcp = tc;
             //BeginReceive();
-
             // 변경예정
             clientTcp.Client.BeginReceive(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None, ReceiveCb, clientTcp.Client);
         }
@@ -160,6 +161,15 @@ namespace CLongServer
                     var result = MatchingManager.Instance.QueueClient(this, s.req);
                     this.Send(new Queue_Ack(s.req, result));
                     MatchingManager.Instance.CheckMatching();
+                }
+                else if (p is PlayerSetting_Req)
+                {
+                    var s = (PlayerSetting_Req)p;
+                    player.character = s.character;
+                    player.firstWeapon = s.firstWeapon;
+                    player.secondWeapon = s.secondWeapon;
+                    player.throwble = s.item;
+                    this.Send(new PlayerSetting_Ack(0));
                 }
             }
             else

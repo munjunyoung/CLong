@@ -159,8 +159,8 @@ namespace CLongServer.Ingame
                 var enemy = PlayerDic[ocNumber];
                 player.Client.Send(new IPacket[]
                 {
-                    new Player_Init((byte)cNumber, player.Hp, player.StartPos, player.StartLookPos, true, 0x00, 0x01, 0x02),
-                    new Player_Init((byte)ocNumber, enemy.Hp, enemy.StartPos, enemy.StartLookPos, false, 0x00, 0x01, 0x02)
+                    new Player_Init((byte)cNumber, player.Hp, player.StartPos, player.StartLookPos, true, player.character, player.firstWeapon, player.secondWeapon, player.throwble),
+                    new Player_Init((byte)ocNumber, enemy.Hp, enemy.StartPos, enemy.StartLookPos, false, enemy.character, enemy.firstWeapon, enemy.secondWeapon, enemy.throwble),
                 });
             }
             else if (p is Player_Ready)
@@ -372,6 +372,10 @@ public class Player
 {
     public bool Ready { get; set; }
     public int RoundPoint { get; set; }
+    public byte character;
+    public byte firstWeapon;
+    public byte secondWeapon;
+    public byte throwble;
     public int Hp
     {
         get

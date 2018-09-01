@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class IngameManager : Singleton<IngameManager>
 {
     //playerIns Prefab
-    public GameObject playerPrefab;
+    public GameObject[] playerPrefab;
     //Player check
     public Player[] playerList = new Player[2];
 
@@ -35,7 +35,7 @@ public class IngameManager : Singleton<IngameManager>
                 //받았을때 클라이언트 생성(아군 적군 모두)
                 var s = (Player_Init)p;
 
-                CreatePlayerObject(s.clientIdx, s.hp,TotalUtility.ToUnityVectorChange(s.startPos), TotalUtility.ToUnityVectorChange(s.startLook), s.assign, s.weapon1, s.weapon2, s.item);
+                CreatePlayerObject(s.clientIdx, s.hp,TotalUtility.ToUnityVectorChange(s.startPos), TotalUtility.ToUnityVectorChange(s.startLook), s.assign, s.character, s.weapon1, s.weapon2, s.item);
                 if (s.assign)
                     NetworkManager.Instance.SendPacket(new Player_Ready(clientPlayerNum), NetworkManager.Protocol.TCP);
 
@@ -157,10 +157,10 @@ public class IngameManager : Singleton<IngameManager>
     /// <summary>
     /// Client 생성
     /// </summary>
-    public void CreatePlayerObject(byte num, int health, Vector3 pos, Vector3 look , bool clientCheck, byte w1, byte w2, byte item)
+    public void CreatePlayerObject(byte num, int health, Vector3 pos, Vector3 look , bool clientCheck, byte c, byte w1, byte w2, byte item)
     {
         //배정되는 클라이언트 num에 prefab생성
-        var tmpPrefab = Instantiate(playerPrefab);
+        var tmpPrefab = Instantiate(playerPrefab[c]);
         tmpPrefab.GetComponent<Player>().clientNum = num;
         tmpPrefab.transform.position = pos;
 

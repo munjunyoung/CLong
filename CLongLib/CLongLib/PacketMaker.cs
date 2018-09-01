@@ -30,7 +30,10 @@ namespace CLongLib
             {typeof(Player_Init),       0x08 },
             {typeof(Player_Ready),      0x09 },
             {typeof(Round_Timer),       0x0A },
+            {typeof(PlayerSetting_Req), 0x0B },
+            {typeof(PlayerSetting_Ack), 0x0C },
 
+            // Ingame packet definition
             {typeof(Player_Input),      0x80 },
             {typeof(Player_Sync),       0x81 },
             {typeof(Player_Info),       0x82 },

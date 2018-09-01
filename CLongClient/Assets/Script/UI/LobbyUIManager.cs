@@ -7,11 +7,13 @@ using CLongLib;
 
 public class LobbyUIManager : Singleton<LobbyUIManager>
 {
-    private enum PanelMove { UP = 0, DOWN, LEFT, RIGHT, RETURN}
+    private enum PanelMove { UP = 0, DOWN, LEFT, RIGHT, RETURN }
 
     public GameObject effectChangeCharacter;
-    public GameObject[] mainCharacterList;
     public Transform pivot;
+    [Header("Inventory Panel")]
+    public GameObject[] mainCharacterList;
+    public ToggleGroup mainCharacterToggleGroup;
 
     [Header("Matching Panel")]
     public RectTransform matchWaitingUI;
@@ -22,7 +24,8 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
 
     private Coroutine _waitTimer;
 
-    private GameObject _curCharacter;
+    private byte _curCharacterIdx;
+    private byte[] _equippedItemAry = new byte[3];
 
     public void OnClickMatch(bool b)
     {
@@ -46,7 +49,7 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
         }
     }
 
-    public void OnClickMovePanel(int i)
+    public void OnClickMoveCanvas(int i)
     {
         var p = (PanelMove)i;
         switch (p)
@@ -80,16 +83,29 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
 
     }
 
+    public void OnClickInvenOK()
+    {
+        NetworkManager.Instance.SendPacket(new PlayerSetting_Req(_curCharacterIdx, _equippedItemAry[0], _equippedItemAry[1], _equippedItemAry[2])
+            , NetworkManager.Protocol.TCP);
+        this.OnClickMoveCanvas((int)PanelMove.RETURN);
+    }
+
+
     public void OnClickChangeCharacter(int idx)
     {
-        _curCharacter.SetActive(false);
-        _curCharacter = mainCharacterList[idx];
-        _curCharacter.SetActive(true);
+        mainCharacterList[_curCharacterIdx].SetActive(false);
+        _curCharacterIdx = (byte)idx;
+        mainCharacterList[_curCharacterIdx].SetActive(true);
+    }
+
+    public void SetEquippedItem(int idx, byte id)
+    {
+        _equippedItemAry[idx] = id;
     }
 
     protected override void Init()
     {
-        _curCharacter = mainCharacterList[0];
+        _curCharacterIdx = 0;
         //OnClickChangeCharacter(0);
         DOTween.defaultEaseType = Ease.OutBack;
     }

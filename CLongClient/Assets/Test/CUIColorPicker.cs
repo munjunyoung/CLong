@@ -191,11 +191,11 @@ public class CUIColorPicker : MonoBehaviour
 
     void Awake()
     {
-        Color = Color.red;
+        //Color = Color.red;
     }
 
     void Update()
     {
-        _update();
+        //_update();
     }
 }

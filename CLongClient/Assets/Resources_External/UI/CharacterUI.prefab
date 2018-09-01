@@ -39,6 +39,7 @@ GameObject:
   - component: {fileID: 222475804382237658}
   - component: {fileID: 114878219700082912}
   - component: {fileID: 114038805277028144}
+  - component: {fileID: 114015189665014490}
   m_Layer: 5
   m_Name: CharacterUI
   m_TagString: Untagged
@@ -80,6 +81,18 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &114015189665014490
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1455870422831562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eea12d86b01309d4299147d0424ba362, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 0
 --- !u!114 &114038805277028144
 MonoBehaviour:
   m_ObjectHideFlags: 1

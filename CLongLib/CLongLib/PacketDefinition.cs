@@ -24,6 +24,37 @@ namespace CLongLib
         public bool req;
     }
 
+    public struct PlayerSetting_Req : IPacket
+    {
+        [MarshalAs(UnmanagedType.U1)]
+        public byte character;
+        [MarshalAs(UnmanagedType.U1)]
+        public byte firstWeapon;
+        [MarshalAs(UnmanagedType.U1)]
+        public byte secondWeapon;
+        [MarshalAs(UnmanagedType.U1)]
+        public byte item;
+
+        public PlayerSetting_Req(byte c, byte w1, byte w2, byte i)
+        {
+            character = c;
+            firstWeapon = w1;
+            secondWeapon = w2;
+            item = i;
+        }
+    }
+
+    public struct PlayerSetting_Ack : IPacket
+    {
+        [MarshalAs(UnmanagedType.U1)]
+        public byte result;
+
+        public PlayerSetting_Ack(byte r)
+        {
+            result = r;
+        }
+    }
+
     #region LoginPacket
     /// <summary>
     /// Login request from CLIENT to SERVER.
@@ -145,19 +176,22 @@ namespace CLongLib
         public Vector3 startLook;
         public bool assign;
         [MarshalAs(UnmanagedType.U1)]
+        public byte character;
+        [MarshalAs(UnmanagedType.U1)]
         public byte weapon1;
         [MarshalAs(UnmanagedType.U1)]
         public byte weapon2;
         [MarshalAs(UnmanagedType.U1)]
         public byte item;
 
-        public Player_Init(byte n, int h, Vector3 p, Vector3 l, bool b, byte w1, byte w2, byte i)
+        public Player_Init(byte n, int h, Vector3 p, Vector3 l, bool b, byte c, byte w1, byte w2, byte i)
         {
             clientIdx = n;
             hp = h;
             startPos = p;
             startLook = l;
             assign = b;
+            character = c;
             weapon1 = w1;
             weapon2 = w2;
             item = i;

@@ -19,17 +19,6 @@ namespace CLongServer
         
         private static void Main()
         {
-            //Queue<IPacket> q = new Queue<IPacket>();
-            //var r = new Player_Reset(0x01, 0x11111111,
-            //    new System.Numerics.Vector3[] {
-            //        new System.Numerics.Vector3(1, 1, 1),
-            //        new System.Numerics.Vector3(2, 2, 2) },
-            //    new float[] { 45, 225 });
-            //var b = PacketMaker.SetPacket(r);
-
-            //var rr = new Match_End(true);
-            //PacketMaker.SetPacket(rr);
-            //PacketMaker.GetPacket(b, ref q);
             Program newProgram = new Program();
             newProgram.TcpStart();
         }
