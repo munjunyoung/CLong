@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class InventoryCharInfo : MonoBehaviour
 {
+    public AudioSource sound;
     public int id;
     Toggle tg;
 
@@ -18,6 +19,7 @@ public class InventoryCharInfo : MonoBehaviour
             if (!isOn) return;
 
             LobbyUIManager.Instance.OnClickChangeCharacter(id);
+            sound.Play();
         });
 	}
 }

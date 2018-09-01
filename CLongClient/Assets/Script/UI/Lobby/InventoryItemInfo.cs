@@ -11,12 +11,15 @@ public class InventoryItemInfo : MonoBehaviour,
     public Image itemImg;
     public GameObject equippedUI;
     public byte itemNum;
+    public AudioSource sound;
 
     private GameObject go;
+    
 
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (equippedUI.activeSelf) return;
+        sound.Play();
 
         go = Instantiate(gameObject, LobbyUIManager.Instance.transform);
         foreach(var img in go.GetComponentsInChildren<Image>())
@@ -37,6 +40,7 @@ public class InventoryItemInfo : MonoBehaviour,
     {
         if (equippedUI.activeSelf) return;
 
+        sound.Play();
         var hoverList = eventData.hovered;
         foreach(GameObject g in hoverList)
         {

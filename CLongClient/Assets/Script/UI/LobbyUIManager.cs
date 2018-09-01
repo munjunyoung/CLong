@@ -11,6 +11,7 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
 
     public GameObject effectChangeCharacter;
     public Transform pivot;
+    public GameObject noticeUI;
     [Header("Inventory Panel")]
     public GameObject[] mainCharacterList;
     public ToggleGroup mainCharacterToggleGroup;
@@ -25,13 +26,22 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
     private Coroutine _waitTimer;
 
     private byte _curCharacterIdx;
-    private byte[] _equippedItemAry = new byte[3];
+    private byte[] _equippedItemAry = new byte[3] { 0xFF, 0xFF, 0xFF };
 
     public void OnClickMatch(bool b)
     {
         //matchWaitingUI.SetActive(b);
         if (b)
         {
+            for (int i = 0; i < _equippedItemAry.Length; ++i)
+            {
+                if (_equippedItemAry[i] == 0xFF)
+                {
+                    noticeUI.SetActive(true);
+                    return;
+                }
+            }
+
             if (_waitTimer != null)
                 return;
 
@@ -71,6 +81,11 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
                 pivot.DOLocalMoveY(0, 0.3f);
                 break;
         }
+    }
+
+    public void OnClickNoticeConfirm()
+    {
+        noticeUI.SetActive(false);
     }
 
     public void OnClickOption()

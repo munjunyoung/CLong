@@ -225,6 +225,7 @@ MonoBehaviour:
   itemImg: {fileID: 114414073746347156}
   equippedUI: {fileID: 1204331770181890}
   itemNum: 0
+  sound: {fileID: 0}
 --- !u!114 &114414073746347156
 MonoBehaviour:
   m_ObjectHideFlags: 1
