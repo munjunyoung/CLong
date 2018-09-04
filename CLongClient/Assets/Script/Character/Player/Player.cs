@@ -35,7 +35,7 @@ public class Player : MonoBehaviour
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
     public bool IsGroundedFromServer = false;
     private float gravity = 10f;
-    private float jumpSpeed = 20f;
+    private float jumpPower = 10f;
     private float jumpTimer = 0f;
     public GameObject GroundCheckObject;
 
@@ -52,7 +52,7 @@ public class Player : MonoBehaviour
     public float dirWeightParam;
     
 
-    private float blendChangeSpeed = 5;
+    private float blendChangeSpeed = 7;
     
     public ActionState currentActionState
     {
@@ -80,11 +80,11 @@ public class Player : MonoBehaviour
                 case ActionState.Seat:
                     moveSpeed = 1.5f;
                     break;
-                case ActionState.SeatWalk:
-                    moveSpeed = 1.5f;
-                    break;  
                 case ActionState.Jump:
-                    moveSpeed = 3f;
+                    moveSpeed = 1f;
+                    break;
+                case ActionState.Fall:
+                    moveSpeed = 0.5f;
                     break;
             }
         }
@@ -134,9 +134,7 @@ public class Player : MonoBehaviour
         
         moveDirection = transform.TransformDirection(moveDirection);
         moveDirection *= moveSpeed;
-
-        //Jump
-        Jump();
+        
         //Gravity
         Fall();
 
@@ -149,6 +147,7 @@ public class Player : MonoBehaviour
         var currentPosHeight = this.transform.position.y;
 
         //애니메이션
+        //점프일경우 return (변경하는 부분은 키데이터를 받았을떄만 처리 (AnyState)
         //제자리일 경우
         if (prevPos == currentPos)
         {
@@ -165,33 +164,13 @@ public class Player : MonoBehaviour
             else if (keyState[(int)Key.LeftShift])
                 currentActionState = ActionState.Run;
             else if (keyState[(int)Key.LeftControl])
-                currentActionState = ActionState.SeatWalk;
+                currentActionState = ActionState.Seat;
             else
                 currentActionState = ActionState.Walk;
         }
         //y값이 다른 경우
-        else if (prePosHegiht > currentPosHeight)
-            currentActionState = ActionState.Fall;
-    }
-
-    /// <summary>
-    /// Jump
-    /// </summary>
-    void Jump()
-    {
-        if (!keyState[(int)Key.Space])
-            return;
-
-        if (jumpTimer <= 0.2f)
-        {
-            jumpTimer += Time.deltaTime;
-            moveDirection.y = jumpSpeed;
-        }
-        else
-        {
-            jumpTimer = 0f;
-            keyState[(int)Key.Space] = false;
-        }
+        //else if (prePosHegiht > currentPosHeight)
+        // 떨어지는 애니매이션
     }
     
     /// <summary>
@@ -266,7 +245,6 @@ public class Player : MonoBehaviour
     /// <param name="key"></param>
     public void KeyDownClient(byte key, bool state)
     {
-        Debug.Log("Key : " + (Key)key);
         switch ((Key)key)
         {
             case Key.W:
@@ -316,7 +294,9 @@ public class Player : MonoBehaviour
                 AimStateStopEvent();
                 break;
             case Key.Space:
-                keyState[key] = state;
+                //keyState[key] = state;
+                currentActionState = ActionState.Jump;
+                animSc.anim.SetTrigger("JumpTrigger");
                 break;
             case Key.RClick:
                 ZoomChange(state);
@@ -482,5 +462,32 @@ public class Player : MonoBehaviour
 
         }
     }
+    
+    /// <summary>
+    /// 점프관련 끝났을떄 state변경해주기 (trigger로 실행하긴하나 점프 할 경우에 이동속도등 변경을 위해서)
+    /// </summary>
+    public void JumpStateChangeInAnim()
+    {
+        currentActionState = ActionState.None;
+    }
 
+    public void JumpStartInAnim()
+    {
+        StartCoroutine(JumpCoroutine());
+        
+    }
+
+    IEnumerator JumpCoroutine()
+    {
+        while (jumpTimer<0.10)
+        {
+            jumpTimer += Time.deltaTime;
+            
+            this.transform.position = Vector3.Slerp(this.transform.position, new Vector3(this.transform.position.x, this.transform.position.y + jumpPower, this.transform.position.z), Time.deltaTime);
+            Debug.Log("<color=blue>" + "점프 : " + this.transform.position.y + "</color>");
+            yield return null;
+        }
+        jumpTimer = 0;
+    }
+    
 }
