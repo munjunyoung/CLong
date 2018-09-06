@@ -6,7 +6,7 @@ class M4Script : ARBase
     /// </summary>
     protected override void Awake()
     {
-        weaponType = "AR";
+        type = ItemType.WEAPON;
         weaponName = "M4";
         shellType = "5mm";
         damage = 30;
@@ -14,6 +14,7 @@ class M4Script : ARBase
         ShootPeriod = 5;
         reboundIntensity = 5;
         reboundRecoveryTime = 2;
+        zoomPossible = true;
     }
 }
 

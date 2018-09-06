@@ -853,6 +853,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myPlayer: {fileID: 0}
+  yRot: 0
+  xRot: 0
   target: {x: 0, y: 0, z: 0}
 --- !u!1 &868549756
 GameObject:
@@ -1094,8 +1096,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerPrefab:
   - {fileID: 1225391518894114, guid: a9dda1d79eb36fb419a5c47ab6f7ad93, type: 2}
-  - {fileID: 1498817198655774, guid: 8a1ca1ab2487cd74dada0c19c6fc9413, type: 2}
   - {fileID: 1736127187016664, guid: 02d866e36f791794b8f59a097213b927, type: 2}
+  - {fileID: 1498817198655774, guid: 8a1ca1ab2487cd74dada0c19c6fc9413, type: 2}
   playerList:
   - {fileID: 0}
   - {fileID: 0}
@@ -1126,8 +1128,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myPlayer: {fileID: 0}
-  xRot: -1
-  yRot: -1
   zoomStateServerSend: 0
   cam: {fileID: 783572681}
   aimImage:
@@ -1135,6 +1135,7 @@ MonoBehaviour:
   - {fileID: 1749623792}
   - {fileID: 1467514813}
   - {fileID: 1416684623}
+  ReboundValue: 0
   ViewRoundPanel: {fileID: 710974505}
   ViewRoundText: {fileID: 183276345}
   ViewPointText: {fileID: 769998293}

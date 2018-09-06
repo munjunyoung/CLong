@@ -238,15 +238,7 @@ ModelImporter:
       mirror: 0
       bodyMask: 00000000010000000100000000000000000000000100000001000000010000000100000000000000000000000100000001000000
       curves: []
-      events:
-      - time: 1
-        functionName: AimStateStopEvent
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 48b5e21a02d2dcf48906822036c0482f,
-          type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
+      events: []
       transformMask: []
       maskType: 3
       maskSource: {fileID: 31900000, guid: 1e0670b7de8f78848a9e070c8f852d99, type: 2}

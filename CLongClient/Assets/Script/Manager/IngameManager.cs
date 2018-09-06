@@ -68,34 +68,34 @@ public class IngameManager : Singleton<IngameManager>
             {
                 //Player key 관련 처리
                 var s = (Player_Input)p;
+                if (playerList[s.clientIdx] == null)
+                    return;
                 playerList[s.clientIdx].KeyDownClient(s.key, s.down);
             }
             else if(p is Player_Grounded)
             {
                 //player isGrounded 처리
                 var s = (Player_Grounded)p;
+                if (playerList[s.clientIdx] == null)
+                    return;
                 playerList[s.clientIdx].IsGroundedFromServer = s.state;
             }
-            else if(p is Bullet_Init)
-            {
-                //총알 생성
-                var s = (Bullet_Init)p;
-                if (playerList[s.clientIdx] != null)
-                    playerList[s.clientIdx].weaponManagerSc.Shoot(s.clientIdx, TotalUtility.ToUnityVectorChange(s.pos), TotalUtility.ToUnityVectorChange(s.rot));
-                if(clientPlayerNum==s.clientIdx)
-                {
-                    inputSc.ReboundPlayerRotation();
-                    inputSc.ReboundAimImage();
-                }
-                //반동처리등 해야함
-            }
-            else if (p is Bomb_Init)
+            else if (p is Use_Item)
             {
                 //폭탄 던지기
-                var s = (Bomb_Init)p;
-                if(playerList[s.clientIdx]!= null)
-                    playerList[s.clientIdx].weaponManagerSc.Shoot(s.clientIdx, TotalUtility.ToUnityVectorChange(s.pos), TotalUtility.ToUnityVectorChange(s.rot));
+                var s = (Use_Item)p;
+                if (playerList[s.clientIdx] == null)
+                    return;
+                if (playerList[s.clientIdx] != null)
+                    playerList[s.clientIdx].weaponManagerSc.UseItem(s.clientIdx, TotalUtility.ToUnityVectorChange(s.pos), TotalUtility.ToUnityVectorChange(s.rot));
             }
+            else if(p is Throw_BombAnim)
+            {
+                var s = (Throw_BombAnim)p;
+                if (playerList[s.clientIdx] != null)
+                    playerList[s.clientIdx].animSc.anim.SetTrigger("Shoot");
+            }
+          
             else if(p is Player_Sync)
             {
                 //체력 설정
@@ -106,7 +106,7 @@ public class IngameManager : Singleton<IngameManager>
             {
                 var s = (Player_Recover)p;
                 if (playerList[s.clientIdx] != null)
-                    playerList[s.clientIdx].weaponManagerSc.Shoot(s.clientIdx, Vector3.zero, Vector3.zero);
+                    playerList[s.clientIdx].weaponManagerSc.UseItem(s.clientIdx, Vector3.zero, Vector3.zero);
                     inputSc.SetHealthUI(s.amount);
             }
             else if(p is Player_Dead)
@@ -140,7 +140,10 @@ public class IngameManager : Singleton<IngameManager>
             {
                 //싱크(적편에게만 적용)
                 var s = (Player_Info)p;
-                if(clientPlayerNum!=s.clientIdx)
+                if (playerList[s.clientIdx] == null)
+                    return;
+
+                if (clientPlayerNum!=s.clientIdx)
                 {
                     var i = s.clientIdx;
                     //Position
@@ -160,7 +163,7 @@ public class IngameManager : Singleton<IngameManager>
     public void CreatePlayerObject(byte num, int health, Vector3 pos, Vector3 look , bool clientCheck, byte c, byte w1, byte w2, byte item)
     {
         //배정되는 클라이언트 num에 prefab생성
-        var tmpPrefab = Instantiate(playerPrefab[c]);
+        var tmpPrefab = Instantiate(playerPrefab[2]);
         tmpPrefab.GetComponent<Player>().clientNum = num;
         tmpPrefab.transform.position = pos;
 
@@ -168,26 +171,28 @@ public class IngameManager : Singleton<IngameManager>
         
         byte[] tmpItemData = { w1, w2, item };
         playerList[num].weaponManagerSc.equipWeaponArray = tmpItemData;
+        //Alive True
+        playerList[num].isAlive = true;
+        playerList[num].animSc.anim.SetBool("Alive", playerList[num].isAlive);
         
         playerList[num].lookTarget = look;
-
-        playerList[num].isAlive = true;
-
+        
+        //클라이언트 일 경우
         if (!clientCheck)
             return;
-        //클라이언트 일 경우
+
         clientPlayerNum = num;
+        playerList[clientPlayerNum].clientCheck = true;
+
         //플레이어 오브젝트 cam
-        inputSc.SetHealthUI(health);
-        //Zoom UI 부분 설정을 위해서
-        playerList[clientPlayerNum].InpusSc = inputSc;
         var camSc = inputSc.cam.GetComponent<CameraManager>();
         camSc.myPlayer = playerList[clientPlayerNum];
-        
-        inputSc.myPlayer = playerList[clientPlayerNum];
+        playerList[clientPlayerNum].cam = camSc;    
 
-        playerList[clientPlayerNum].clientCheck = true;
-        playerList[clientPlayerNum].GroundCheckObject.SetActive(true);
+        //Input
+        playerList[clientPlayerNum].InputSc = inputSc;
+        inputSc.myPlayer = playerList[clientPlayerNum];
+        inputSc.SetHealthUI(health);
     }
 
     /// <summary>
@@ -201,14 +206,13 @@ public class IngameManager : Singleton<IngameManager>
         {
             var tmpP = playerList[i];
             tmpP.transform.position = TotalUtility.ToUnityVectorChange(p[i]);
-
             tmpP.lookTarget = TotalUtility.ToUnityVectorChange(target[i]);
 
             if (tmpP.zoomState)
-                tmpP.ZoomChange(tmpP.zoomState = false);
-            if (!tmpP.gameObject.activeSelf)
-                tmpP.gameObject.SetActive(true);
+                tmpP.weaponManagerSc.ZoomChange(tmpP.zoomState = false);
+
             tmpP.isAlive = true;
+            tmpP.animSc.anim.SetBool("Alive", tmpP.isAlive);
         }
         //Send
         NetworkManager.Instance.SendPacket(new Player_Ready(clientPlayerNum), NetworkManager.Protocol.TCP);

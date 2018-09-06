@@ -12,8 +12,11 @@ public class Player : MonoBehaviour
     public byte clientNum;
     //add Script
     public PlayerWeaponManager weaponManagerSc;
-    public InputManager InpusSc = null;
     public PlayerAnimatorIK animSc;
+
+    //자신의 클라이언트일경우에만 null이 아니다
+    public InputManager InputSc = null;
+    public CameraManager cam = null;
 
     //Key
     private bool[] keyState = new bool[20];
@@ -38,11 +41,7 @@ public class Player : MonoBehaviour
     private float jumpPower = 10f;
     private float jumpTimer = 0f;
     public GameObject GroundCheckObject;
-
-    //Equip
-    public Transform equipWeaponTransform;
-    public bool weaponSwaping = false;
-
+    
     //Action State
     private float verticalWeight;
     public float verticalParam;
@@ -51,7 +50,6 @@ public class Player : MonoBehaviour
     private float dirWeight;
     public float dirWeightParam;
     
-
     private float blendChangeSpeed = 7;
     
     public ActionState currentActionState
@@ -66,25 +64,23 @@ public class Player : MonoBehaviour
             switch(_currentAc)
             {
                 case ActionState.None:
-                    moveSpeed = 3f;
+                    moveSpeed = 2f;
                     break;
                 case ActionState.SlowWalk:
                     moveSpeed = 1f;
                     break;
                 case ActionState.Walk:
-                    moveSpeed = 3f;
+                    moveSpeed = 2f;
                     break;
                 case ActionState.Run:
-                    moveSpeed = 5f;
+                    moveSpeed = 3f;
                     break;
                 case ActionState.Seat:
                     moveSpeed = 1.5f;
                     break;
                 case ActionState.Jump:
-                    moveSpeed = 1f;
                     break;
                 case ActionState.Fall:
-                    moveSpeed = 0.5f;
                     break;
             }
         }
@@ -102,7 +98,7 @@ public class Player : MonoBehaviour
 
     private void LateUpdate()
     {
-        WeaponRotationFunc();
+        weaponManagerSc.WeaponRotationAimState();
     }
     
     /// <summary>
@@ -122,7 +118,7 @@ public class Player : MonoBehaviour
         verticalParam = Mathf.Lerp(verticalParam, verticalWeight, Time.deltaTime * blendChangeSpeed);//verticalWeight.Equals(0)? 0 : 
         horizontalParam = Mathf.Lerp(horizontalParam, horizontalWeight, Time.deltaTime * blendChangeSpeed);//horizontalWeight.Equals(0)?0 :
 
-        // -1이면 수직, 1이면 수평 0이면 섞는다
+        // -1이면 수직, 1이면 수평, 0이면 섞는다
         var verTmp = verticalWeight.Equals(0) ? 0 : -1;
         var horTmp = horizontalWeight.Equals(0) ? 0 : 1;
         dirWeight = verTmp + horTmp;
@@ -147,8 +143,12 @@ public class Player : MonoBehaviour
         var currentPosHeight = this.transform.position.y;
 
         //애니메이션
-        //점프일경우 return (변경하는 부분은 키데이터를 받았을떄만 처리 (AnyState)
+        //점프일경우 action State를 고정해주기 위해서
+        if (currentActionState == ActionState.Jump)
+            return;
         //제자리일 경우
+
+
         if (prevPos == currentPos)
         {
             if (keyState[(int)Key.LeftControl])
@@ -182,6 +182,33 @@ public class Player : MonoBehaviour
             return;
         moveDirection.y -= gravity;
     }
+    
+    /// <summary>
+    /// 점프관련 끝났을떄 state변경해주기 (trigger로 실행하긴하나 점프 할 경우에 이동속도등 변경을 위해서)
+    /// </summary>
+    public void JumpStateChangeInAnim()
+    {
+        currentActionState = ActionState.None;
+    }
+
+    public void JumpStartInAnim()
+    {
+        StartCoroutine(JumpCoroutine());
+    }
+
+    IEnumerator JumpCoroutine()
+    {
+        while (jumpTimer < 0.10)
+        {
+            jumpTimer += Time.deltaTime;
+
+            //this.transform.position = Vector3.Slerp(this.transform.position, new Vector3(this.transform.position.x, this.transform.position.y + jumpPower, this.transform.position.z), Time.deltaTime);
+            //this.transform.position = new Vector3(this.transform.position.x, Mathf.Lerp(startY, endY, Time.deltaTime * 0.5f), this.transform.position.z);
+            playerController.Move(Vector3.up * jumpPower * Time.deltaTime);
+            yield return null;
+        }
+        jumpTimer = 0;
+    }
 
     /// <summary>
     /// 맞은위치 pos을 받아와 데미지 이펙트 처리
@@ -197,11 +224,12 @@ public class Player : MonoBehaviour
     /// </summary>
     public void Death()
     {
+        if (zoomState)
+            weaponManagerSc.ZoomChange(false);
         //모두 정지
         isAlive = false;
-        this.gameObject.SetActive(false);
-        Debug.Log("저 주거욧");
-
+        animSc.anim.SetTrigger("Death");
+        animSc.anim.SetBool("Alive", isAlive);
     }
 
     /// <summary>
@@ -210,7 +238,9 @@ public class Player : MonoBehaviour
     /// <param name="other"></param>
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.tag);
+        if (!isAlive)
+            return;
+
         if (other.tag == "Shell")
         {
             //내가 쏜 총알이 아닐 경우에
@@ -245,6 +275,7 @@ public class Player : MonoBehaviour
     /// <param name="key"></param>
     public void KeyDownClient(byte key, bool state)
     {
+        Debug.Log("Input Key : " + (Key)key);
         switch ((Key)key)
         {
             case Key.W:
@@ -270,36 +301,38 @@ public class Player : MonoBehaviour
                 break;
             case Key.Alpha1:
                 if (zoomState)
-                    ZoomChange(false);
+                    weaponManagerSc.ZoomChange(false);
                 weaponManagerSc.WeaponChange(0);
-                AimStateStopEvent();
+                weaponManagerSc.AimStateStopEvent();
                 break;
             case Key.Alpha2:
-                
                 if (zoomState)
-                    ZoomChange(false);
+                    weaponManagerSc.ZoomChange(false);
                 weaponManagerSc.WeaponChange(1);
-                AimStateStopEvent();
+                weaponManagerSc.AimStateStopEvent();
                 break;
             case Key.Alpha3:
                 if (zoomState)
-                    ZoomChange(false);
+                    weaponManagerSc.ZoomChange(false);
                 weaponManagerSc.WeaponChange(2);
-                AimStateStopEvent();
+                weaponManagerSc.AimStateStopEvent();
                 break;
             case Key.Alpha4:
                 if (zoomState)
-                    ZoomChange(false);
+                    weaponManagerSc.ZoomChange(false);
                 weaponManagerSc.WeaponChange(3);
-                AimStateStopEvent();
+                weaponManagerSc.AimStateStopEvent();
                 break;
             case Key.Space:
                 //keyState[key] = state;
+                //이미 점프중일 경우 리턴
+                if (currentActionState==ActionState.Jump)
+                    return;
                 currentActionState = ActionState.Jump;
                 animSc.anim.SetTrigger("JumpTrigger");
                 break;
             case Key.RClick:
-                ZoomChange(state);
+                weaponManagerSc.ZoomChange(state);
                 //if(clientCheck)
                     
                 break;
@@ -309,185 +342,79 @@ public class Player : MonoBehaviour
         }
     }
     #endregion
+}
 
-    #region Weapon
-    /// <summary>
-    /// 줌상태일경우 WeaponRotation 상태
-    /// </summary>
-    private void WeaponRotationFunc()
+
+/*
+
+/// <summary>
+/// TestFunc
+/// </summary>
+private void TestFunc()
+{
+    if (Input.GetKeyDown(KeyCode.W))
     {
-        if (AimingState)
-        {
-            var dir = lookTarget - equipWeaponTransform.position;
-            dir = dir.normalized;
-            var tmpRot = Quaternion.LookRotation(dir);
-            equipWeaponTransform.rotation = Quaternion.Slerp(equipWeaponTransform.rotation, tmpRot, 7 * Time.deltaTime);
-           // equipWeaponTransform.LookAt(animSc.lookTarget);
-        }
-     
+        keyState[(int)Key.W] = true;
+    }
+    if (Input.GetKeyDown(KeyCode.S))
+    {
+        keyState[(int)Key.S] = true;
+    }
+    if (Input.GetKeyDown(KeyCode.A))
+    {
+        keyState[(int)Key.A] = true;
+    }
+    if (Input.GetKeyDown(KeyCode.D))
+    {
+        keyState[(int)Key.D] = true;
     }
 
-    /// <summary>
-    /// 총을쏘기 시작할경우 변경
-    /// </summary>
-    public void AimStateChangeFunc()
+    if (Input.GetKeyUp(KeyCode.W))
+    {
+        keyState[(int)Key.W] = false;
+    }
+    if (Input.GetKeyUp(KeyCode.S))
+    {
+        keyState[(int)Key.S] = false;
+    }
+    if (Input.GetKeyUp(KeyCode.A))
+    {
+        keyState[(int)Key.A] = false;
+    }
+    if (Input.GetKeyUp(KeyCode.D))
+    {
+        keyState[(int)Key.D] = false;
+    }
+
+    if (Input.GetKeyDown(KeyCode.Z))
+        keyState[(int)Key.Z] = true;
+    if (Input.GetKeyDown(KeyCode.LeftShift))
+        keyState[(int)Key.LeftShift] = true;
+
+    if (Input.GetKeyUp(KeyCode.Z))
+        keyState[(int)Key.Z] = false;
+    if (Input.GetKeyUp(KeyCode.LeftShift))
+        keyState[(int)Key.LeftShift] = false;
+
+    if (Input.GetKeyDown(KeyCode.Space))
+        keyState[(int)Key.Space] = true;
+
+    if (Input.GetKeyDown(KeyCode.LeftControl))
+        keyState[(int)Key.LeftControl] = true;
+    if (Input.GetKeyUp(KeyCode.LeftControl))
+        keyState[(int)Key.LeftControl] = false;
+
+    if (Input.GetMouseButtonDown(0))
     {
         animSc.anim.SetTrigger("Shoot");
         AimingState = true;
         animSc.anim.SetBool("AimingState", AimingState);
     }
 
-    /// <summary>
-    /// 애니메이션 이벤트 추가 (클립 Aiming) , 웨폰 스왑시에 함수실행
-    /// </summary>
-    public void AimStateStopEvent()
+    if (Input.GetMouseButtonDown(1))
     {
-        weaponSwaping = true;
-        //줌상태일경우 이벤트 실행 ㄴ
-        if (zoomState)
-            return;
-        if (AimingState)
-            AimingState = false;
-        animSc.anim.SetBool("AimingState", AimingState);
+        zoomState = zoomState.Equals(true) ? false : true;
 
-        StartCoroutine(GunRotation());
     }
-
-    /// <summary>
-    /// GunRotation 변경 slerp처리하려다가 slerp가끝나기전에 변경되거나하면 slerp가 멈추지않는경우가 생겨서 변경 
-    /// 다시 slerp로 변경(state 설정하여 다른부분을 금지)
-    /// </summary>
-    /// <returns></returns>
-    IEnumerator GunRotation()
-    {
-        //yield return new WaitForSeconds(0.2f);
-        //equipWeaponTransform.localRotation = Quaternion.identity;
-        while (equipWeaponTransform.localRotation != Quaternion.identity)
-        {
-            
-            equipWeaponTransform.localRotation = Quaternion.Slerp(equipWeaponTransform.localRotation, Quaternion.identity, 30 * Time.deltaTime);
-            yield return null;
-        }
-        weaponSwaping = false;
-    }
-    
-
-    /// <summary>
-    /// 줌 상태 변경(무기의 위치만 변경,
-    /// </summary>
-    /// <param name="tmpZoom"></param>
-    public void ZoomChange(bool tmpZoom)
-    {
-        //클라이언트 줌 UI 부분은 UI 매니저에서 생성(현재 없음)
-        zoomState = tmpZoom;
-        if (zoomState)
-        {
-            AimingState = zoomState;
-            animSc.anim.SetBool("AimingState", AimingState);
-        }
-
-        if (clientCheck)
-            InpusSc.ZoomFunc(zoomState);
-    }
-    #endregion
-
-
-    /// <summary>
-    /// TestFunc
-    /// </summary>
-    private void TestFunc()
-    {
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            keyState[(int)Key.W] = true;
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            keyState[(int)Key.S] = true;
-        }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            keyState[(int)Key.A] = true;
-        }
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            keyState[(int)Key.D] = true;
-        }
-
-        if (Input.GetKeyUp(KeyCode.W))
-        {
-            keyState[(int)Key.W] = false;
-        }
-        if (Input.GetKeyUp(KeyCode.S))
-        {
-            keyState[(int)Key.S] = false;
-        }
-        if (Input.GetKeyUp(KeyCode.A))
-        {
-            keyState[(int)Key.A] = false;
-        }
-        if (Input.GetKeyUp(KeyCode.D))
-        {
-            keyState[(int)Key.D] = false;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Z))
-            keyState[(int)Key.Z] = true;
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-            keyState[(int)Key.LeftShift] = true;
-
-        if (Input.GetKeyUp(KeyCode.Z))
-            keyState[(int)Key.Z] = false;
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-            keyState[(int)Key.LeftShift] = false;
-
-        if (Input.GetKeyDown(KeyCode.Space))
-            keyState[(int)Key.Space] = true;
-
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-            keyState[(int)Key.LeftControl] = true;
-        if (Input.GetKeyUp(KeyCode.LeftControl))
-            keyState[(int)Key.LeftControl] = false;
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            animSc.anim.SetTrigger("Shoot");
-            AimingState = true;
-            animSc.anim.SetBool("AimingState", AimingState);
-        }
-
-        if (Input.GetMouseButtonDown(1))
-        {
-            zoomState = zoomState.Equals(true) ? false : true;
-
-        }
-    }
-    
-    /// <summary>
-    /// 점프관련 끝났을떄 state변경해주기 (trigger로 실행하긴하나 점프 할 경우에 이동속도등 변경을 위해서)
-    /// </summary>
-    public void JumpStateChangeInAnim()
-    {
-        currentActionState = ActionState.None;
-    }
-
-    public void JumpStartInAnim()
-    {
-        StartCoroutine(JumpCoroutine());
-        
-    }
-
-    IEnumerator JumpCoroutine()
-    {
-        while (jumpTimer<0.10)
-        {
-            jumpTimer += Time.deltaTime;
-            
-            this.transform.position = Vector3.Slerp(this.transform.position, new Vector3(this.transform.position.x, this.transform.position.y + jumpPower, this.transform.position.z), Time.deltaTime);
-            Debug.Log("<color=blue>" + "점프 : " + this.transform.position.y + "</color>");
-            yield return null;
-        }
-        jumpTimer = 0;
-    }
-    
 }
+*/

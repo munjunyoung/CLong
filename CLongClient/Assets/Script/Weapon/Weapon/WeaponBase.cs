@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WeaponBase : MonoBehaviour
+public class WeaponBase : ItemBase
 {
+    public Player ownPlayer;
     //Weapon (Input에서 반동 처리를 하기위함..) 
     public float reboundIntensity; // 반동세기
     public float reboundRecoveryTime;//반동회복?
     //private WeaponScript go;
-    public string weaponType; // 해당 타입에 따라 InputManager에서 줌을 사용을 처리하기 위해Public
+    public ItemType type; // 해당 타입에 따라 InputManager에서 줌을 사용을 처리하기 위해Public
     protected string weaponName; //
     //weapon Option
     protected int damage; // 총기 데미지
@@ -17,6 +18,7 @@ public class WeaponBase : MonoBehaviour
     public int equipWeaponNum; //무기별 장착 번호
     // false -> 사용했음 true -> 가지고있음
     public bool weaponState = false;
+    public bool zoomPossible = false;
     //Bomb
     //Eating
     

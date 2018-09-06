@@ -30,10 +30,7 @@ namespace CLongServer
         //Ingame 
         public bool ingame = false;
         public Player player;
-
-        //Weapon
-        public string[] sendWeaponArray = { "AR/AK", "AR/M4", "Throwable/HandGenerade" };
-
+        
         #endregion
         /// <summary>
         /// Constructor .. Stream Save;

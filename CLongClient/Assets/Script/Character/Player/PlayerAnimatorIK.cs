@@ -5,12 +5,11 @@ using CLongLib;
 
 public class PlayerAnimatorIK : MonoBehaviour
 {
-    public Player OwnPlayer;
+    public Player ownPlayer;
     public Animator anim;
     
     //Player 부위 
     private Transform leftHand;
-    private Transform spine;
 
     //-0.065 0.016 0.03
     [Range(0.0f, 1.0f)]
@@ -32,16 +31,15 @@ public class PlayerAnimatorIK : MonoBehaviour
     void Start()
     {
         leftHand = anim.GetBoneTransform(HumanBodyBones.LeftHand);
-        spine = anim.GetBoneTransform(HumanBodyBones.Spine);
     }
     //0.07 -0.15 0.1
     //-0.12 -0.17
     private void LateUpdate()
     {
-        anim.SetInteger("StateParam", (int)OwnPlayer.currentActionState);
-        anim.SetFloat("WeightParam", OwnPlayer.dirWeightParam);
-        anim.SetFloat("VerticalParam", OwnPlayer.verticalParam);
-        anim.SetFloat("HorizontalParam", OwnPlayer.horizontalParam);
+        anim.SetInteger("StateParam", (int)ownPlayer.currentActionState);
+        anim.SetFloat("WeightParam", ownPlayer.dirWeightParam);
+        anim.SetFloat("VerticalParam", ownPlayer.verticalParam);
+        anim.SetFloat("HorizontalParam", ownPlayer.horizontalParam);
 
     }
     /// <summary>
@@ -50,13 +48,16 @@ public class PlayerAnimatorIK : MonoBehaviour
     /// <param name="layerInex"></param>
     void OnAnimatorIK(int layerInex)
     {
+        if (!ownPlayer.isAlive)
+            return;
+
         anim.SetLookAtWeight(lookWeight, bodyWeight, headWeight, eyesWeight, clampWeight);
-        anim.SetLookAtPosition(OwnPlayer.lookTarget);
+        anim.SetLookAtPosition(ownPlayer.lookTarget);
 
         //이동중일경우 y값을 오브젝트 최선임에게 적용 
-        if (OwnPlayer.currentActionState != ActionState.None)
+        if (ownPlayer.currentActionState != ActionState.None)
         {
-            var dir = OwnPlayer.lookTarget - this.transform.position;
+            var dir = ownPlayer.lookTarget - this.transform.position;
             dir = dir.normalized;
 
             Quaternion q = Quaternion.identity;
@@ -66,7 +67,7 @@ public class PlayerAnimatorIK : MonoBehaviour
 
         //플레이어 중심과 바라보는 방향 각도구하기
         var LowerDir = transform.forward;
-        var UpperDir = new Vector3(OwnPlayer.lookTarget.x, transform.position.y, OwnPlayer.lookTarget.z) - transform.position;
+        var UpperDir = new Vector3(ownPlayer.lookTarget.x, transform.position.y, ownPlayer.lookTarget.z) - transform.position;
         UpperDir = UpperDir.normalized;
         var angle = Vector3.Angle(LowerDir, UpperDir);
         //법선벡터의 y값이 양수면 우측turn 음수면 좌측turn 
@@ -87,20 +88,15 @@ public class PlayerAnimatorIK : MonoBehaviour
                 //anim.SetBool("LeftTurn", true);
             }
         }
-        else
-        {
-            //anim.SetBool("RightTurn", false);
-            //anim.SetBool("LeftTurn", false);
-        }
 
-        if (OwnPlayer.weaponManagerSc.CurrentleftHandTarget != null)
+        if (ownPlayer.weaponManagerSc.CurrentleftHandTarget != null)
         {
             //왼손처리
             anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, leftHandWeight);
-            anim.SetIKPosition(AvatarIKGoal.LeftHand, OwnPlayer.weaponManagerSc.CurrentleftHandTarget.position);
+            anim.SetIKPosition(AvatarIKGoal.LeftHand, ownPlayer.weaponManagerSc.CurrentleftHandTarget.position);
             anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1);
-            anim.SetIKRotation(AvatarIKGoal.LeftHand, OwnPlayer.weaponManagerSc.CurrentleftHandTarget.rotation);
-            leftHand.position = OwnPlayer.weaponManagerSc.CurrentleftHandTarget.position;
+            anim.SetIKRotation(AvatarIKGoal.LeftHand, ownPlayer.weaponManagerSc.CurrentleftHandTarget.rotation);
+            leftHand.position = ownPlayer.weaponManagerSc.CurrentleftHandTarget.position;
         }
     }
 

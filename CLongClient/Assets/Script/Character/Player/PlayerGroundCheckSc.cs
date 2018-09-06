@@ -9,6 +9,9 @@ public class PlayerGroundCheckSc : MonoBehaviour
     public Player myPlayer;
     private void OnTriggerEnter(Collider other)
     {
+        if (!myPlayer.clientCheck)
+            return;
+
         if(other.transform.tag == "Ground")
         {
             NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(myPlayer.lookTarget), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
@@ -18,6 +21,9 @@ public class PlayerGroundCheckSc : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        if (!myPlayer.clientCheck)
+            return;
+
         if (other.transform.tag == "Ground")
         {
             NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(myPlayer.lookTarget), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);

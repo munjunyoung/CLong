@@ -18,8 +18,8 @@ public class CameraManager : MonoBehaviour
     private float sideDistance = 0.5f;
 
     //Camera Tunring
-    private float yRot = 0;
-    private float xRot = 0;
+    public float yRot = 0;
+    public float xRot = 0;
     private float Sens = 1f;
     //마우스 Turing 최소 최대값
     private float maxX = 45f;
@@ -36,7 +36,10 @@ public class CameraManager : MonoBehaviour
     
     private void LateUpdate()
     {
-        if (myPlayer != null)
+        if (myPlayer == null)
+            return;
+
+        if (myPlayer.isAlive)
             FollowCam();
     }
 

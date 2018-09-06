@@ -342,7 +342,7 @@ GameObject:
   - component: {fileID: 114030760953954092}
   m_Layer: 0
   m_Name: PlayerCharacter1
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -441,7 +441,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &1289001183483614
 GameObject:
   m_ObjectHideFlags: 1
@@ -3195,7 +3195,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1275553617141574}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.2, z: 0}
+  m_LocalPosition: {x: 0, y: -0.02, z: 0}
   m_LocalScale: {x: 0.3, y: 0, z: 0.3}
   m_Children: []
   m_Father: {fileID: 4123024604429164}
@@ -3304,9 +3304,11 @@ Animator:
   m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
     are already bound by a Humanoid avatar. These transforms can only be changed by
     Humanoid clips.\n\tTransform 'J_L_HairSide_00'\n\tTransform 'J_L_HairSide_00'\n\tTransform
-    'J_L_HairSide_00'\n\tFrom animation clip 'Walk_HairMove'\n\tFrom animation clip
+    'J_L_HairSide_00'\n\tFrom animation clip 'Stand_HairMove'\n\tFrom animation clip
     'Stand_HairMove'\n\tFrom animation clip 'Walk_HairMove'\n\tFrom animation clip
-    'Run_HairMove'\n\tFrom animation clip 'Walk_HairMove'"
+    'Stand_HairMove'\n\tFrom animation clip 'Run_HairMove'\n\tFrom animation clip
+    'Walk_HairMove'\n\tFrom animation clip 'Walk_HairMove'\n\tFrom animation clip
+    'Run_HairMove'"
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
@@ -3330,8 +3332,8 @@ MonoBehaviour:
   - {fileID: 4769296165194194}
   - {fileID: 4427125058118430}
   - {fileID: 4068220429177786}
-  leftHandTarget: {fileID: 0}
-  ZoomPosTarget: {fileID: 0}
+  CurrentleftHandTarget: {fileID: 0}
+  CurrentZoomPosTarget: {fileID: 0}
 --- !u!114 &114468680049415920
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3343,7 +3345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ff5b83d4397c714c88c84935c65d0e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OwnPlayer: {fileID: 114878926016160578}
+  ownPlayer: {fileID: 114878926016160578}
   anim: {fileID: 95862821243556376}
   lookWeight: 1
   bodyWeight: 1
@@ -3351,7 +3353,6 @@ MonoBehaviour:
   eyesWeight: 1
   clampWeight: 1
   leftHandWeight: 0.7
-  AnimActionState: 0
 --- !u!114 &114822286388011886
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3378,8 +3379,9 @@ MonoBehaviour:
   clientCheck: 0
   clientNum: 0
   weaponManagerSc: {fileID: 114030760953954092}
-  InpusSc: {fileID: 0}
   animSc: {fileID: 114468680049415920}
+  InputSc: {fileID: 0}
+  cam: {fileID: 0}
   isAlive: 0
   playerController: {fileID: 143597889263523770}
   zoomState: 0
@@ -3387,7 +3389,9 @@ MonoBehaviour:
   lookTarget: {x: 0, y: 0, z: 0}
   IsGroundedFromServer: 0
   GroundCheckObject: {fileID: 1275553617141574}
-  equipWeaponTransform: {fileID: 4817365580583928}
+  verticalParam: 0
+  horizontalParam: 0
+  dirWeightParam: 0
 --- !u!137 &137131405589461800
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
@@ -3667,6 +3671,6 @@ CharacterController:
   m_Radius: 0.3
   m_SlopeLimit: 45
   m_StepOffset: 0.3
-  m_SkinWidth: 0.1
+  m_SkinWidth: 0.01
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.5, z: 0}

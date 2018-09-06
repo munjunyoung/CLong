@@ -1,8 +1,6 @@
-﻿using System.Collections;
+﻿using CLongLib;
 using System.Collections.Generic;
 using UnityEngine;
-using CLongLib;
-using tcpNet;
 using UnityEngine.UI;
 
 public class InputManager : MonoBehaviour
@@ -12,13 +10,7 @@ public class InputManager : MonoBehaviour
 
     //KeyList
     List<KeyCode> KeyList = new List<KeyCode>();
-
-    //Rotation
-    private float xSens = 1.0f;
-    private float ySens = 1.0f;
-    public float xRot = -1f;
-    public float yRot = -1f;
-
+    
     //Turning Send Packet
     float mousePacketSendFrame = 0f;
     float mouseDelay = 1f;
@@ -30,7 +22,7 @@ public class InputManager : MonoBehaviour
     private float aimImageStartPosValue = 10f; //조준상태가 아닐경우 에임 이미지 위치 넓히기위함
     //Aim Rebound
     public Transform[] aimImage = new Transform[4];
-    private float ReboundValue = 0f;
+    public float ReboundValue = 0f;
 
     #region UI Var
     //Current Round View 
@@ -54,20 +46,9 @@ public class InputManager : MonoBehaviour
     /// <summary>
     /// 키셋팅 및 현재 체력 설정
     /// </summary>
-    private void Start()
-    {
-        
+    private void Awake()
+    {   
         KeySet();
-    }
-
-    private void FixedUpdate()
-    {
-        if (myPlayer == null)
-            return;
-        if (!myPlayer.isAlive)
-            return;
-        // Tunring();
-
     }
 
     private void Update()
@@ -79,7 +60,6 @@ public class InputManager : MonoBehaviour
 
         SendKeyData();
         // SendAngleYData();
-
         ReturnAimImage();
     }
 
@@ -203,19 +183,13 @@ public class InputManager : MonoBehaviour
         //Shooting
         if (Input.GetMouseButton(0))
         {
-            //웨폰 포지션 slerp가 종료되지않았을경우
-            if(!myPlayer.weaponSwaping)
-            myPlayer.weaponManagerSc.SendShootToServer(myPlayer.clientNum, ReboundShell());
+            myPlayer.weaponManagerSc.SendUseItemToServer();
         }
         //Zoom
         if (Input.GetMouseButtonDown(1))
         {
-            if (myPlayer.weaponManagerSc.currentUsingWeapon.weaponType.Equals("AR"))
-            {
-                //웨폰포지션의 slerp가 종료된 후에
-                if(!myPlayer.weaponSwaping)
+            if (myPlayer.weaponManagerSc.currentUsingWeapon.zoomPossible)
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.RClick, myPlayer.zoomState.Equals(true) ? false : true), NetworkManager.Protocol.TCP);
-            }
         }
 
         //Turning Send
@@ -223,11 +197,11 @@ public class InputManager : MonoBehaviour
             NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
     }
 
-    #region Aim
+    #region Aim UI
     /// <summary>
     /// 인게임에서 조준(총의 위치와 카메라 위치 변경)Zoom (UI로 넘기는게 좋을거같다)
     /// </summary>
-    public void ZoomFunc(bool zoomStateValue)
+    public void ZoomUIFunc(bool zoomStateValue)
     {
         //카메라 포지션변경
         //cam.GetComponent<CameraManager>().ZoomSetCamPos(zoomStateValue);
@@ -236,21 +210,7 @@ public class InputManager : MonoBehaviour
         foreach (var a in aimImage)
             a.transform.localPosition = new Vector3(aimImageStartPosValue, 0f, 0f);
     }
-
-    /// <summary>
-    /// 실제 총알이 도착할곳 리바운드
-    /// </summary>
-    private Vector3 ReboundShell()
-    {
-        //정중앙 (반동추가)
-        var ShellDestination = cam.target;
-
-        myPlayer.weaponManagerSc.fireTransform.LookAt(ShellDestination);
-        var shellDirection = myPlayer.weaponManagerSc.fireTransform.eulerAngles;
-
-        return shellDirection;
-    }
-
+    
     /// <summary>
     /// when Shoot, Rebound Image Pos Increas
     /// </summary>
@@ -259,14 +219,15 @@ public class InputManager : MonoBehaviour
         foreach (var a in aimImage)
         {
             //25이상 더이상 안벌어지도록
-            if (a.localPosition.x >= 25)
+            if (a.localPosition.x >= 30)
             {
-                a.localPosition = Vector3.right * 25f;
+                a.localPosition = Vector3.right * 30f;
                 ReboundValue = aimImage[0].localPosition.x;
                 return;
             }
             //Aim 이동
-            a.Translate(Vector3.right * myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity);
+            a.transform.localPosition = a.transform.localPosition + (Vector3.right * myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity);
+            //a.Translate(a.transform.right * myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity);
             ReboundValue = aimImage[0].localPosition.x;
         }
     }
@@ -295,8 +256,8 @@ public class InputManager : MonoBehaviour
     public void ReboundPlayerRotation()
     {
         var reboundValue = myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity;
-        yRot += (reboundValue * 0.1f);
-        xRot += Random.Range(-reboundValue * 0.5f, reboundValue * 0.5f);
+        cam.yRot += Random.Range(-reboundValue * 0.1f, reboundValue * 0.1f); 
+        cam.xRot += (reboundValue * 0.1f);
         NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
     }
     #endregion

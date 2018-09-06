@@ -452,36 +452,33 @@ namespace CLongLib
     /// <summary>
     /// InsShell
     /// </summary>
-    public struct Bullet_Init : IPacket
+    public struct Use_Item : IPacket
     {
         [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
         public Vector3 pos;
         public Vector3 rot;
 
-        public Bullet_Init(byte n, Vector3 p, Vector3 r)
+        public Use_Item(byte n, Vector3 p, Vector3 r)
         {
             clientIdx = n;
             pos = p;
             rot = r;
         }
     }
+   
 
     /// <summary>
-    /// ThrowBomb
+    /// Throw Animation Start
     /// </summary>
-    public struct Bomb_Init : IPacket
+    public struct Throw_BombAnim : IPacket
     {
         [MarshalAs(UnmanagedType.U1)]
         public byte clientIdx;
-        public Vector3 pos;
-        public Vector3 rot;
 
-        public Bomb_Init(byte n, Vector3 p, Vector3 r)
+        public Throw_BombAnim(byte n)
         {
             clientIdx = n;
-            pos = p;
-            rot = r;
         }
     }
     #endregion

@@ -8,8 +8,10 @@ class FishScript : FoodBase
 {
     protected override void Awake()
     {
+        type = ItemType.CONSUMABLE;
         fillHealthAmount = 50;
         eatingTime = 2;
+        zoomPossible = false;
     }
 
 }

@@ -7,14 +7,15 @@ public class AKscript : ARBase
     /// </summary>
     protected override void Awake()
     {
-        weaponType = "AR";
+        type = ItemType.WEAPON;
         weaponName = "AK";
         shellType = "7mm";
-        damage = 1;
+        damage = 10;
         shellSpeed = 50;
         ShootPeriod = 5;
         reboundIntensity = 7;
         reboundRecoveryTime = 2f;
+        zoomPossible = true;
     }
     
 }

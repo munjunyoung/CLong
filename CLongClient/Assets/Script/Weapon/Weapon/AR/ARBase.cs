@@ -19,12 +19,7 @@ public class ARBase : WeaponBase
     public Transform ZoomPos;
 
     public int shootPeriodCount = 0;
-
-    private void LateUpdate()
-    {
-     
-        Debug.DrawRay(transform.position, transform.forward * 100f, Color.green);
-    }
+    
 
     /// <summary>
     /// AR 총
@@ -50,7 +45,7 @@ public class ARBase : WeaponBase
         base.ShootSendServer(clientNum, pos, dir);
         if (shootPeriodCount > ShootPeriod)
         {
-            NetworkManager.Instance.SendPacket(new Bullet_Init(clientNum,TotalUtility.ToNumericVectorChange(pos),TotalUtility.ToNumericVectorChange(dir)), NetworkManager.Protocol.TCP);
+            NetworkManager.Instance.SendPacket(new Use_Item(clientNum,TotalUtility.ToNumericVectorChange(pos),TotalUtility.ToNumericVectorChange(dir)), NetworkManager.Protocol.TCP);
             shootPeriodCount = 0;
         }
         shootPeriodCount++;

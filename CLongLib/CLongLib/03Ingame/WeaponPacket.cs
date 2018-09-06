@@ -36,7 +36,9 @@ namespace CLongLib
             Rot = rot;
         }
     }
-
+    /// <summary>
+    /// ThrowBomb
+    /// </summary>
     public class ThrowBomb : Packet
     {
         public int ClientNum { get; set; }

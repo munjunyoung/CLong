@@ -35,8 +35,7 @@ public class GlobalManager : Singleton<GlobalManager>
                 NetworkManager.Instance.SendPacket(new Login_Req("id", "pw"), NetworkManager.Protocol.TCP);
             }
         }
-
-
+        
         if (SceneManager.GetActiveScene().name == "02Lobby")
         {
             if (Input.GetKeyDown(KeyCode.F1))

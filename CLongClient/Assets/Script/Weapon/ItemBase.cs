@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-class ItemBase
+public class ItemBase : MonoBehaviour 
 {
+    
 }
+
+
 

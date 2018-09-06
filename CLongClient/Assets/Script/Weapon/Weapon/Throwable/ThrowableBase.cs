@@ -6,7 +6,7 @@ using CLongLib;
 
 public class ThrowableBase : WeaponBase
 {
-    private float throwSpeed = 50f;
+    private float throwSpeed = 1000f;
     public Rigidbody bombRigidbody;
     public SphereCollider coll;
     private float explosionRadius = 10f;
@@ -45,7 +45,17 @@ public class ThrowableBase : WeaponBase
             return;
         //서버에서 한번만 보내도록 설정
         weaponState = false;
-        NetworkManager.Instance.SendPacket(new Bomb_Init(clientNum, TotalUtility.ToNumericVectorChange(pos), TotalUtility.ToNumericVectorChange(dir)), NetworkManager.Protocol.TCP);
+        
+        NetworkManager.Instance.SendPacket(new Use_Item(clientNum, TotalUtility.ToNumericVectorChange(pos), TotalUtility.ToNumericVectorChange(dir)), NetworkManager.Protocol.TCP);
+    }
+
+    /// <summary>
+    /// 애니매이션 먼져 시작한후 던지는 순간에 패킷을 슛 패킷을보냄..
+    /// </summary>
+    /// <param name="clientNum"></param>
+    public void ThrowAnimStart(byte clientNum)
+    {
+        NetworkManager.Instance.SendPacket(new Throw_BombAnim(clientNum), NetworkManager.Protocol.TCP);
     }
 
     /// <summary>
@@ -89,6 +99,10 @@ public class ThrowableBase : WeaponBase
         Explosion();
     }
 
+    /// <summary>
+    /// 터진후 active false
+    /// </summary>
+    /// <returns></returns>
     IEnumerator SetActiveRoutine()
     {
         yield return new WaitForSeconds(0.5f);

@@ -157,6 +157,15 @@ namespace CLongServer.Ingame
                 var ocNumber = (cNumber + 1) % 2;
                 var player = PlayerDic[cNumber];
                 var enemy = PlayerDic[ocNumber];
+
+                //없애도됨 대충 셋팅
+                player.firstWeapon = 0;
+                player.secondWeapon = 1;
+                player.throwble = 2;
+
+                enemy.firstWeapon = 0;
+                enemy.secondWeapon = 1;
+                enemy.throwble = 2;
                 player.Client.Send(new IPacket[]
                 {
                     new Player_Init((byte)cNumber, player.Hp, player.StartPos, player.StartLookPos, true, player.character, player.firstWeapon, player.secondWeapon, player.throwble),
@@ -178,8 +187,8 @@ namespace CLongServer.Ingame
             }
             else if (p is Player_Input
                 || p is Player_Grounded
-                || p is Bullet_Init
-                || p is Bomb_Init)
+                || p is Use_Item
+                || p is Throw_BombAnim)
             {
                 foreach (var pair in PlayerDic)
                     pair.Value.Client.Send(p);

@@ -26,7 +26,7 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
     private Coroutine _waitTimer;
 
     private byte _curCharacterIdx;
-    private byte[] _equippedItemAry = new byte[3] { 0xFF, 0xFF, 0xFF };
+    private byte[] _equippedItemAry = new byte[3] { 0, 0, 0 };//{ 0xFF, 0xFF, 0xFF };
 
     public void OnClickMatch(bool b)
     {
