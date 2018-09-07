@@ -17,9 +17,9 @@ public class ARBase : WeaponBase
 
     public Transform LeftHand;
     public Transform ZoomPos;
-
-    public int shootPeriodCount = 0;
     
+    public int shootPeriodCount = 0;
+    public ParticleSystem EffectPrefab;
 
     /// <summary>
     /// AR 총
@@ -30,7 +30,7 @@ public class ARBase : WeaponBase
     public override void Shoot(byte clientNum, Vector3 pos, Vector3 dir)
     {
         base.Shoot(clientNum, pos, dir);
-
+        EffectPrefab.Play(true);
         ShellIns(shellType, clientNum, pos, dir);
     }
 

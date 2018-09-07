@@ -6,13 +6,14 @@ using CLongLib;
 
 public class ThrowableBase : WeaponBase
 {
-    private float throwSpeed = 1000f;
+    private float throwSpeed = 500f;
     public Rigidbody bombRigidbody;
     public SphereCollider coll;
     private float explosionRadius = 10f;
     private float explosionForce = 1000f;
     private float BombTime = 2f;
-    
+
+    public ParticleSystem BombEffect;
     /// <summary>
     /// 던져라
     /// </summary>
@@ -32,6 +33,7 @@ public class ThrowableBase : WeaponBase
         weaponState = false;
         StartCoroutine(BombCoroutine());
     }
+
     /// <summary>
     /// 서버로 전송
     /// </summary>
@@ -66,7 +68,7 @@ public class ThrowableBase : WeaponBase
         coll.isTrigger = true;
         coll.radius = explosionRadius;
         bombRigidbody.useGravity = false;
-
+        BombEffect.Play(true);
         //넉백 부분 놉(addExplosionForce의 경우 rigidbody가 타겟에게도 필요하므로 보류
         StartCoroutine(SetActiveRoutine());
     }
@@ -105,7 +107,7 @@ public class ThrowableBase : WeaponBase
     /// <returns></returns>
     IEnumerator SetActiveRoutine()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(3f);
         if(this.gameObject.activeSelf)
         this.gameObject.SetActive(false);
     }
