@@ -8,9 +8,10 @@ public class ShellScript : MonoBehaviour {
     public byte clientNum;
     public int damage;
     public Transform parentTransform;
+
 	// Use this for initialization
 	private void Start () {
-        Destroy(this.gameObject, 3f);
+        Destroy(this.parentTransform.gameObject, 3f);
 	}
 	
 	// Update is called once per frame
@@ -20,5 +21,6 @@ public class ShellScript : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("총알트리거 : " + other.tag);
     }
 }

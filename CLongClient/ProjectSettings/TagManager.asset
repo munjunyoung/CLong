@@ -9,6 +9,7 @@ TagManager:
   - Shell
   - Ground
   - Generade
+  - Head
   layers:
   - Default
   - TransparentFX

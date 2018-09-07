@@ -157,7 +157,7 @@ public class PlayerWeaponManager : MonoBehaviour
                 //반동설정
                 if (ownPlayer.clientCheck)
                 {
-                    ownPlayer.InputSc.ReboundPlayerRotation();
+                   // ownPlayer.InputSc.ReboundPlayerRotation();
                     ownPlayer.InputSc.ReboundAimImage();
                 }
                 break;
@@ -221,7 +221,7 @@ public class PlayerWeaponManager : MonoBehaviour
     {
         var tmpTarget = ownPlayer.cam.target;
         var ReboundValue = ownPlayer.InputSc.ReboundValue;
-        var ShellDestination = new Vector3(tmpTarget.x + Random.Range(ReboundValue * 0.1f, ReboundValue * 0.1f), tmpTarget.y + Random.Range(-ReboundValue * 0.5f, ReboundValue * 0.5f), tmpTarget.z);
+        var ShellDestination = tmpTarget;//new Vector3(tmpTarget.x + Random.Range(ReboundValue * 0.1f, ReboundValue * 0.1f), tmpTarget.y + Random.Range(-ReboundValue * 0.5f, ReboundValue * 0.5f), tmpTarget.z);
         fireTransform.LookAt(ShellDestination);
         var shellDirection = fireTransform.eulerAngles;
 
