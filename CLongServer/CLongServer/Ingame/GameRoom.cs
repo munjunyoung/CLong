@@ -78,8 +78,8 @@ namespace CLongServer.Ingame
             c1.Send(new Start_Game((ushort)multicastPortUDP, 0xEF0000B6));
             c2.Send(new Start_Game((ushort)multicastPortUDP, 0xEF0000B6));
             //TeamSet
-            PlayerDic.Add((int)TeamColor.BLUE, new Player(0, c1));
-            PlayerDic.Add((int)TeamColor.RED, new Player(0, c2));
+            PlayerDic.Add((int)TeamColor.BLUE, c1.player);
+            PlayerDic.Add((int)TeamColor.RED, c2.player);
 
             foreach (var team in PlayerDic)
             {

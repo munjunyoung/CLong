@@ -1,16 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CLongLib;
 
-public class IngameUIManager : MonoBehaviour {
+public class IngameUIManager : Singleton<IngameUIManager>
+{
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    protected override void Init()
+    {
+        NetworkManager.Instance.RecvHandler += ProcessPacket;
+    }
+
+    private void ProcessPacket(IPacket p, NetworkManager.Protocol pt)
+    {
+
+    }
 }
