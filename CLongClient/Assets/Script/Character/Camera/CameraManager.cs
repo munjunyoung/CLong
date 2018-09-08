@@ -9,13 +9,8 @@ public class CameraManager : MonoBehaviour
     /// <summary>
     /// Cam Distance -> 기본 - max 조준 min
     /// </summary>
-    private float camBackDistance = 0;
-    private float camHeightDistance = 0;
-    private float maxBack = 5f;
-    private float maxHeight = 1.2f;
-    private float minBack = 0f;
-    private float minHeight = 0.7f;
-    private float sideDistance = 0.5f;
+    private float camBackDistance = 5f;
+    private float camHeightDistance = 1.2f;
 
     //Camera Tunring
     public float yRot = 0;
@@ -28,11 +23,6 @@ public class CameraManager : MonoBehaviour
     public Vector3 target;
     
     
-    private void Start()
-    {
-        camBackDistance = maxBack;
-        camHeightDistance = maxHeight;
-    }
     
     private void LateUpdate()
     {

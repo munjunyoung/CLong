@@ -21,6 +21,5 @@ public class ShellScript : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("총알트리거 : " + other.tag);
     }
 }

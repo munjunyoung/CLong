@@ -341,6 +341,7 @@ GameObject:
   - component: {fileID: 114878926016160578}
   - component: {fileID: 114468680049415920}
   - component: {fileID: 114030760953954092}
+  - component: {fileID: 54619339718419052}
   m_Layer: 0
   m_Name: PlayerCharacter1
   m_TagString: Player
@@ -481,6 +482,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4720848487435514}
+  - component: {fileID: 136242581222050462}
   m_Layer: 0
   m_Name: Character1_Spine2
   m_TagString: Untagged
@@ -3259,6 +3261,21 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1275553617141574}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &54619339718419052
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1225391518894114}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!54 &54864494651406406
 Rigidbody:
   m_ObjectHideFlags: 1
@@ -3407,6 +3424,19 @@ MonoBehaviour:
   verticalParam: 0
   horizontalParam: 0
   dirWeightParam: 0
+--- !u!136 &136242581222050462
+CapsuleCollider:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1302242730279664}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.15
+  m_Height: 0.3
+  m_Direction: 0
+  m_Center: {x: 0, y: -0.03, z: 0}
 --- !u!137 &137131405589461800
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
@@ -3682,10 +3712,10 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 0.65
-  m_Radius: 0.2
+  m_Height: 0.5
+  m_Radius: 0.15
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.01
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.35, z: 0}
+  m_Center: {x: 0, y: 0.25, z: 0}

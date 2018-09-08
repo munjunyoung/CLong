@@ -10,9 +10,6 @@ class FoodBase : WeaponBase
     protected int fillHealthAmount;
     protected int eatingTime;
     
-    public Rigidbody bombRigidbody;
-    public SphereCollider coll;
-
     /// <summary>
     /// Shoot이지만 일단먹는거.. weaponBase로 통합한거라.. 파라미터는 사용하지않음
     /// </summary>

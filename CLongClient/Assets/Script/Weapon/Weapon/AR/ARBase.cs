@@ -20,6 +20,7 @@ public class ARBase : WeaponBase
     
     public int shootPeriodCount = 0;
     public ParticleSystem EffectPrefab;
+    
 
     /// <summary>
     /// AR 총

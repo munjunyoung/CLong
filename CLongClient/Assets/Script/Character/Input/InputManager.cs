@@ -11,14 +11,9 @@ public class InputManager : MonoBehaviour
     //KeyList
     List<KeyCode> KeyList = new List<KeyCode>();
     
-    //Turning Send Packet
-    float mousePacketSendFrame = 0f;
-    float mouseDelay = 1f;
-    
     //Aim
     public bool zoomStateServerSend = false;
     public CameraManager cam;
-    private Vector3 shellDirection = Vector3.zero;
     private float aimImageStartPosValue = 10f; //조준상태가 아닐경우 에임 이미지 위치 넓히기위함
     //Aim Rebound
     public Transform[] aimImage = new Transform[4];

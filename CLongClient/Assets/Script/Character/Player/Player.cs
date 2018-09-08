@@ -36,7 +36,7 @@ public class Player : MonoBehaviour
     public Vector3 lookTarget;
 
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
-    public bool IsGroundedFromServer = false;
+    public bool IsGroundedFromServer = true;
     private float gravity = 10f;
     private float jumpPower = 10f;
     private float jumpTimer = 0f;
@@ -240,6 +240,7 @@ public class Player : MonoBehaviour
     {
         if (!isAlive)
             return;
+        Debug.Log("확인해봅시당");
         if (other.tag == "Shell")
         {
             //내가 쏜 총알이 아닐 경우에
@@ -248,6 +249,7 @@ public class Player : MonoBehaviour
                 if (clientCheck)
                 {
                     //TakeDamage(other.GetComponent<ShellScript>().damage);
+                    
                     NetworkManager.Instance.SendPacket(new Player_TakeDmg(clientNum, other.GetComponent<ShellScript>().damage) ,NetworkManager.Protocol.TCP);
                 }
                 Destroy(other.gameObject);

@@ -38,7 +38,12 @@ public class PlayerWeaponManager : MonoBehaviour
         WeaponManagerDicInit();
         WeaponEquip(equipWeaponArray);
     }
-    
+
+    private void LateUpdate()
+    {
+        Debug.DrawRay(fireTransform.position, fireTransform.forward * 100f, Color.green);
+    }
+
     /// <summary>
     /// Weapon Equip - Create Weapon
     /// </summary>
