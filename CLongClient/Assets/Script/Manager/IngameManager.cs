@@ -62,7 +62,6 @@ public class IngameManager : Singleton<IngameManager>
             {
                 //Timer countdown == 0  : 타이머를 시작 1 : 타이머 종료
                 var s = (Round_Timer)p;
-                inputSc.SetTimerUI(s.countDown);
             }
             else if(p is Player_Input)
             {
@@ -100,14 +99,12 @@ public class IngameManager : Singleton<IngameManager>
             {
                 //체력 설정
                 var s = (Player_Sync)p;
-                inputSc.SetHealthUI(s.hp);
             }
             else if (p is Player_Recover)
             {
                 var s = (Player_Recover)p;
                 if (playerList[s.clientIdx] != null)
                     playerList[s.clientIdx].weaponManagerSc.UseItem(s.clientIdx, Vector3.zero, Vector3.zero);
-                    inputSc.SetHealthUI(s.amount);
             }
             else if(p is Player_Dead)
             {
@@ -192,7 +189,6 @@ public class IngameManager : Singleton<IngameManager>
         //Input
         playerList[clientPlayerNum].InputSc = inputSc;
         inputSc.myPlayer = playerList[clientPlayerNum];
-        inputSc.SetHealthUI(health);
     }
 
     /// <summary>
@@ -201,7 +197,6 @@ public class IngameManager : Singleton<IngameManager>
     public void ResetPlayerVar(byte num, int hp, System.Numerics.Vector3[] p, System.Numerics.Vector3[] target)
     {
         //클라이언트 플레이어 오브젝트 체력 설정
-        inputSc.SetHealthUI(hp);
         for(int i=0; i<2; i++)
         {
             var tmpP = playerList[i];

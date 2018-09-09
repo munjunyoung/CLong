@@ -14,30 +14,9 @@ public class InputManager : MonoBehaviour
     //Aim
     public bool zoomStateServerSend = false;
     public CameraManager cam;
-    private float aimImageStartPosValue = 10f; //조준상태가 아닐경우 에임 이미지 위치 넓히기위함
+    //private float aimImageStartPosValue = 10f; //조준상태가 아닐경우 에임 이미지 위치 넓히기위함
     //Aim Rebound
-    public Transform[] aimImage = new Transform[4];
-    public float ReboundValue = 0f;
-
-    #region UI Var
-    //Current Round View 
-    public GameObject ViewRoundPanel;
-    public Text ViewRoundText;
-    public Text ViewPointText;
-
-    //Timer
-    public GameObject TimerPanel;
-    public Text TimerText;
-    public int TimerState = 0;  //0 : 시작타이머, 1 : 라운드 종료 타이머
-
-    //RoundResult
-    public GameObject RoundResultPanel;
-    public Text RoundResultText;
-
-    //Health UI
-    public int currentHealth = 100;
-    public Slider healthSlider;
-    #endregion
+    
     /// <summary>
     /// 키셋팅 및 현재 체력 설정
     /// </summary>
@@ -55,7 +34,7 @@ public class InputManager : MonoBehaviour
 
         SendKeyData();
         // SendAngleYData();
-        ReturnAimImage();
+        //ReturnAimImage();
     }
 
     /// <summary>
@@ -196,54 +175,54 @@ public class InputManager : MonoBehaviour
     /// <summary>
     /// 인게임에서 조준(총의 위치와 카메라 위치 변경)Zoom (UI로 넘기는게 좋을거같다)
     /// </summary>
-    public void ZoomUIFunc(bool zoomStateValue)
-    {
-        //카메라 포지션변경
-        //cam.GetComponent<CameraManager>().ZoomSetCamPos(zoomStateValue);
-        //AimImage 변경
-        aimImageStartPosValue = zoomStateValue ? 0 : 10f;
-        foreach (var a in aimImage)
-            a.transform.localPosition = new Vector3(aimImageStartPosValue, 0f, 0f);
-    }
-    
+    //public void ZoomUIFunc(bool zoomStateValue)
+    //{
+    //    //카메라 포지션변경
+    //    //cam.GetComponent<CameraManager>().ZoomSetCamPos(zoomStateValue);
+    //    //AimImage 변경
+    //    aimImageStartPosValue = zoomStateValue ? 0 : 10f;
+    //    foreach (var a in aimImage)
+    //        a.transform.localPosition = new Vector3(aimImageStartPosValue, 0f, 0f);
+    //}
+
     /// <summary>
     /// when Shoot, Rebound Image Pos Increas
     /// </summary>
-    public void ReboundAimImage()
-    {
-        foreach (var a in aimImage)
-        {
-            //25이상 더이상 안벌어지도록
-            if (a.localPosition.x >= 30)
-            {
-                a.localPosition = Vector3.right * 30f;
-                ReboundValue = aimImage[0].localPosition.x;
-                return;
-            }
-            //Aim 이동
-            a.transform.localPosition = a.transform.localPosition + (Vector3.right * myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity);
-            //a.Translate(a.transform.right * myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity);
-            ReboundValue = aimImage[0].localPosition.x;
-        }
-    }
+    //public void ReboundAimImage()
+    //{
+    //    foreach (var a in aimImage)
+    //    {
+    //        //25이상 더이상 안벌어지도록
+    //        if (a.localPosition.x >= 30)
+    //        {
+    //            a.localPosition = Vector3.right * 30f;
+    //            ReboundValue = aimImage[0].localPosition.x;
+    //            return;
+    //        }
+    //        //Aim 이동
+    //        a.transform.localPosition = a.transform.localPosition + (Vector3.right * myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity);
+    //        //a.Translate(a.transform.right * myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity);
+    //        ReboundValue = aimImage[0].localPosition.x;
+    //    }
+    //}
 
     /// <summary>
     /// Return Aim Image
     /// </summary>
-    private void ReturnAimImage()
-    {
-        if (aimImage[0].localPosition.x.Equals(aimImageStartPosValue))
-            return;
+    //private void ReturnAimImage()
+    //{
+    //    if (aimImage[0].localPosition.x.Equals(aimImageStartPosValue))
+    //        return;
 
-        if (myPlayer == null)
-            return;
-        foreach (var a in aimImage)
-        {
-            a.localPosition = Vector3.Slerp(a.transform.localPosition,
-                new Vector3(aimImageStartPosValue, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.currentUsingWeapon.reboundRecoveryTime);
-        }
-        ReboundValue = aimImage[0].localPosition.x;
-    }
+    //    if (myPlayer == null)
+    //        return;
+    //    foreach (var a in aimImage)
+    //    {
+    //        a.localPosition = Vector3.Slerp(a.transform.localPosition,
+    //            new Vector3(aimImageStartPosValue, 0, 0), Time.deltaTime * myPlayer.weaponManagerSc.currentUsingWeapon.reboundRecoveryTime);
+    //    }
+    //    ReboundValue = aimImage[0].localPosition.x;
+    //}
 
     /// <summary>
     /// Cam Rebound
@@ -255,40 +234,7 @@ public class InputManager : MonoBehaviour
         cam.xRot += (reboundValue * 0.1f);
         NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
     }
-    #endregion
-
-    #region UIManager?
-    /// <summary>
-    /// set player HealthUI 
-    /// when takeDamge, and startGame Setting
-    /// </summary>
-    public void SetHealthUI(int h)
-    {
-        currentHealth = h;
-        if (currentHealth <= 0)
-            healthSlider.value = 0;
-        else
-            healthSlider.value = currentHealth;
-    }
-
-    /// <summary>
-    /// TimerUI Set
-    /// </summary>
-    /// <param name="time"></param>
-    public void SetTimerUI(byte countDown)
-    {
-        if (countDown == 0)
-        {
-            if (!TimerPanel.activeSelf)
-                TimerPanel.SetActive(true);
-        }
-        else if (countDown == 1)
-        {
-            if (TimerPanel.activeSelf)
-                TimerPanel.SetActive(false);
-        }
-    }
-    #endregion;
+    #endregion    
 
     /// <summary>
     /// setting Key List;
