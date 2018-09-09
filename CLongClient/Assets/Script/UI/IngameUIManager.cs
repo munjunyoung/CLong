@@ -194,12 +194,12 @@ public class IngameUIManager : Singleton<IngameUIManager>
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.F11))
-            ReboundAimPoint();
+        //if (Input.GetKey(KeyCode.F11))
+        //    ReboundAimPoint();
 
         if (Input.GetKeyDown(KeyCode.F12))
             Cursor.lockState = (cursor = !cursor) ? CursorLockMode.Locked : CursorLockMode.None;
 
-        _curSize -= Time.deltaTime * _aimRecover * 100;
+        _curSize -= Time.deltaTime * _aimRecover * 30;
     }
 }
