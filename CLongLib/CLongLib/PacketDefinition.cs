@@ -272,10 +272,13 @@ namespace CLongLib
         // true : 매칭종료, false : 매칭종료중 오류
         [MarshalAs(UnmanagedType.I1)]
         public bool req;
+        [MarshalAs(UnmanagedType.I1)]
+        public bool win;
 
-        public Match_End(bool b)
+        public Match_End(bool b, bool w)
         {
             req = b;
+            win = w;
         }
     }
 
@@ -365,11 +368,11 @@ namespace CLongLib
     public struct Round_Result : IPacket
     {
         [MarshalAs(UnmanagedType.I1)]
-        public bool win;
+        public byte winTeam;
 
-        public Round_Result(bool b)
+        public Round_Result(byte b)
         {
-            win = b;
+            winTeam = b;
         }
     }
 

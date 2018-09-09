@@ -35,6 +35,7 @@ namespace CLongServer.Ingame
         private int CurrentRound = 0;
         private int EndGameMaxPoint = 2;
         private int[] currentPoint = { 0, 0 };
+        private int matchWinnerIdx = -1;
 
         //Timer
         private System.Timers.Timer gameTimer = new System.Timers.Timer();
@@ -278,19 +279,22 @@ namespace CLongServer.Ingame
                 roundState = RoundState.ROUND_END;
             //Game End (winner의 point 가 2일 경우 )
             else if (PlayerDic[winnerIndex].RoundPoint.Equals(2))
+            {
                 roundState = RoundState.MATCH_END;
+                matchWinnerIdx = winnerIndex;
+            }
 
             PlayerDic[winnerIndex].Client.Send(
                 new IPacket[]
                 {
                     new Round_Stat((byte)CurrentRound, (byte)currentPoint[0], (byte)currentPoint[1]),
-                    new Round_Result(true)
+                    new Round_Result((byte)winnerIndex)
                 });
             PlayerDic[loserIndex].Client.Send(
                 new IPacket[]
                 {
                     new Round_Stat((byte)CurrentRound, (byte)currentPoint[0], (byte)currentPoint[1]),
-                    new Round_Result(false)
+                    new Round_Result((byte)winnerIndex)
                 });
 
             //라운드 종료후 씬전환 전 종료 카운트 실행
@@ -350,10 +354,12 @@ namespace CLongServer.Ingame
             else if (roundState == RoundState.MATCH_END)
             {
                 foreach (var p in PlayerDic)
-                {
                     p.Value.Client.ingame = false;
-                    p.Value.Client.Send(new Match_End(true));
-                }
+
+                var loserIdx = ((matchWinnerIdx + 1) % 2);
+                PlayerDic[matchWinnerIdx].Client.Send(new Match_End(true, true));
+                PlayerDic[loserIdx].Client.Send(new Match_End(true, false));
+              
                 //해당 게임룸 종료
                 GameRoomManager.Instance.DellGameRoom(this);
             }

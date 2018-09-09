@@ -14,7 +14,7 @@ public class IngameUIManager : Singleton<IngameUIManager>
     public GameObject winFrame;
     public GameObject lossFrame;
     public Text roundTimerText;
-    
+    public Text roundResultText;
 
     [Header("HP UI")]
     public Slider hpSlider;
@@ -50,6 +50,7 @@ public class IngameUIManager : Singleton<IngameUIManager>
         winFrame.SetActive(false);
         lossFrame.SetActive(false);
         roundTimerText.gameObject.SetActive(false);
+        roundResultText.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -67,9 +68,6 @@ public class IngameUIManager : Singleton<IngameUIManager>
 
     public void SetHpValue(int value)
     {
-        if (value <= 0)
-            return;
-
         if (value < _curValue)
         {
             // Damaged
@@ -110,6 +108,7 @@ public class IngameUIManager : Singleton<IngameUIManager>
     protected override void Init()
     {
         NetworkManager.Instance.RecvHandler += ProcessPacket;
+        InitRound();
     }
 
     private void ProcessPacket(IPacket p, NetworkManager.Protocol pt)
@@ -137,8 +136,16 @@ public class IngameUIManager : Singleton<IngameUIManager>
         else if (p is Round_Result)
         {
             var s = (Round_Result)p;
-            winFrame.SetActive(s.win);
-            lossFrame.SetActive(!s.win);
+            switch(s.winTeam)
+            {
+                case 0:
+                    roundResultText.text = "<color=blue>BLUE</color> Team Win !";
+                    break;
+                case 1:
+                    roundResultText.text = "<color=red>RED</color> Team Win !";
+                    break;
+            }
+            roundResultText.gameObject.SetActive(true);
         }
         else if (p is Player_Reset)
         {
@@ -167,14 +174,18 @@ public class IngameUIManager : Singleton<IngameUIManager>
         }
         else if(p is Match_End)
         {
-            StartCoroutine(EndMatch());
+            var s = (Match_End)p;
+            
+            StartCoroutine(EndMatch(s.win));
         }
     }
 
-    private IEnumerator EndMatch()
+    private IEnumerator EndMatch(bool isWin)
     {
         yield return new WaitForSecondsRealtime(3.0f);
-
+        winFrame.SetActive(isWin);
+        lossFrame.SetActive(!isWin);
+        yield return new WaitForSecondsRealtime(3.0f);
         InitRound();
     }
 
