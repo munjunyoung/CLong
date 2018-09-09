@@ -43,6 +43,8 @@ namespace CLongServer.Ingame
         private int countDownTime = 0;
         private RoundState roundState = RoundState.ROUND_START;
 
+        private System.Timers.Timer matchEndTimer = new System.Timers.Timer();
+
         //TestRoom
         private int peopleCount = 0;
 
@@ -65,6 +67,10 @@ namespace CLongServer.Ingame
             CurrentRound = 1;
             //Set Timer;
             countTimerSet();
+
+            matchEndTimer.Interval = 5000f;
+            matchEndTimer.Elapsed += MatchEndCb;
+            matchEndTimer.AutoReset = false;
         }
 
         /// <summary>
@@ -359,10 +365,16 @@ namespace CLongServer.Ingame
                 var loserIdx = ((matchWinnerIdx + 1) % 2);
                 PlayerDic[matchWinnerIdx].Client.Send(new Match_End(true, true));
                 PlayerDic[loserIdx].Client.Send(new Match_End(true, false));
-              
+
                 //해당 게임룸 종료
-                GameRoomManager.Instance.DellGameRoom(this);
+                matchEndTimer.Start();
             }
+        }
+
+        private void MatchEndCb(object state, System.Timers.ElapsedEventArgs e)
+        {
+            matchEndTimer.Stop();
+            GameRoomManager.Instance.DellGameRoom(this);
         }
 
         #endregion

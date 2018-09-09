@@ -212,4 +212,9 @@ public class IngameManager : Singleton<IngameManager>
         //Send
         NetworkManager.Instance.SendPacket(new Player_Ready(clientPlayerNum), NetworkManager.Protocol.TCP);
     }
+
+    private void OnDestroy()
+    {
+        NetworkManager.Instance.RecvHandler -= ProcessPacket;
+    }
 }

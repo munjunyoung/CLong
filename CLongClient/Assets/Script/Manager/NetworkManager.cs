@@ -23,7 +23,7 @@ public class NetworkManager : Singleton<NetworkManager>
 
     public void SendPacket(IPacket p, Protocol pt)
     {
-        Debug.Log("Send Packet : " + p.GetType());
+        Debug.Log("Send Packet : <color=red>" + p.GetType() + "</color>");
         switch (pt)
         {
             case Protocol.TCP:
@@ -147,12 +147,12 @@ public class NetworkManager : Singleton<NetworkManager>
 
                 if (recvSize > 0)
                 {
-                    Debug.Log("[TCP] Received data size : " + recvSize);
+                    //Debug.Log("[TCP] Received data size : " + recvSize);
                     var dataAry = new byte[recvSize];
                     Array.Copy(_recvBuffer, 0, dataAry, 0, recvSize);
                     PacketMaker.GetPacket(dataAry, ref packetQueue);
                     Array.Clear(_recvBuffer, 0, _recvBuffer.Length);
-                    Debug.Log("[TCP] Process was done.");
+                    //Debug.Log("[TCP] Process was done.");
                 }
                 else
                 {
@@ -221,7 +221,7 @@ public class NetworkManager : Singleton<NetworkManager>
                 var dataAry = uc.EndReceive(ar, ref remoteEp);
                 if (dataAry.Length > 0)
                 {
-                    Debug.Log("[UDP] Received data size : " + dataAry.Length);
+                    //Debug.Log("[UDP] Received data size : " + dataAry.Length);
                     PacketMaker.GetPacket(dataAry, ref packetQueue);
                 }
                 uc.BeginReceive(ReceiveCb, uc);

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using CLongLib;
+using UnityEngine.SceneManagement;
 
 public class IngameUIManager : Singleton<IngameUIManager>
 {
@@ -13,6 +14,7 @@ public class IngameUIManager : Singleton<IngameUIManager>
     public Text blueTeamScore;
     public GameObject winFrame;
     public GameObject lossFrame;
+    public GameObject lobbyBtn;
     public Text roundTimerText;
     public Text roundResultText;
 
@@ -24,7 +26,6 @@ public class IngameUIManager : Singleton<IngameUIManager>
     
     private int _curValue = 100;
     private int _maxValue = 100;
-
 
     [Header("Aim UI")]
     public RectTransform aimRect;
@@ -45,10 +46,16 @@ public class IngameUIManager : Singleton<IngameUIManager>
     [SerializeField, Range(0, 1)]
     private float _aimRecover = 0;
 
+    public void OnClickLobbyBtn()
+    {
+        StartCoroutine(ChangeToLobby());
+    }
+
     public void InitRound()
     {
         winFrame.SetActive(false);
         lossFrame.SetActive(false);
+        lobbyBtn.SetActive(false);
         roundTimerText.gameObject.SetActive(false);
         roundResultText.gameObject.SetActive(false);
     }
@@ -182,13 +189,13 @@ public class IngameUIManager : Singleton<IngameUIManager>
 
     private IEnumerator EndMatch(bool isWin)
     {
-        yield return new WaitForSecondsRealtime(3.0f);
+        yield return new WaitForSecondsRealtime(1.0f);
         winFrame.SetActive(isWin);
         lossFrame.SetActive(!isWin);
-        yield return new WaitForSecondsRealtime(3.0f);
-        InitRound();
+        lobbyBtn.SetActive(true);
+        roundTimerText.gameObject.SetActive(false);
+        roundResultText.gameObject.SetActive(false);
     }
-
 
     bool cursor = false;
 
@@ -201,5 +208,24 @@ public class IngameUIManager : Singleton<IngameUIManager>
             Cursor.lockState = (cursor = !cursor) ? CursorLockMode.Locked : CursorLockMode.None;
 
         _curSize -= Time.deltaTime * _aimRecover * 30;
+    }
+
+    private IEnumerator ChangeToLobby()
+    {
+        string sName = "02Lobby";
+        Scene cs = SceneManager.GetActiveScene();
+        var asyncOp = SceneManager.LoadSceneAsync(sName, LoadSceneMode.Additive);
+        while (!asyncOp.isDone)
+            yield return null;
+
+        var scene = SceneManager.GetSceneByName(sName);
+        SceneManager.MoveGameObjectToScene(GlobalManager.Instance.gameObject, scene);
+
+        SceneManager.UnloadSceneAsync(cs);
+    }
+
+    private void OnDestroy()
+    {
+        NetworkManager.Instance.RecvHandler -= ProcessPacket;
     }
 }

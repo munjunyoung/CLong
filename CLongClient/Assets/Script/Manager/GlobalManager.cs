@@ -93,7 +93,6 @@ public class GlobalManager : Singleton<GlobalManager>
         {
             _inGame = false;
             InitHandler(false);
-            LoadScene(_sceneNames[1]);
         }
     }
 
@@ -109,7 +108,6 @@ public class GlobalManager : Singleton<GlobalManager>
 
         if (sName.Equals(_sceneNames[2]))
             _inGame = true;
-            
 
         SceneManager.UnloadSceneAsync(cs);
     }
