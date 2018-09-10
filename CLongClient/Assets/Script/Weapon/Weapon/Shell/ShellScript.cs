@@ -21,5 +21,7 @@ public class ShellScript : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
+        if(other.tag == "Player")
+        Debug.Log("<color=green>" + "플레이어 num : " + other.GetComponent<Player>().clientNum + ", 총알 num :" + clientNum + "</color>");
     }
 }

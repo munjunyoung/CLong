@@ -51,6 +51,9 @@ public class Player : MonoBehaviour
     public float dirWeightParam;
     
     private float blendChangeSpeed = 7;
+
+    //Effect
+    public ParticleSystem bloodEffect;
     
     public ActionState currentActionState
     {
@@ -214,9 +217,12 @@ public class Player : MonoBehaviour
     /// 맞은위치 pos을 받아와 데미지 이펙트 처리
     /// </summary>
     /// <param name="pos"></param>
-    public void TakeDamage(Vector3 pos)
+    public void TakeDamage(Vector3 pos, Quaternion dir)
     {
-
+        bloodEffect.transform.position = pos;
+        //반대방향 벡터
+        bloodEffect.transform.rotation = Quaternion.Inverse(dir);
+        bloodEffect.Play(true);
     }
 
     /// <summary>
@@ -249,9 +255,12 @@ public class Player : MonoBehaviour
                 if (clientCheck)
                 {
                     //TakeDamage(other.GetComponent<ShellScript>().damage);
-                    
                     NetworkManager.Instance.SendPacket(new Player_TakeDmg(clientNum, other.GetComponent<ShellScript>().damage) ,NetworkManager.Protocol.TCP);
+                    
+                    
                 }
+                TakeDamage(other.transform.position, other.transform.rotation);
+                Debug.Log("총알 위치" + other.transform.position);
                 Destroy(other.gameObject);
             }
         }
