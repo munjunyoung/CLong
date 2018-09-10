@@ -374,6 +374,8 @@ namespace CLongServer.Ingame
         private void MatchEndCb(object state, System.Timers.ElapsedEventArgs e)
         {
             matchEndTimer.Stop();
+            foreach (var player in PlayerDic)
+                player.Value.Client.ProcessHandler -= IngameDataRequestTCP;
             GameRoomManager.Instance.DellGameRoom(this);
         }
 
