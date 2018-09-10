@@ -332,7 +332,7 @@ public class PlayerWeaponManager : MonoBehaviour
     {
         WeaponManagerDic.Add(0, "AR/AK");
         WeaponManagerDic.Add(1, "AR/M4");
-        WeaponManagerDic.Add(2, "Throwable/HandGrenade");
+        WeaponManagerDic.Add(5, "Throwable/HandGrenade");
     }
 
 }

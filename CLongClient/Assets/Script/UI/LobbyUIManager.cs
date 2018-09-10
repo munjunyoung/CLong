@@ -15,6 +15,9 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
     [Header("Inventory Panel")]
     public GameObject[] mainCharacterList;
     public ToggleGroup mainCharacterToggleGroup;
+    public InventoryItemInfo[] itemList;
+    public EquippedItemInfo[] equipList;
+    public InventoryCharInfo[] charList;
 
     [Header("Matching Panel")]
     public RectTransform matchWaitingUI;
@@ -103,6 +106,7 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
         NetworkManager.Instance.SendPacket(new PlayerSetting_Req(_curCharacterIdx, _equippedItemAry[0], _equippedItemAry[1], _equippedItemAry[2])
             , NetworkManager.Protocol.TCP);
         this.OnClickMoveCanvas((int)PanelMove.RETURN);
+        SavePlayerSetting();
     }
 
 
@@ -123,6 +127,36 @@ public class LobbyUIManager : Singleton<LobbyUIManager>
         _curCharacterIdx = 0;
         //OnClickChangeCharacter(0);
         DOTween.defaultEaseType = Ease.OutBack;
+        LoadPlayerSetting();
+    }
+
+    private void Start()
+    {
+    }
+
+    private void LoadPlayerSetting()
+    {
+        var c = PlayerPrefs.GetInt("CharIdx", 0);
+        var w1 = PlayerPrefs.GetInt("W1", 0);
+        var w2 = PlayerPrefs.GetInt("W2", 1);
+        var th = PlayerPrefs.GetInt("TH", 5);
+
+        charList[c].tg.isOn = true;
+        OnClickChangeCharacter(c);
+        equipList[0].SetItem(itemList[w1]);
+        equipList[1].SetItem(itemList[w2]);
+        equipList[2].SetItem(itemList[th]);
+
+        NetworkManager.Instance.SendPacket(new PlayerSetting_Req(_curCharacterIdx, _equippedItemAry[0], _equippedItemAry[1], _equippedItemAry[2])
+            , NetworkManager.Protocol.TCP);
+    }
+
+    private void SavePlayerSetting()
+    {
+        PlayerPrefs.SetInt("CharIdx", _curCharacterIdx);
+        PlayerPrefs.SetInt("W1", _equippedItemAry[0]);
+        PlayerPrefs.SetInt("W2", _equippedItemAry[1]);
+        PlayerPrefs.SetInt("TH", _equippedItemAry[2]);
     }
 
     private IEnumerator MatchTimer(Text t)

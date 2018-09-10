@@ -7,7 +7,7 @@ public class InventoryCharInfo : MonoBehaviour
 {
     public AudioSource sound;
     public int id;
-    Toggle tg;
+    public Toggle tg;
 
 	// Use this for initialization
 	void Start ()

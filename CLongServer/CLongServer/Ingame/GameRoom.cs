@@ -87,6 +87,11 @@ namespace CLongServer.Ingame
             //TeamSet
             PlayerDic.Add((int)TeamColor.BLUE, c1.player);
             PlayerDic.Add((int)TeamColor.RED, c2.player);
+            foreach(var player in PlayerDic)
+            {
+                if (player.Value.RoundPoint > 0)
+                    player.Value.RoundPoint = 0;
+            }
 
             foreach (var team in PlayerDic)
             {
@@ -168,11 +173,11 @@ namespace CLongServer.Ingame
                 //없애도됨 대충 셋팅
                 player.firstWeapon = 0;
                 player.secondWeapon = 1;
-                player.throwble = 2;
+                player.throwble = 5;
 
                 enemy.firstWeapon = 0;
                 enemy.secondWeapon = 1;
-                enemy.throwble = 2;
+                enemy.throwble = 5;
                 player.Client.Send(new IPacket[]
                 {
                     new Player_Init((byte)cNumber, player.Hp, player.StartPos, player.StartLookPos, true, player.character, player.firstWeapon, player.secondWeapon, player.throwble),

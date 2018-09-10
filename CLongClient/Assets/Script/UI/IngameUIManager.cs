@@ -195,6 +195,7 @@ public class IngameUIManager : Singleton<IngameUIManager>
         lobbyBtn.SetActive(true);
         roundTimerText.gameObject.SetActive(false);
         roundResultText.gameObject.SetActive(false);
+        Cursor.lockState = CursorLockMode.None;
     }
 
     bool cursor = false;
