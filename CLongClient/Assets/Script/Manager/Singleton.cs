@@ -10,16 +10,17 @@ public class Singleton<T> : MonoBehaviour
 
     protected virtual void Awake()
     {
-        if (_instance == null)
+        //if (_instance == null)
         {
             _instance = GetComponent<T>();
             Init();
         }
-        else
-        {
-            Debug.LogError("Scene has two <color=red>" + _instance.GetType() + "</color> components. Destroy new one.", gameObject);
-            Destroy(gameObject);
-        }
+        //}
+        //else
+        //{
+        //    Debug.LogError("Scene has two <color=red>" + _instance.GetType() + "</color> components. Destroy new one.", gameObject);
+        //    Destroy(gameObject);
+        //}
     }
 
     protected virtual void Init()
