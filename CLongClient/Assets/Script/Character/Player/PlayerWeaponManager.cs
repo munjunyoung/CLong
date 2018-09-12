@@ -41,7 +41,7 @@ public class PlayerWeaponManager : MonoBehaviour
 
     private void LateUpdate()
     {
-        Debug.DrawRay(fireTransform.position, fireTransform.forward * 100f, Color.green);
+        //Debug.DrawRay(fireTransform.position, fireTransform.forward * 100f, Color.green);
     }
 
     /// <summary>

@@ -8,20 +8,37 @@ public class ShellScript : MonoBehaviour {
     public byte clientNum;
     public int damage;
     public Transform parentTransform;
+    public bool coroutineCheck = true;
 
 	// Use this for initialization
 	private void Start () {
         Destroy(this.parentTransform.gameObject, 3f);
-	}
+        parentTransform.GetComponent<Rigidbody>().AddForce(-transform.up * shellSpeed, ForceMode.Impulse);
+        // StartCoroutine(ShellMove());
+    }
 	
 	// Update is called once per frame
 	private void FixedUpdate () {
-        parentTransform.Translate(Vector3.forward * shellSpeed * Time.deltaTime);
-	}
+        //parentTransform.Translate(Vector3.forward * shellSpeed * Time.deltaTime);
+       
+    }
 
     private void OnTriggerEnter(Collider other)
     {
         if(other.tag == "Player")
-        Debug.Log("<color=green>" + "플레이어 num : " + other.GetComponent<Player>().clientNum + ", 총알 num :" + clientNum + "</color>");
+        {
+            coroutineCheck = false;
+            Debug.Log("<color=green>" + "플레이어 num : " + other.GetComponent<Player>().clientNum + ", 총알 num :" + clientNum + "</color>");
+        }
+        
+    }
+
+    IEnumerator ShellMove()
+    {
+        while (coroutineCheck)
+        {
+           
+            yield return null;
+        }
     }
 }

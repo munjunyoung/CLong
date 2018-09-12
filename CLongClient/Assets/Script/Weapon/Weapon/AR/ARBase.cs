@@ -57,7 +57,8 @@ public class ARBase : WeaponBase
     /// <param name="st"></param>
     protected virtual void ShellIns(string st, byte num, Vector3 pos, Vector3 dir)
     {
-        shellPrefab = Instantiate(Resources.Load("Prefab/Item/Weapon/Shell/" + st)) as GameObject;
+        
+        /*shellPrefab = Instantiate(Resources.Load("Prefab/Item/Weapon/Shell/" + st)) as GameObject;
         //var weaponFireTransform = transform.Find("FirePosition").transform;
         var tmpShellSc = shellPrefab.GetComponentInChildren<ShellScript>();
         tmpShellSc.parentTransform.localPosition = pos;
@@ -65,6 +66,14 @@ public class ARBase : WeaponBase
         tmpShellSc.shellSpeed = shellSpeed;
         tmpShellSc.clientNum = num;
         tmpShellSc.damage = damage;
+        */
+        RaycastHit hit;
+        if(Physics.Raycast(pos, dir, out hit, 300f))
+        {
+            Debug.Log(hit.collider.tag);
+            Debug.DrawRay(pos, dir * 100f, Color.red, 5f);
+        }
+        
     }
 }
 
