@@ -107,6 +107,8 @@ public class ThrowableBase : WeaponBase
     /// <returns></returns>
     IEnumerator SetActiveRoutine()
     {
+        yield return new WaitForSeconds(0.1f);
+        coll.enabled = false;
         yield return new WaitForSeconds(3f);
         if(this.gameObject.activeSelf)
         this.gameObject.SetActive(false);

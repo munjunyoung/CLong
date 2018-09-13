@@ -20,7 +20,7 @@ public class ShellScript : MonoBehaviour {
 	// Update is called once per frame
 	private void FixedUpdate () {
         //parentTransform.Translate(Vector3.forward * shellSpeed * Time.deltaTime);
-       
+        //parentTransform.GetComponent<Rigidbody>().AddForce(-transform.up * shellSpeed, ForceMode.Acceleration);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -28,7 +28,7 @@ public class ShellScript : MonoBehaviour {
         if(other.tag == "Player")
         {
             coroutineCheck = false;
-            Debug.Log("<color=green>" + "플레이어 num : " + other.GetComponent<Player>().clientNum + ", 총알 num :" + clientNum + "</color>");
+      
         }
         
     }

@@ -73,7 +73,7 @@ GameObject:
   - component: {fileID: 33196027926040258}
   - component: {fileID: 23697152686796974}
   - component: {fileID: 135418959653706304}
-  - component: {fileID: 54012147962471684}
+  - component: {fileID: 54654106440946216}
   - component: {fileID: 114724463538059822}
   - component: {fileID: 114232171604493454}
   m_Layer: 0
@@ -335,7 +335,7 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1446931069212146}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!54 &54012147962471684
+--- !u!54 &54654106440946216
 Rigidbody:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -368,8 +368,6 @@ MonoBehaviour:
   equipWeaponNum: 0
   weaponState: 0
   zoomPossible: 0
-  bombRigidbody: {fileID: 0}
-  coll: {fileID: 0}
 --- !u!114 &114724463538059822
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -388,7 +386,7 @@ MonoBehaviour:
   equipWeaponNum: 0
   weaponState: 0
   zoomPossible: 0
-  bombRigidbody: {fileID: 54012147962471684}
+  bombRigidbody: {fileID: 54654106440946216}
   coll: {fileID: 135418959653706304}
   BombEffect: {fileID: 198304347991375050}
 --- !u!135 &135418959653706304

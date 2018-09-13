@@ -143,3 +143,4 @@ MonoBehaviour:
   clientNum: 0
   damage: 0
   parentTransform: {fileID: 4283789988356374}
+  coroutineCheck: 1

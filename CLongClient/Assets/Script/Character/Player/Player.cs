@@ -246,7 +246,7 @@ public class Player : MonoBehaviour
     {
         if (!isAlive)
             return;
-
+        Debug.Log("실행됫니?");
         if (other.tag == "Shell")
         {
             //내가 쏜 총알이 아닐 경우에
@@ -259,8 +259,8 @@ public class Player : MonoBehaviour
                     
                     
                 }
+                Debug.Log("Enter : ");
                 TakeDamage(other.transform.position, other.transform.rotation);
-                Debug.Log("총알 위치" + other.transform.position);
                 Destroy(other.gameObject);
             }
         }
