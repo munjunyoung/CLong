@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using tcpNet;
 using CLongLib;
 
 public class ARBase : WeaponBase
@@ -20,8 +19,14 @@ public class ARBase : WeaponBase
     
     public int shootPeriodCount = 0;
     public ParticleSystem EffectPrefab;
-    
 
+    public GameObject[] Shell = new GameObject[30];
+
+    public int currentShellLoaded = 30;
+    public int shellLoadedValue;
+
+    public bool ReloadPlaying = false;
+    
     /// <summary>
     /// AR 총
     /// </summary>
@@ -30,9 +35,39 @@ public class ARBase : WeaponBase
     /// <param name="rot"></param>
     public override void Shoot(byte clientNum, Vector3 pos, Vector3 dir)
     {
-        base.Shoot(clientNum, pos, dir);
-        EffectPrefab.Play(true);
-        ShellIns(shellType, clientNum, pos, dir);
+        if (currentShellLoaded > 0)
+        {
+            base.Shoot(clientNum, pos, dir);
+            EffectPrefab.Play(true);
+            ShellIns(shellType, clientNum, pos, dir);
+            weaponAudio.clip = weaponAudioClip[0];
+            weaponAudio.Play();
+            currentShellLoaded--;
+        }
+        else
+        {
+            weaponAudio.clip = weaponAudioClip[1];
+            weaponAudio.Play();
+        }
+    }
+
+    public void Reload()
+    {
+        if (ReloadPlaying)
+            return;
+        
+        weaponAudio.clip = weaponAudioClip[2];
+        weaponAudio.Play();
+        //animation reload start
+        StartCoroutine(ReloadStart());
+    }
+
+    IEnumerator ReloadStart()
+    {
+        ReloadPlaying = true;
+        yield return new WaitForSeconds(2f);
+        currentShellLoaded = shellLoadedValue;
+        ReloadPlaying = false;
     }
 
     /// <summary>
@@ -51,13 +86,13 @@ public class ARBase : WeaponBase
         }
         shootPeriodCount++;
     }
+
     /// <summary>
     /// Create Shell
     /// </summary>
     /// <param name="st"></param>
     protected virtual void ShellIns(string st, byte num, Vector3 pos, Vector3 dir)
     {
-        
         shellPrefab = Instantiate(Resources.Load("Prefab/Item/Weapon/Shell/" + st)) as GameObject;
         //var weaponFireTransform = transform.Find("FirePosition").transform;
         var tmpShellSc = shellPrefab.GetComponentInChildren<ShellScript>();

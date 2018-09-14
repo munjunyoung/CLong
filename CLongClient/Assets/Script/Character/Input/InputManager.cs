@@ -169,6 +169,7 @@ public class InputManager : MonoBehaviour
         //Turning Send
         if (Mathf.Abs(Input.GetAxis("Mouse X")) > 0 || Mathf.Abs(Input.GetAxis("Mouse Y")) > 0)
             NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
+        
     }
 
     #region Aim UI

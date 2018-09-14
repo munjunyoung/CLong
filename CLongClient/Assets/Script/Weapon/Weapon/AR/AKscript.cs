@@ -1,4 +1,4 @@
-﻿
+﻿using UnityEngine;
 
 public class AKscript : ARBase
 {
@@ -7,6 +7,7 @@ public class AKscript : ARBase
     /// </summary>
     protected override void Awake()
     {
+        base.Awake();
         type = ItemType.WEAPON;
         weaponName = "AK";
         shellType = "7mm";
@@ -16,6 +17,9 @@ public class AKscript : ARBase
         reboundIntensity = 7;
         reboundRecoveryTime = 2f;
         zoomPossible = true;
+
+        shellLoadedValue = 30;
+        
     }
     
 }

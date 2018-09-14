@@ -32,6 +32,9 @@ public class ThrowableBase : WeaponBase
         //다른클라가 던졌을때 ontrigger체크를 위해
         weaponState = false;
         StartCoroutine(BombCoroutine());
+
+        weaponAudio.clip = weaponAudioClip[0];
+        weaponAudio.Play();
     }
 
     /// <summary>
@@ -71,6 +74,8 @@ public class ThrowableBase : WeaponBase
         BombEffect.Play(true);
         //넉백 부분 놉(addExplosionForce의 경우 rigidbody가 타겟에게도 필요하므로 보류
         StartCoroutine(SetActiveRoutine());
+        weaponAudio.clip = weaponAudioClip[1];
+        weaponAudio.Play();
     }
 
     /// <summary>

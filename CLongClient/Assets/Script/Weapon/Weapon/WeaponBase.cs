@@ -21,12 +21,16 @@ public class WeaponBase : ItemBase
     public bool zoomPossible = false;
     //Bomb
     //Eating
-    
+    //Audio
+    public AudioClip[] weaponAudioClip = new AudioClip[3];
+    public AudioSource weaponAudio;
     /// <summary>
     /// 상속
     /// </summary>
     protected virtual void Awake()
     {
+        weaponAudio = this.GetComponent<AudioSource>();
+        Debug.Log("weaponAudio" + weaponAudio);
     }
     
     /// <summary>

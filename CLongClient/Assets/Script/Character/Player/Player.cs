@@ -246,7 +246,6 @@ public class Player : MonoBehaviour
     {
         if (!isAlive)
             return;
-        Debug.Log("실행됫니?");
         if (other.tag == "Shell")
         {
             //내가 쏜 총알이 아닐 경우에

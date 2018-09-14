@@ -7,6 +7,7 @@ public class GrenadeScript : ThrowableBase {
     // Update is called once per frame
     protected override void Awake()
     {
+        base.Awake();
         type = ItemType.THROWBLE;
         damage = 50;
         zoomPossible = false;
