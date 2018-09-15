@@ -10,6 +10,8 @@ public class ShellScript : MonoBehaviour {
     public Transform parentTransform;
     public bool coroutineCheck = true;
 
+    public ParticleSystem SparkEffect;
+
 	// Use this for initialization
 	private void Start () {
         Destroy(this.parentTransform.gameObject, 3f);
@@ -25,10 +27,12 @@ public class ShellScript : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.tag == "Player")
+        if(other.tag == "Ground")
         {
-            coroutineCheck = false;
-      
+            var ef = Instantiate(SparkEffect);
+            ef.transform.position = this.transform.position;
+
+            Destroy(this.gameObject);
         }
         
     }
