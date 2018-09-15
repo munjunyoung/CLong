@@ -841,7 +841,7 @@ BlendTree:
     m_DirectBlendParameter: SeatWalkBlend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 5a91ea3139c9ab7419a101ca01e50859, type: 3}
+    m_Motion: {fileID: 7400000, guid: 3cb4977438f6bd34ebf85d77d68a95ab, type: 2}
     m_Threshold: 1
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -915,7 +915,7 @@ BlendTree:
     m_DirectBlendParameter: SeatWalkBlend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: c2accaa09b5728c44bff7bfa5a390220, type: 3}
+    m_Motion: {fileID: 7400000, guid: f2678396d899ab844809e97e71d20ac0, type: 2}
     m_Threshold: 1
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1

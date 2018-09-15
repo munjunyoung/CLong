@@ -57,8 +57,8 @@ public class Player : MonoBehaviour
     //audio
     public AudioSource movingAudio;
     public AudioSource voiceAudio;
-    //
-    public AudioClip[] movingAudioClip = new AudioClip[2];
+    //0 walk 1 run 3 jump
+    public AudioClip[] movingAudioClip = new AudioClip[3];
     public AudioClip[] voiceAudioClip = new AudioClip[2];
     
     public ActionState currentActionState
@@ -86,6 +86,7 @@ public class Player : MonoBehaviour
                     break;
                 case ActionState.Seat:
                     moveSpeed = 1.5f;
+                    movingAudio.Stop();
                     break;
                 case ActionState.Jump:
                     break;
@@ -96,7 +97,6 @@ public class Player : MonoBehaviour
     }
     private ActionState _currentAc;
    
-
     private void FixedUpdate()
     {
         if (!isAlive)
@@ -180,6 +180,8 @@ public class Player : MonoBehaviour
         //y값이 다른 경우
         //else if (prePosHegiht > currentPosHeight)
         // 떨어지는 애니매이션
+
+        
     }
     
     /// <summary>
@@ -202,6 +204,8 @@ public class Player : MonoBehaviour
 
     public void JumpStartInAnim()
     {
+        movingAudio.clip = movingAudioClip[2];
+        movingAudio.Play();
         StartCoroutine(JumpCoroutine());
     }
 
@@ -229,6 +233,10 @@ public class Player : MonoBehaviour
         //반대방향 벡터
         bloodEffect.transform.rotation = Quaternion.Inverse(dir);
         bloodEffect.Play(true);
+
+        //audio
+        voiceAudio.clip = voiceAudioClip[0];
+        voiceAudio.Play();
     }
 
     /// <summary>
@@ -242,6 +250,8 @@ public class Player : MonoBehaviour
         isAlive = false;
         animSc.anim.SetTrigger("Death");
         animSc.anim.SetBool("Alive", isAlive);
+        voiceAudio.clip = voiceAudioClip[1];
+        voiceAudio.Play();
     }
 
     /// <summary>
@@ -361,6 +371,25 @@ public class Player : MonoBehaviour
         }
     }
     #endregion
+
+
+    /// <summary>
+    /// WalkSound
+    /// </summary>
+    public void WalkSoundAnim()
+    {
+        movingAudio.clip = movingAudioClip[0];
+        movingAudio.Play();
+    }
+    /// <summary>
+    /// RunSound
+    /// </summary>
+    public void RunSoundAnim()
+    {
+        movingAudio.clip = movingAudioClip[1];
+        movingAudio.Play();
+    }
+
 }
 
 

@@ -216,9 +216,12 @@ namespace CLongServer.Ingame
             else if (p is Player_TakeDmg)
             {
                 var s = (Player_TakeDmg)p;
+                //이미 죽은경우 리턴
+                if (PlayerDic[s.clientIdx].Hp <= 0)
+                    return;
+
                 PlayerDic[s.clientIdx].Hp -= s.damage;
-                PlayerDic[s.clientIdx].Client.Send(
-                    new Player_Sync(s.clientIdx, PlayerDic[s.clientIdx].Hp));
+                PlayerDic[s.clientIdx].Client.Send(new Player_Sync(s.clientIdx, PlayerDic[s.clientIdx].Hp));
                 if (PlayerDic[s.clientIdx].Hp <= 0)
                 {
                     foreach (var pair in PlayerDic)
@@ -393,8 +396,8 @@ namespace CLongServer.Ingame
         public void SetStartPos()
         {
             //1.1f 인 이유는 skinwidth
-            StartPosList.Add(new Vector3(5, 1f, 5));
-            StartPosList.Add(new Vector3(10, 1f, 10));
+            StartPosList.Add(new Vector3(-15f, 1f, 5));
+            StartPosList.Add(new Vector3(17, 1f, -8));
         }
 
     }

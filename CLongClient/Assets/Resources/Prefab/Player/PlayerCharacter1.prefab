@@ -3536,7 +3536,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -3731,11 +3731,12 @@ MonoBehaviour:
   movingAudio: {fileID: 82930240232792090}
   voiceAudio: {fileID: 82514526090466880}
   movingAudioClip:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: 6b17ed8009ff8934b865d7f27b73874e, type: 3}
+  - {fileID: 8300000, guid: 84adbfe275c992a4fab3a627960f3654, type: 3}
+  - {fileID: 8300000, guid: f1ccb53e747a33848ac70eb879b1c722, type: 3}
   voiceAudioClip:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: 058d490eb46e0924b961bb593e89d597, type: 3}
+  - {fileID: 8300000, guid: 9788a376e550cbb4d8e16ea7cd46ca53, type: 3}
 --- !u!135 &135969390498458262
 SphereCollider:
   m_ObjectHideFlags: 1
@@ -4038,7 +4039,7 @@ CharacterController:
   serializedVersion: 2
   m_Height: 0.5
   m_Radius: 0.15
-  m_SlopeLimit: 45
+  m_SlopeLimit: 50
   m_StepOffset: 0.3
   m_SkinWidth: 0.01
   m_MinMoveDistance: 0.001
