@@ -50,7 +50,7 @@ public class Player : MonoBehaviour
     private float dirWeight;
     public float dirWeightParam;
     
-    private float blendChangeSpeed = 7;
+    private float blendChangeSpeed = 15;
 
     //Effect
     public ParticleSystem bloodEffect;
@@ -76,13 +76,13 @@ public class Player : MonoBehaviour
                     moveSpeed = 2f;
                     break;
                 case ActionState.SlowWalk:
-                    moveSpeed = 1f;
-                    break;
-                case ActionState.Walk:
                     moveSpeed = 2f;
                     break;
-                case ActionState.Run:
+                case ActionState.Walk:
                     moveSpeed = 3f;
+                    break;
+                case ActionState.Run:
+                    moveSpeed = 4f;
                     break;
                 case ActionState.Seat:
                     moveSpeed = 1.5f;
@@ -264,7 +264,6 @@ public class Player : MonoBehaviour
                     
                     
                 }
-                Debug.Log("Enter : ");
                 TakeDamage(other.transform.position, other.transform.rotation);
                 Destroy(other.gameObject);
             }
