@@ -16,7 +16,9 @@ class M4Script : ARBase
         reboundIntensity = 5;
         reboundRecoveryTime = 2;
         zoomPossible = true;
-        shellLoadedValue = 30;
+
+        MaxItemValue = 30;
+        currentItemValue = 30;
     }
 }
 

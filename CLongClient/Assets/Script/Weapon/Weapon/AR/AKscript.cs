@@ -18,7 +18,8 @@ public class AKscript : ARBase
         reboundRecoveryTime = 2f;
         zoomPossible = true;
 
-        shellLoadedValue = 30;
+        MaxItemValue = 30;
+        currentItemValue = 30;
         
     }
     

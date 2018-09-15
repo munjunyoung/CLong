@@ -24,6 +24,9 @@ public class WeaponBase : ItemBase
     //Audio
     public AudioClip[] weaponAudioClip = new AudioClip[3];
     public AudioSource weaponAudio;
+    //
+    public int currentItemValue;
+    public int MaxItemValue;
     /// <summary>
     /// 상속
     /// </summary>

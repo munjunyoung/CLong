@@ -484,5 +484,6 @@ namespace CLongLib
             clientIdx = n;
         }
     }
+
     #endregion
 }

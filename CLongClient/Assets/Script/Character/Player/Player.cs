@@ -54,6 +54,12 @@ public class Player : MonoBehaviour
 
     //Effect
     public ParticleSystem bloodEffect;
+    //audio
+    public AudioSource movingAudio;
+    public AudioSource voiceAudio;
+    //
+    public AudioClip[] movingAudioClip = new AudioClip[2];
+    public AudioClip[] voiceAudioClip = new AudioClip[2];
     
     public ActionState currentActionState
     {
@@ -339,6 +345,11 @@ public class Player : MonoBehaviour
                     return;
                 currentActionState = ActionState.Jump;
                 animSc.anim.SetTrigger("JumpTrigger");
+                break;
+            case Key.R:
+                if (weaponManagerSc.ReloadingAnim)
+                    return;
+                weaponManagerSc.ReloadWeapon();
                 break;
             case Key.RClick:
                 weaponManagerSc.ZoomChange(state);

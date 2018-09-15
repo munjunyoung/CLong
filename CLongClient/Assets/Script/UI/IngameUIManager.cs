@@ -45,6 +45,12 @@ public class IngameUIManager : Singleton<IngameUIManager>
     private float _aimIntensity = 0;
     [SerializeField, Range(0, 1)]
     private float _aimRecover = 0;
+    
+    [Header("ItemValue UI")]
+    public Text ItemValueText;
+    public Image ItemImage;
+    private int currentValue;
+    private int maxValue;
 
     public void OnClickLobbyBtn()
     {
@@ -228,5 +234,12 @@ public class IngameUIManager : Singleton<IngameUIManager>
     private void OnDestroy()
     {
         NetworkManager.Instance.RecvHandler -= ProcessPacket;
+    }
+
+    public void SetItemText(int cv, int mv)
+    {
+        currentValue = cv;
+        maxValue = mv;
+        ItemValueText.text= cv + " / " + mv;
     }
 }

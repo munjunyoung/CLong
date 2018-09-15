@@ -12,6 +12,9 @@ class FishScript : FoodBase
         fillHealthAmount = 50;
         eatingTime = 2;
         zoomPossible = false;
+
+        MaxItemValue = 1;
+        currentItemValue = 1;
     }
 
 }

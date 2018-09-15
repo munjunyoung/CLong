@@ -20,6 +20,7 @@ class FoodBase : WeaponBase
     {
         base.Shoot(clientNum, pos, rot);
         gameObject.SetActive(false);
+        currentItemValue--;
     }
 
     public override void ShootSendServer(byte clientNum, Vector3 pos, Vector3 dir)

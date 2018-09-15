@@ -32,6 +32,8 @@ public class PlayerWeaponManager : MonoBehaviour
     private float aimTimer;
     private bool idleCoroutineRunning = false;
     private bool SendTest = false;
+    //Reload
+    public bool ReloadingAnim = false;
 
     private void Start()
     {
@@ -88,8 +90,9 @@ public class PlayerWeaponManager : MonoBehaviour
             EquipweaponDic[foodData.equipWeaponNum].weaponState = true;
             EquipweaponDic[foodData.equipWeaponNum].enabled = false;
         }
+        //ItemUI 설정
+        
     }
-
     /// <summary>
     ///  player Change Weapon by input key
     /// </summary>
@@ -139,6 +142,8 @@ public class PlayerWeaponManager : MonoBehaviour
                 break;
         }
         ownPlayer.animSc.anim.SetInteger("ItemType", (int)currentUsingWeapon.type);
+        //ItemUI 설정
+        SetItemValueUI();
     }
 
     /// <summary>
@@ -180,8 +185,10 @@ public class PlayerWeaponManager : MonoBehaviour
                 break;
         }
         currentUsingWeapon.Shoot(clientnum, pos, rot);
+        //ItemUI 설정
+        SetItemValueUI();
     }
-    
+
     /// <summary>
     /// 슛하기전 서버로 전송 -> 무기로 접근해서 전송
     /// </summary>
@@ -208,6 +215,31 @@ public class PlayerWeaponManager : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    /// <summary>
+    /// Reload 시작(스크립트로 실행)
+    /// </summary>
+    public void ReloadWeapon()
+    {
+        //R을 클릭했을때 inputmanager에서도 조건을 걸어두긴했음..
+        if (currentUsingWeapon.type.Equals(ItemType.WEAPON))
+        {
+            ReloadingAnim = true;
+            ownPlayer.animSc.anim.SetTrigger("Reload");
+            currentUsingWeapon.GetComponent<ARBase>().ReloadStart();
+        }
+    }
+
+    /// <summary>
+    /// Reload종료 실제로 총알숫자가 초기화고 상태를 변경, animation 에서 실행
+    /// </summary>
+    public void ReloadEnd()
+    {
+        currentUsingWeapon.GetComponent<ARBase>().ReloadEnd();
+        ReloadingAnim = false;
+        //ItemUI 설정
+        SetItemValueUI();
     }
 
     /// <summary>
@@ -335,4 +367,12 @@ public class PlayerWeaponManager : MonoBehaviour
         WeaponManagerDic.Add(5, "Throwable/HandGrenade");
     }
 
+    /// <summary>
+    /// 체크좀
+    /// </summary>
+    public void SetItemValueUI()
+    {
+        if (ownPlayer.clientCheck)
+            IngameUIManager.Instance.SetItemText(currentUsingWeapon.currentItemValue, currentUsingWeapon.MaxItemValue);
+    }
 }

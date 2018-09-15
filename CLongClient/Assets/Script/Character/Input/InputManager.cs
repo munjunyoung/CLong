@@ -124,52 +124,68 @@ public class InputManager : MonoBehaviour
                 NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Space, true), NetworkManager.Protocol.TCP);
         }
 
-        //WeaponSwap
-        if (Input.GetKeyDown(KeyList[(int)Key.Alpha1]))
+        //장전중일땐 안되도록 설정
+        if (!myPlayer.weaponManagerSc.ReloadingAnim)
         {
-            //이미 장착한 번호와 같은경우 전송 안되도록
-            if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 0)
-                NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha1, true), NetworkManager.Protocol.TCP);
-        }
-        else if (Input.GetKeyDown(KeyList[(int)Key.Alpha2]))
-        {
-            if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 1)
-                NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha2, true), NetworkManager.Protocol.TCP);
-        }
-        else if (Input.GetKeyDown(KeyList[(int)Key.Alpha3]))
-        {
-            if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 2)
+            //WeaponSwap
+            if (Input.GetKeyDown(KeyList[(int)Key.Alpha1]))
             {
-                //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
-                if (myPlayer.weaponManagerSc.EquipweaponDic[2].weaponState.Equals(true))
-                    NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha3, true), NetworkManager.Protocol.TCP);
+                //이미 장착한 번호와 같은경우 전송 안되도록
+                if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 0)
+                    NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha1, true), NetworkManager.Protocol.TCP);
             }
-        }
-        else if (Input.GetKeyDown(KeyList[(int)Key.Alpha4]))
-        {
-            if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 3)
+            else if (Input.GetKeyDown(KeyList[(int)Key.Alpha2]))
             {
-                //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
-                if (myPlayer.weaponManagerSc.EquipweaponDic[3].weaponState.Equals(true))
-                    NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha4, true), NetworkManager.Protocol.TCP);
+                if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 1)
+                    NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha2, true), NetworkManager.Protocol.TCP);
             }
-        }
-        //Shooting
-        if (Input.GetMouseButton(0))
-        {
-            myPlayer.weaponManagerSc.SendUseItemToServer();
-        }
-        //Zoom
-        if (Input.GetMouseButtonDown(1))
-        {
-            if (myPlayer.weaponManagerSc.currentUsingWeapon.zoomPossible)
-                NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.RClick, myPlayer.zoomState.Equals(true) ? false : true), NetworkManager.Protocol.TCP);
+            else if (Input.GetKeyDown(KeyList[(int)Key.Alpha3]))
+            {
+                if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 2)
+                {
+                    //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
+                    if (myPlayer.weaponManagerSc.EquipweaponDic[2].weaponState.Equals(true))
+                        NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha3, true), NetworkManager.Protocol.TCP);
+                }
+            }
+            else if (Input.GetKeyDown(KeyList[(int)Key.Alpha4]))
+            {
+                if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 3)
+                {
+                    //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
+                    if (myPlayer.weaponManagerSc.EquipweaponDic[3].weaponState.Equals(true))
+                        NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha4, true), NetworkManager.Protocol.TCP);
+                }
+            }
+            //Shooting
+            if (Input.GetMouseButton(0))
+            {
+
+                myPlayer.weaponManagerSc.SendUseItemToServer();
+            }
+            //Zoom
+            if (Input.GetMouseButtonDown(1))
+            {
+                if (myPlayer.weaponManagerSc.currentUsingWeapon.zoomPossible)
+                    NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.RClick, myPlayer.zoomState.Equals(true) ? false : true), NetworkManager.Protocol.TCP);
+            }
+
+            if (Input.GetKeyDown(KeyList[(int)Key.R]))
+            {
+                if (myPlayer.weaponManagerSc.currentUsingWeapon.type.Equals(ItemType.WEAPON))
+                {
+                    if (myPlayer.weaponManagerSc.currentUsingWeapon.GetComponent<ARBase>().currentItemValue < 30)
+                    {
+                        NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.R, true), NetworkManager.Protocol.TCP);
+                    }
+
+                }
+            }
         }
 
         //Turning Send
         if (Mathf.Abs(Input.GetAxis("Mouse X")) > 0 || Mathf.Abs(Input.GetAxis("Mouse Y")) > 0)
             NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
-        
     }
 
     #region Aim UI
@@ -266,5 +282,8 @@ public class InputManager : MonoBehaviour
 
         //Jump
         KeyList.Add(KeyCode.Space);
+        
+        //Reload
+        KeyList.Add(KeyCode.R);
     }
 }

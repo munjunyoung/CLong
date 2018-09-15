@@ -11,6 +11,9 @@ public class GrenadeScript : ThrowableBase {
         type = ItemType.THROWBLE;
         damage = 50;
         zoomPossible = false;
+
+        MaxItemValue = 1;
+        currentItemValue = 1;
     }
     /// <summary>
     /// 수류탄이 터질때 실행

@@ -22,10 +22,7 @@ public class ARBase : WeaponBase
 
     public GameObject[] Shell = new GameObject[30];
 
-    public int currentShellLoaded = 30;
-    public int shellLoadedValue;
-
-    public bool ReloadPlaying = false;
+    
     
     /// <summary>
     /// AR 총
@@ -35,14 +32,14 @@ public class ARBase : WeaponBase
     /// <param name="rot"></param>
     public override void Shoot(byte clientNum, Vector3 pos, Vector3 dir)
     {
-        if (currentShellLoaded > 0)
+        if (currentItemValue > 0)
         {
             base.Shoot(clientNum, pos, dir);
             EffectPrefab.Play(true);
             ShellIns(shellType, clientNum, pos, dir);
             weaponAudio.clip = weaponAudioClip[0];
             weaponAudio.Play();
-            currentShellLoaded--;
+            currentItemValue--;
         }
         else
         {
@@ -51,23 +48,21 @@ public class ARBase : WeaponBase
         }
     }
 
-    public void Reload()
+    /// <summary>
+    /// Reload Gun
+    /// </summary>
+    public void ReloadStart()
     {
-        if (ReloadPlaying)
-            return;
-        
         weaponAudio.clip = weaponAudioClip[2];
         weaponAudio.Play();
-        //animation reload start
-        StartCoroutine(ReloadStart());
     }
 
-    IEnumerator ReloadStart()
+    /// <summary>
+    /// ReloadEnd
+    /// </summary>
+    public void ReloadEnd()
     {
-        ReloadPlaying = true;
-        yield return new WaitForSeconds(2f);
-        currentShellLoaded = shellLoadedValue;
-        ReloadPlaying = false;
+        currentItemValue = MaxItemValue;
     }
 
     /// <summary>

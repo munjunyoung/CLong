@@ -35,6 +35,8 @@ public class ThrowableBase : WeaponBase
 
         weaponAudio.clip = weaponAudioClip[0];
         weaponAudio.Play();
+
+        currentItemValue--;
     }
 
     /// <summary>
