@@ -161,7 +161,6 @@ public class InputManager : MonoBehaviour
             //Shooting
             if (Input.GetMouseButton(0))
             {
-
                 myPlayer.weaponManagerSc.SendUseItemToServer();
             }
             //Zoom
