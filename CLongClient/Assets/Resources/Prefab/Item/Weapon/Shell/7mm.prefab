@@ -253,5 +253,5 @@ MonoBehaviour:
   damage: 0
   parentTransform: {fileID: 4179847790865090}
   coroutineCheck: 1
-  SparkEffect: {fileID: 198475901026531600, guid: 0ed1c5b9845f23342a9224fa4dec06ec,
+  SparkEffect: {fileID: 1056328030371420, guid: 0ed1c5b9845f23342a9224fa4dec06ec,
     type: 2}

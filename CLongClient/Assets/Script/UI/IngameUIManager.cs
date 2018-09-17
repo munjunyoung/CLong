@@ -18,6 +18,8 @@ public class IngameUIManager : Singleton<IngameUIManager>
     public Text roundTimerText;
     public Text roundResultText;
 
+    public float timerValue = 3f;
+
     [Header("HP UI")]
     public Slider hpSlider;
     public RectTransform recoverHpRect;
@@ -179,9 +181,10 @@ public class IngameUIManager : Singleton<IngameUIManager>
             {
                 case 0:
                     roundTimerText.gameObject.SetActive(true);
+                    StartCoroutine(TimerStart());
                     break;
                 case 1:
-                    roundTimerText.gameObject.SetActive(false);
+                    //StartCoroutine()
                     break;
             }
         }
@@ -191,6 +194,23 @@ public class IngameUIManager : Singleton<IngameUIManager>
             
             StartCoroutine(EndMatch(s.win));
         }
+    }
+
+    IEnumerator TimerStart()
+    {
+        while (timerValue > 0)
+        {
+            roundTimerText.text = timerValue.ToString();
+            timerValue--;
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+    IEnumerable TimerStartEnd()
+    {
+        roundTimerText.text = "START !";
+        yield return new WaitForSeconds(1f);
+        roundTimerText.gameObject.SetActive(false);
     }
 
     private IEnumerator EndMatch(bool isWin)

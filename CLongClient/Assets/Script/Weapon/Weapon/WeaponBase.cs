@@ -33,7 +33,6 @@ public class WeaponBase : ItemBase
     protected virtual void Awake()
     {
         weaponAudio = this.GetComponent<AudioSource>();
-        Debug.Log("weaponAudio" + weaponAudio);
     }
     
     /// <summary>

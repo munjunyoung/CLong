@@ -10,7 +10,7 @@ public class ShellScript : MonoBehaviour {
     public Transform parentTransform;
     public bool coroutineCheck = true;
 
-    public ParticleSystem SparkEffect;
+    public GameObject SparkEffect;
 
 	// Use this for initialization
 	private void Start () {
@@ -31,7 +31,10 @@ public class ShellScript : MonoBehaviour {
         {
             var ef = Instantiate(SparkEffect);
             ef.transform.position = this.transform.position;
-
+            var dir = other.transform.position - this.transform.position;
+            dir = dir.normalized;
+            ef.transform.rotation =  Quaternion.LookRotation(dir);
+            
             Destroy(this.gameObject);
         }
         

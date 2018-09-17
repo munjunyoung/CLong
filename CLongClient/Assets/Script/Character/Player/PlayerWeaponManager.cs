@@ -225,6 +225,7 @@ public class PlayerWeaponManager : MonoBehaviour
         //R을 클릭했을때 inputmanager에서도 조건을 걸어두긴했음..
         if (currentUsingWeapon.type.Equals(ItemType.WEAPON))
         {
+            ZoomChange(false);
             ReloadingAnim = true;
             ownPlayer.animSc.anim.SetTrigger("Reload");
             currentUsingWeapon.GetComponent<ARBase>().ReloadStart();

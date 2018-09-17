@@ -27,6 +27,7 @@ namespace CLongServer.Ingame
 
         //Start Position Set
         private List<Vector3> StartPosList = new List<Vector3>();
+        private List<float> StartYRotList = new List<float>();
 
         //Team
         private Dictionary<int, Player> PlayerDic = new Dictionary<int, Player>();
@@ -39,7 +40,7 @@ namespace CLongServer.Ingame
 
         //Timer
         private System.Timers.Timer gameTimer = new System.Timers.Timer();
-        private int countMaxTime = 2;
+        private int countMaxTime = 3;
         private int countDownTime = 0;
         private RoundState roundState = RoundState.ROUND_START;
 
@@ -123,17 +124,17 @@ namespace CLongServer.Ingame
                 if (CurrentRound.Equals(1))
                 {
                     team.Value.StartPos = StartPosList[team.Key % 2];
-                    team.Value.StartLookPos = StartPosList[(team.Key+1) % 2];
+                    team.Value.StartLookYRot = StartYRotList[(team.Key+1) % 2];
                 }
                 else if (CurrentRound.Equals(2)) //스타트 포지션 변경
                 {
                     team.Value.StartPos = StartPosList[(team.Key + 1) % 2];
-                    team.Value.StartLookPos = StartPosList[team.Key % 2];
+                    team.Value.StartLookYRot = StartYRotList[team.Key % 2];
                 }
                 else if (CurrentRound.Equals(3))
                 {
                     team.Value.StartPos = StartPosList[team.Key % 2];
-                    team.Value.StartLookPos = StartPosList[(team.Key + 1) % 2];
+                    team.Value.StartLookYRot = StartYRotList[(team.Key + 1) % 2];
                 }
             }
         }
@@ -180,8 +181,8 @@ namespace CLongServer.Ingame
                 enemy.throwble = 5;
                 player.Client.Send(new IPacket[]
                 {
-                    new Player_Init((byte)cNumber, player.Hp, player.StartPos, player.StartLookPos, true, player.character, player.firstWeapon, player.secondWeapon, player.throwble),
-                    new Player_Init((byte)ocNumber, enemy.Hp, enemy.StartPos, enemy.StartLookPos, false, enemy.character, enemy.firstWeapon, enemy.secondWeapon, enemy.throwble),
+                    new Player_Init((byte)cNumber, player.Hp, player.StartPos, player.StartLookYRot, true, player.character, player.firstWeapon, player.secondWeapon, player.throwble),
+                    new Player_Init((byte)ocNumber, enemy.Hp, enemy.StartPos, enemy.StartLookYRot, false, enemy.character, enemy.firstWeapon, enemy.secondWeapon, enemy.throwble),
                 });
             }
             else if (p is Player_Ready)
@@ -362,7 +363,7 @@ namespace CLongServer.Ingame
                 //Client Set
                 SetClientVar();
                 Vector3[] Pos = { PlayerDic[(int)TeamColor.BLUE].StartPos, PlayerDic[(int)TeamColor.RED].StartPos };
-                Vector3[] LookPos = { PlayerDic[(int)TeamColor.BLUE].StartLookPos, PlayerDic[(int)TeamColor.RED].StartLookPos };
+                float[] LookPos = { PlayerDic[(int)TeamColor.BLUE].StartLookYRot, PlayerDic[(int)TeamColor.RED].StartLookYRot};
                 foreach (var cl in PlayerDic)
                     cl.Value.Client.Send(new Player_Reset((byte)cl.Key, cl.Value.Hp, Pos, LookPos));
             }
@@ -398,6 +399,9 @@ namespace CLongServer.Ingame
             //1.1f 인 이유는 skinwidth
             StartPosList.Add(new Vector3(-15f, 1f, 5));
             StartPosList.Add(new Vector3(17, 1f, -8));
+
+            StartYRotList.Add(-90);
+            StartYRotList.Add(-270);
         }
 
     }
@@ -433,7 +437,7 @@ public class Player
     }
     public bool IsAlive { get; set; }
     public Vector3 StartPos { get; set; }
-    public Vector3 StartLookPos { get; set; }
+    public float StartLookYRot { get; set; }
     public ClientTCP Client { get; set; }
 
     private int _hp;

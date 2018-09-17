@@ -148,15 +148,16 @@ public class InputManager : MonoBehaviour
                         NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha3, true), NetworkManager.Protocol.TCP);
                 }
             }
-            else if (Input.GetKeyDown(KeyList[(int)Key.Alpha4]))
-            {
-                if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 3)
-                {
-                    //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
-                    if (myPlayer.weaponManagerSc.EquipweaponDic[3].weaponState.Equals(true))
-                        NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha4, true), NetworkManager.Protocol.TCP);
-                }
-            }
+            //음식은 애니매이션 구현이 안되어있어서 아예 안건드는게 좋을듯
+            //else if (Input.GetKeyDown(KeyList[(int)Key.Alpha4]))
+            //{
+            //    if (myPlayer.weaponManagerSc.currentUsingWeapon.equipWeaponNum != 3)
+            //    {
+            //        //해당 dictionary가 존재하지 않으면 하지 않음(수류탄을 던졌을경우)
+            //        if (myPlayer.weaponManagerSc.EquipweaponDic[3].weaponState.Equals(true))
+            //            NetworkManager.Instance.SendPacket(new Player_Input(myPlayer.clientNum, Key.Alpha4, true), NetworkManager.Protocol.TCP);
+            //    }
+            //}
             //Shooting
             if (Input.GetMouseButton(0))
             {
