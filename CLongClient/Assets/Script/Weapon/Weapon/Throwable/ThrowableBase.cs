@@ -6,7 +6,7 @@ using CLongLib;
 
 public class ThrowableBase : WeaponBase
 {
-    private float throwSpeed = 500f;
+    private float throwSpeed = 70f;
     public Rigidbody bombRigidbody;
     public SphereCollider coll;
     private float explosionRadius = 10f;
@@ -26,7 +26,7 @@ public class ThrowableBase : WeaponBase
         bombRigidbody.transform.eulerAngles = rot;
         bombRigidbody.isKinematic = false;
         bombRigidbody.useGravity = true;
-        bombRigidbody.AddForce(transform.forward * throwSpeed);
+        bombRigidbody.AddForce(transform.forward * throwSpeed, ForceMode.Impulse);
         //캐릭터 이동 오류로인해 false
         coll.isTrigger = false;
         //다른클라가 던졌을때 ontrigger체크를 위해

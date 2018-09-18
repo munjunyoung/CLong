@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
     //Gravity Server에서 패킷을 보냈을 때 변경하는 변수
     public bool IsGroundedFromServer = true;
     private float gravity = 10f;
-    private float jumpPower = 10f;
+    private float jumpPower = 20f;
     private float jumpTimer = 0f;
     public GameObject GroundCheckObject;
     
@@ -211,7 +211,7 @@ public class Player : MonoBehaviour
 
     IEnumerator JumpCoroutine()
     {
-        while (jumpTimer < 0.10)
+        while (jumpTimer < 0.2)
         {
             jumpTimer += Time.deltaTime;
 
@@ -354,6 +354,7 @@ public class Player : MonoBehaviour
                     return;
                 currentActionState = ActionState.Jump;
                 animSc.anim.SetTrigger("JumpTrigger");
+                JumpStartInAnim();
                 break;
             case Key.R:
                 if (weaponManagerSc.ReloadingAnim)

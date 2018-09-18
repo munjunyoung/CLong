@@ -114,8 +114,15 @@ public class NetworkManager : Singleton<NetworkManager>
 
         internal void Init(string ip, int port)
         {
-            tcp = new TcpClient();
-            tcp.BeginConnect(ip, port, ConnectCb, tcp);
+            try
+            {
+                tcp = new TcpClient();
+                tcp.BeginConnect(ip, port, ConnectCb, tcp);
+            }
+            catch(Exception e)
+            {
+                Debug.Log("Connect e : " + e);
+            }
         }
 
         internal void Send(IPacket p)
