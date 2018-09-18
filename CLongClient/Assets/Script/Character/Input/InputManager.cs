@@ -248,7 +248,7 @@ public class InputManager : MonoBehaviour
     {
         var reboundValue = myPlayer.weaponManagerSc.currentUsingWeapon.reboundIntensity;
         cam.yRot += Random.Range(-reboundValue * 0.1f, reboundValue * 0.1f); 
-        cam.xRot += (reboundValue * 0.1f);
+        cam.xRot += (reboundValue * 0.05f);
         NetworkManager.Instance.SendPacket(new Player_Info(myPlayer.clientNum, TotalUtility.ToNumericVectorChange(cam.target), TotalUtility.ToNumericVectorChange(myPlayer.transform.position)), NetworkManager.Protocol.UDP);
     }
     #endregion    

@@ -10,7 +10,7 @@ class M4Script : ARBase
         type = ItemType.WEAPON;
         weaponName = "M4";
         shellType = "5mm";
-        damage = 30;
+        damage = 27;
         shellSpeed = 30;
         ShootPeriod = 5;
         reboundIntensity = 5;

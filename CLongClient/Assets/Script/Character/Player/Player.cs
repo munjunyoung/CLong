@@ -11,7 +11,7 @@ public class Player : MonoBehaviour
     //Client assigned Number
     public byte clientNum;
     //add Script
-    public PlayerWeaponManager weaponManagerSc;
+    public PlayerWeapon weaponManagerSc;
     public PlayerAnimatorIK animSc;
 
     //자신의 클라이언트일경우에만 null이 아니다

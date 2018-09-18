@@ -339,7 +339,7 @@ namespace CLongServer.Ingame
                 return;
 
             foreach (var p in PlayerDic)
-                p.Value.Client.Send(new Round_Timer(0));
+                p.Value.Client.Send(new Round_Timer((byte)countMaxTime));
 
             countDownTime = countMaxTime;
             gameTimer.Start();
@@ -355,7 +355,7 @@ namespace CLongServer.Ingame
             if (roundState == RoundState.ROUND_START)
             {
                 foreach (var cl in PlayerDic)
-                    cl.Value.Client.Send(new Round_Timer(1));
+                    cl.Value.Client.Send(new Round_Timer(0));
             }
             else if (roundState == RoundState.ROUND_END)
             {

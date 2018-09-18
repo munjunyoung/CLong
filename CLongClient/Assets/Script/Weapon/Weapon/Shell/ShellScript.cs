@@ -15,13 +15,13 @@ public class ShellScript : MonoBehaviour {
 	// Use this for initialization
 	private void Start () {
         Destroy(this.parentTransform.gameObject, 3f);
-        parentTransform.GetComponent<Rigidbody>().AddForce(-transform.up * shellSpeed, ForceMode.Impulse);
+        //parentTransform.GetComponent<Rigidbody>().AddForce(-transform.up * shellSpeed, ForceMode.Impulse);
         // StartCoroutine(ShellMove());
     }
 	
 	// Update is called once per frame
 	private void FixedUpdate () {
-        //parentTransform.Translate(Vector3.forward * shellSpeed * Time.deltaTime);
+        parentTransform.Translate(Vector3.forward * shellSpeed * Time.deltaTime);
         //parentTransform.GetComponent<Rigidbody>().AddForce(-transform.up * shellSpeed, ForceMode.Acceleration);
     }
 

@@ -47,17 +47,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="01Login\LoginPacket.cs" />
-    <Compile Include="03Ingame\GameStartPacket.cs" />
-    <Compile Include="03Ingame\HealthPacket.cs" />
-    <Compile Include="03Ingame\MatchingPacket.cs" />
-    <Compile Include="03Ingame\MovePacket.cs" />
-    <Compile Include="03Ingame\WeaponPacket.cs" />
+    <Compile Include="PrevPacket\LoginPacket.cs" />
+    <Compile Include="PrevPacket\GameStartPacket.cs" />
+    <Compile Include="PrevPacket\HealthPacket.cs" />
+    <Compile Include="PrevPacket\MatchingPacket.cs" />
+    <Compile Include="PrevPacket\MovePacket.cs" />
+    <Compile Include="PrevPacket\WeaponPacket.cs" />
     <Compile Include="CommonPacket.cs" />
     <Compile Include="PacketDefinition.cs" />
     <Compile Include="PacketMaker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="02Lobby\QueuePacket.cs" />
+    <Compile Include="PrevPacket\QueuePacket.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

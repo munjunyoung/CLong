@@ -177,15 +177,14 @@ public class IngameUIManager : Singleton<IngameUIManager>
         else if (p is Round_Timer)
         {
             var s = (Round_Timer)p;
-            switch(s.countDown)
+            if (s.countDown > 0)
             {
-                case 0:
-                    roundTimerText.gameObject.SetActive(true);
-                    StartCoroutine(TimerStart());
-                    break;
-                case 1:
-                    //StartCoroutine()
-                    break;
+                roundTimerText.gameObject.SetActive(true);
+                StartCoroutine(TimerStart(s.countDown));
+            }
+            else if(s.countDown==0)
+            {
+                StartCoroutine(TimerStartEnd());
             }
         }
         else if(p is Match_End)
@@ -196,9 +195,10 @@ public class IngameUIManager : Singleton<IngameUIManager>
         }
     }
 
-    IEnumerator TimerStart()
+    IEnumerator TimerStart(int maxTime)
     {
-        while (timerValue > 0)
+        timerValue = maxTime;
+        while (timerValue > 0)                      
         {
             roundTimerText.text = timerValue.ToString();
             timerValue--;
@@ -206,9 +206,9 @@ public class IngameUIManager : Singleton<IngameUIManager>
         }
     }
 
-    IEnumerable TimerStartEnd()
+    IEnumerator TimerStartEnd()
     {
-        roundTimerText.text = "START !";
+        roundTimerText.text = "0";
         yield return new WaitForSeconds(1f);
         roundTimerText.gameObject.SetActive(false);
     }
