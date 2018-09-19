@@ -11,8 +11,8 @@ public class AKscript : ARBase
         type = ItemType.WEAPON;
         weaponName = "AK";
         shellType = "7mm";
-        damage = 5;
-        shellSpeed = 30;
+        damage = 34;
+        shellSpeed = 100;
         ShootPeriod = 8;
         reboundIntensity = 7;
         reboundRecoveryTime = 2f;

@@ -79,13 +79,13 @@ public class Player : MonoBehaviour
                     moveSpeed = 2f;
                     break;
                 case ActionState.Walk:
-                    moveSpeed = 3f;
-                    break;
-                case ActionState.Run:
                     moveSpeed = 4f;
                     break;
+                case ActionState.Run:
+                    moveSpeed = 5f;
+                    break;
                 case ActionState.Seat:
-                    moveSpeed = 1.5f;
+                    moveSpeed = 2f;
                     movingAudio.Stop();
                     break;
                 case ActionState.Jump:
@@ -211,7 +211,7 @@ public class Player : MonoBehaviour
 
     IEnumerator JumpCoroutine()
     {
-        while (jumpTimer < 0.2)
+        while (jumpTimer < 0.25)
         {
             jumpTimer += Time.deltaTime;
 

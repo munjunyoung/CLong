@@ -167,7 +167,7 @@ public class PlayerWeapon : MonoBehaviour
                 //반동설정
                 if (ownPlayer.clientCheck)
                 {
-                    //ownPlayer.InputSc.ReboundPlayerRotation();
+                    ownPlayer.InputSc.ReboundPlayerRotation();
                     //ownPlayer.InputSc.ReboundAimImage();
                     IngameUIManager.Instance.ReboundAimPoint();
                 }
