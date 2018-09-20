@@ -196,7 +196,9 @@ public class NetworkManager : Singleton<NetworkManager>
             Debug.Log("Addr : " + new IPAddress(addr));
             serverEP = new IPEndPoint(IPAddress.Parse(_IP), port);
             Debug.Log("EP : " + serverEP.Address + " Port : " + serverEP.Port);
-            udp.JoinMulticastGroup(new IPAddress(addr));
+
+                udp.JoinMulticastGroup(new IPAddress(addr));
+            
             udp.BeginReceive(ReceiveCb, udp);
         }
 
