@@ -84,7 +84,6 @@ namespace CLongServer.Ingame
             {
                 var d = PacketMaker.SetPacket(p);
                 clientUDP.BeginSend(d, d.Length, multicastEP, null, null);
-                //Console.WriteLine(multicastEP.Address);
             }
             catch(Exception e)
             {

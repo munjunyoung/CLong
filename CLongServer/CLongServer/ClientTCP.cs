@@ -16,8 +16,8 @@ namespace CLongServer
     public class ClientTCP
     {
         //Socket
-        TcpClient clientTcp;
-
+        public TcpClient clientTcp;
+        
         //Receive
         private byte[] _recvBuffer = new byte[4096];
         private Queue<IPacket> _packetQueue = new Queue<IPacket>();
@@ -42,6 +42,7 @@ namespace CLongServer
             clientTcp = tc;
             //BeginReceive();
             // 변경예정
+            
             clientTcp.Client.BeginReceive(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None, ReceiveCb, clientTcp.Client);
         }
 

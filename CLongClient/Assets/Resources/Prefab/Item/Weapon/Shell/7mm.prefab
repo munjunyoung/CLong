@@ -38,8 +38,8 @@ GameObject:
   - component: {fileID: 4876948421080280}
   - component: {fileID: 33701650208462418}
   - component: {fileID: 23975853545115726}
-  - component: {fileID: 114234324991556754}
   - component: {fileID: 64826713201282028}
+  - component: {fileID: 114234324991556754}
   m_Layer: 0
   m_Name: 7mmModel
   m_TagString: Shell

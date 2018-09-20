@@ -232,7 +232,6 @@ namespace CLongServer.Ingame
                     RoundProcess(s.clientIdx);
                 }
             }
-         
         }
 
         /// <summary>
@@ -241,7 +240,10 @@ namespace CLongServer.Ingame
         /// <param name="p"></param>
         private void IngameDataRequestUDP(IPacket p)
         {
-            udpServer.Send(p);
+            foreach (var pair in PlayerDic)
+            {
+                udpServer.Send(p);
+            }
         }
         #endregion
 

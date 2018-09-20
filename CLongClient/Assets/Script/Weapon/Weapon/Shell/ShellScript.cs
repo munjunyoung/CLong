@@ -26,7 +26,6 @@ public class ShellScript : MonoBehaviour {
       
         //parentTransform.Translate(Vector3.forward * shellSpeed * Time.deltaTime);
         //parentTransform.GetComponent<Rigidbody>().AddForce(-transform.up * shellSpeed);
-        Debug.Log("확인 : " + this.gameObject.transform.position);
     }
 
     private void OnTriggerEnter(Collider other)

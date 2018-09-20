@@ -6,7 +6,7 @@ using CLongLib;
 
 public class ThrowableBase : WeaponBase
 {
-    private float throwSpeed = 70f;
+    private float throwSpeed = 30f;
     public Rigidbody bombRigidbody;
     public SphereCollider coll;
     private float explosionRadius = 10f;
