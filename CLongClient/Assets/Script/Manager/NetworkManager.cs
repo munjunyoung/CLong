@@ -20,7 +20,7 @@ public class NetworkManager : Singleton<NetworkManager>
     private Coroutine _procRoutineTCP;
     private Coroutine _procRoutineUDP;
     private GlobalManager _gm;
-
+    
     public void SendPacket(IPacket p, Protocol pt)
     {
         Debug.Log("Send Packet : <color=red>" + p.GetType() + "</color>");
@@ -198,6 +198,7 @@ public class NetworkManager : Singleton<NetworkManager>
             Debug.Log("EP : " + serverEP.Address + " Port : " + serverEP.Port);
             udp.JoinMulticastGroup(new IPAddress(addr));
             udp.BeginReceive(ReceiveCb, udp);
+            
         }
 
         internal void ResetUDP()
@@ -223,6 +224,7 @@ public class NetworkManager : Singleton<NetworkManager>
         {
             try
             {
+                Debug.Log("받는지 확인");
                 var uc = (UdpClient)ar.AsyncState;
                 var remoteEp = new IPEndPoint(IPAddress.Any,0);
                 var dataAry = uc.EndReceive(ar, ref remoteEp);
