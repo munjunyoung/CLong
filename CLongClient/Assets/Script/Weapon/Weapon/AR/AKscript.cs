@@ -13,7 +13,7 @@ public class AKscript : ARBase
         shellType = "7mm";
         damage = 34;
         shellSpeed = 100;
-        ShootPeriod = 8;
+        ShootPeriod = 7;
         reboundIntensity = 7;
         reboundRecoveryTime = 2f;
         zoomPossible = true;

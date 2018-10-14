@@ -651,7 +651,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: d882f43161087b84087a1d2c77882223, type: 3}
+  m_audioClip: {fileID: 8300000, guid: a095bd7236d179b42b127de957571951, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -756,10 +756,12 @@ MonoBehaviour:
   weaponState: 0
   zoomPossible: 0
   weaponAudioClip:
-  - {fileID: 8300000, guid: d882f43161087b84087a1d2c77882223, type: 3}
+  - {fileID: 8300000, guid: a095bd7236d179b42b127de957571951, type: 3}
   - {fileID: 8300000, guid: da90df694dd659143903aa0a5e3a670c, type: 3}
   - {fileID: 8300000, guid: c3242ca339ec68a40a1f68611ffef39b, type: 3}
   weaponAudio: {fileID: 0}
+  currentItemValue: 0
+  MaxItemValue: 0
   ShootPeriod: 0
   LeftHand: {fileID: 4144364372695224}
   ZoomPos: {fileID: 4180898819338396}
@@ -796,9 +798,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  currentShellLoaded: 30
-  shellLoadedValue: 0
-  ReloadPlaying: 0
 --- !u!198 &198289682407799660
 ParticleSystem:
   m_ObjectHideFlags: 1

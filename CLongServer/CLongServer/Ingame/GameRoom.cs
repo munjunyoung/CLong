@@ -400,7 +400,7 @@ namespace CLongServer.Ingame
         {
             //1.1f 인 이유는 skinwidth
             StartPosList.Add(new Vector3(-15f, 1f, 5));
-            StartPosList.Add(new Vector3(17, 1f, -8));
+            StartPosList.Add(new Vector3(15f, 1f, -8));
 
             StartYRotList.Add(-90);
             StartYRotList.Add(-270);
